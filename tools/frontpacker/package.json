@@ -1,0 +1,44 @@
+{
+  "name": "frontpacker",
+  "description": "A tool that allows you to automate keyboard and mouse events.",
+  "author": "Nico Heinola",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "easy-pack": "cd \"../../frontend\" && npm run build && xcopy /f /y \"build\" \"../tools/frontpacker/frontend/\" /E /H /C /I && cd \"../tools/frontpacker\" && npm run pack",
+    "dist": "electron-builder"
+  },
+  "build": {
+    "asar": true,
+    "appId": "com.yourcompany.yourapp",
+    "productName": "YourApp",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "frontend/**/*"
+    ],
+    "mac": {
+      "category": "your.app.category.type"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ]
+    }
+  },
+  "keywords": [],
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^29.1.6",
+    "electron-builder": "^24.13.3"
+  }
+}
