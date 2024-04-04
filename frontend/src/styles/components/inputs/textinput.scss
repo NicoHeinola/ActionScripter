@@ -1,0 +1,74 @@
+@import "styles/variables.scss";
+
+.text-input {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    backdrop-filter: $global-darkened-box-brightness;
+    border-radius: $global-border-radius;
+
+    .input-container {
+        position: relative;
+        width: 100%;
+        padding: 20px 20px;
+        padding-bottom: 5px;
+
+        .input {
+            width: 100%;
+            background: none;
+            border: none;
+            outline: none;
+            padding: 0;
+        }
+
+        .placeholder {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0.6;
+            pointer-events: none;
+
+            transition: all 0.2s;
+
+            &.active {
+                color: $input-color-1;
+                opacity: 1;
+            }
+
+            &.active-or-value {
+                top: 5px;
+                transform: none;
+                font-size: 11px;
+            }
+        }
+    }
+
+    .underlines {
+        position: relative;
+        width: 100%;
+        height: 3px;
+
+        .underline {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            left: 0;
+            top: 0;
+
+            border-radius: 50px;
+            background: rgba(0, 0, 0, 0.171);
+
+            transition: all 0.2s;
+
+            &.colorful {
+                background: $input-color-1;
+                width: 0%;
+            }
+
+            &.active {
+                width: 100%;
+            }
+        }
+    }
+}

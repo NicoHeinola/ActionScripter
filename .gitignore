@@ -28,3 +28,4 @@ yarn-error.log*
 /tools/frontpacker/node_modules/
 /tools/frontpacker/frontend/
 /tools/frontpacker/dist/
+*.env

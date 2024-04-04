@@ -1,0 +1,24 @@
+@import "styles/variables.scss";
+
+.basic-button {
+    border: none;
+    padding: 10px;
+    border-radius: $global-border-radius;
+
+    background: $button-color-1;
+    color: $button-text-color-1;
+
+    filter: brightness(80%);
+
+    transition: all 0.2s;
+
+    cursor: pointer;
+
+    &:hover {
+        filter: brightness(100%);
+    }
+
+    &:active {
+        filter: brightness(70%);
+    }
+}

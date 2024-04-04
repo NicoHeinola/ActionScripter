@@ -1,24 +1,18 @@
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import 'styles/app.scss';
+import MissingPageView from 'views/MissingPageView';
+import NoFileSelectedView from 'views/NoFileSelectedView';
+import ScriptEditorView from 'views/ScriptEditorView';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path='/' element={<NoFileSelectedView />} />
+        <Route index path='/script-editor' element={<ScriptEditorView />} />
+        <Route index path='*' element={<MissingPageView />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
