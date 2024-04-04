@@ -3,8 +3,13 @@ $site-text-color-1: white;
 
 $button-color-1: rgb(133, 212, 137);
 $button-text-color-1: rgb(34, 34, 34);
-$input-color-1: rgb(133, 212, 137);
-$button-text-color-1: white;
+
+$input-color-1: rgb(0, 0, 0);
+$input-active-color-1: rgb(133, 212, 137);
+$input-text-color-1: white;
+$input-placeholder-color-1: rgba(255, 255, 255, 0.445);
+
+$select-color-1: rgb(69, 109, 81);
 
 $global-border-radius: 3px;
 $global-darkened-box-brightness: brightness(90%);

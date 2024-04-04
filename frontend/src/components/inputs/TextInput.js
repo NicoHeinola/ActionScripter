@@ -22,13 +22,14 @@ const TextInput = (props) => {
 
     return (
         <div className={"text-input" + ((props.className) ? ` ${props.className}` : "")}>
+            <div className={"bg" + ((isInputActive) ? " active" : "")}></div>
             <div className="input-container">
                 <input value={props.value} onFocus={() => setIsInputActive(true)} onBlur={() => setIsInputActive(false)} onChange={valueChanged} type={props.type} className="input" />
                 <p className={"placeholder" + ((value || isInputActive) ? " active-or-value" : "") + ((isInputActive) ? " active" : "")}>{props.placeholder}</p>
             </div>
             <div className="underlines">
-                <div className={"underline colorful" + ((isInputActive) ? " active" : "")} ></div>
                 <div className="underline" ></div>
+                <div className={"underline colorful" + ((isInputActive) ? " active" : "")} ></div>
             </div>
         </div>
     );

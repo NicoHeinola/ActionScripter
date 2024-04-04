@@ -1,24 +1,47 @@
 @import "styles/variables.scss";
 
 .text-input {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 2px;
-    backdrop-filter: $global-darkened-box-brightness;
     border-radius: $global-border-radius;
+
+    &:hover {
+        .bg {
+            opacity: 0.1;
+        }
+    }
+
+    .bg {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: $input-color-1;
+        opacity: 0.05;
+        pointer-events: none;
+        transition: all 0.2s;
+
+        &.active {
+            opacity: 0.2 !important;
+        }
+    }
 
     .input-container {
         position: relative;
         width: 100%;
-        padding: 20px 20px;
         padding-bottom: 5px;
 
         .input {
+            padding: 0 20px;
+            padding-top: 20px;
             width: 100%;
             background: none;
             border: none;
             outline: none;
-            padding: 0;
+            color: $input-text-color-1;
         }
 
         .placeholder {
@@ -26,13 +49,14 @@
             left: 20px;
             top: 50%;
             transform: translateY(-50%);
-            opacity: 0.6;
             pointer-events: none;
 
             transition: all 0.2s;
 
+            color: $input-placeholder-color-1;
+
             &.active {
-                color: $input-color-1;
+                color: $input-active-color-1;
                 opacity: 1;
             }
 
@@ -57,12 +81,14 @@
             top: 0;
 
             border-radius: 50px;
-            background: rgba(0, 0, 0, 0.171);
+            background: $input-color-1;
+            opacity: 0.4;
 
             transition: all 0.2s;
 
             &.colorful {
-                background: $input-color-1;
+                background: $input-active-color-1;
+                opacity: 1;
                 width: 0%;
             }
 
