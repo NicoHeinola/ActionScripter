@@ -65,3 +65,28 @@ h2 {
 h3 {
     font-size: 30px;
 }
+
+table {
+    position: relative;
+    width: 100%;
+    border-collapse: collapse;
+    backdrop-filter: $global-darkened-box-brightness;
+    overflow-y: auto;
+
+    tr {
+        th {
+            position: relative;
+            border-bottom: 3px solid rgba(0, 0, 0, 0.4);
+            padding: 10px 20px;
+            min-width: 100px;
+            text-align: left;
+        }
+
+        td {
+            padding: 10px 20px;
+            text-align: left;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+    }
+}

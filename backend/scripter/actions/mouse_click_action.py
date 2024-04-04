@@ -1,6 +1,6 @@
 from .action import Action
 
-class MouseMoveAction(Action):
+class MouseClickAction(Action):
     def do_action() -> bool:
         print("Mouse moving!")
 

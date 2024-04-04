@@ -29,3 +29,5 @@ yarn-error.log*
 /tools/frontpacker/frontend/
 /tools/frontpacker/dist/
 *.env
+
+*.pyc

@@ -38,6 +38,7 @@
         left: 0;
 
         transition: all 0.1s;
+        z-index: 10;
 
         &.hidden {
             opacity: 0;
@@ -49,10 +50,10 @@
             position: absolute;
             display: flex;
             flex-direction: column;
-            overflow: scroll;
+            overflow-x: auto;
 
             width: 100%;
-            max-height: 300px;
+            max-height: 500px;
             opacity: 1;
 
             background: $select-color-1;
