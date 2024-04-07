@@ -2,9 +2,12 @@ import BasicButton from "components/inputs/BasicButton";
 import SelectBox from "components/inputs/SelectBox";
 import TextInput from "components/inputs/TextInput";
 import { useEffect, useMemo, useState } from "react";
-import "styles/views/scripteditorview.scss";
 
+import { connect } from 'react-redux';
 import actionAPI from "apis/actionAPI";
+import { addAction, removeAction } from "store/reducers/actionsReducer";
+
+import "styles/views/scripteditorview.scss";
 
 const ScriptEditorView = (props) => {
     let actionTypes = useMemo(() => [
@@ -26,12 +29,13 @@ const ScriptEditorView = (props) => {
         filterActions();
     }, [actionFilterKeyword, actionTypes])
 
-    const addNewAction = () => {
+    const addNewAction = async () => {
         if (selectedActionType === "") {
             return;
         }
 
-        actionAPI.addAction(selectedActionType);
+        let response = await actionAPI.addAction(selectedActionType);
+        props.addAction(response.data);
     }
 
     return (
@@ -54,6 +58,13 @@ const ScriptEditorView = (props) => {
                             </tr>
                         </thead>
                         <tbody>
+                            {props.allActions.map(action =>
+                                <tr className="action-row" key={'action-' + action.id}>
+                                    <td className="action-data">{action["name"]}</td>
+                                    <td className="action-data">{action["type"]}</td>
+                                    <td className="action-data">{action["start-delay-ms"]}</td>
+                                    <td className="action-data">{action["end-delay-ms"]}</td>
+                                </tr>)}
                         </tbody>
                     </table>
                 </div>
@@ -62,4 +73,14 @@ const ScriptEditorView = (props) => {
     );
 }
 
-export default ScriptEditorView;
+const mapStateToProps = (state) => {
+    return {
+        allActions: state.actions.allActions,
+    };
+};
+
+const mapDispatchToProps = {
+    addAction, removeAction
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(ScriptEditorView);

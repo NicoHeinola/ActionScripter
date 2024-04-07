@@ -2,6 +2,11 @@ from .action import Action
 
 
 class MouseClickAction(Action):
+    action_type = "Mouse Click"
+
+    def __init__(self) -> None:
+        super().__init__()
+
     def do_action() -> bool:
         print("Mouse moving!")
 

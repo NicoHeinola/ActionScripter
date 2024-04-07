@@ -3,10 +3,14 @@ import { Link } from "react-router-dom";
 import "styles/views/nofileselectedview.scss"
 import actionScriptAPI from "apis/actionScriptAPI";
 
+import { connect } from 'react-redux';
+import { setActions } from "store/reducers/actionsReducer";
+
 const NoFileSelectedView = (props) => {
 
     const newEmptyActionScript = () => {
         actionScriptAPI.newActionScript();
+        props.setActions([]);
     }
 
     return (
@@ -33,4 +37,12 @@ const NoFileSelectedView = (props) => {
     );
 }
 
-export default NoFileSelectedView;
+const mapStateToProps = (state) => {
+    return {};
+};
+
+const mapDispatchToProps = {
+    setActions
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(NoFileSelectedView);

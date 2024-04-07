@@ -4,15 +4,20 @@ import MissingPageView from 'views/MissingPageView';
 import NoFileSelectedView from 'views/NoFileSelectedView';
 import ScriptEditorView from 'views/ScriptEditorView';
 
+import { Provider } from 'react-redux';
+import store from "store/store";
+
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path='/' element={<NoFileSelectedView />} />
-        <Route index path='/script-editor' element={<ScriptEditorView />} />
-        <Route index path='*' element={<MissingPageView />} />
-      </Routes>
-    </BrowserRouter>
+    <Provider store={store}>
+      <BrowserRouter>
+        <Routes>
+          <Route path='/' element={<NoFileSelectedView />} />
+          <Route index path='/script-editor' element={<ScriptEditorView />} />
+          <Route index path='*' element={<MissingPageView />} />
+        </Routes>
+      </BrowserRouter>
+    </Provider>
   );
 }
 

@@ -5,6 +5,9 @@ import random
 class Action(ABC):
     current_action_id: int = 0
 
+    # A type to display to the frontend
+    action_type: str = "Missing Action Type"
+
     def __init__(self) -> None:
         # Used to keep track of which action this one is
         self._id: str = Action.current_action_id
@@ -16,6 +19,7 @@ class Action(ABC):
         # How long to wait for the next action when this is finished
         self._end_delay_ms: int = 50
 
+        # Name to display to the frontend
         self._name: str = f"Action {self._id}"
 
     @abstractmethod
@@ -28,6 +32,7 @@ class Action(ABC):
         data["id"] = self._id
         data["start-delay-ms"] = self._start_delay_ms
         data["end-delay-ms"] = self._end_delay_ms
+        data["type"] = self.action_type
         return data
 
     def deserialize(self, data: dict) -> None:
