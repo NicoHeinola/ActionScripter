@@ -13,7 +13,7 @@ class ActionScript:
     def __init__(self) -> None:
         ActionScript.current_script = self
 
-        self._actions: List[Action] = []
+        self._actions: Dict[int, Action] = {}
 
     def add_action(self, action_type: str) -> Action:
         if action_type not in ActionScript.all_actions:
@@ -22,6 +22,10 @@ class ActionScript:
         action_class: Action = ActionScript.all_actions[action_type]
         new_action: Action = action_class()
 
-        self._actions.append(new_action)
+        self._actions[f"{new_action._id}"] = new_action
 
         return new_action
+
+    def remove_action(self, action_id: int) -> None:
+        if action_id in self._actions:
+            del self._actions[f"{action_id}"]

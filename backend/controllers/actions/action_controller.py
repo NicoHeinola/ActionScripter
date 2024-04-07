@@ -26,3 +26,12 @@ class ActionController(BaseController):
                 return make_response({"error": f"Invalid action type: {action_type}"}, 400)
 
             return make_response(added_action.serialize(), 200)
+
+        @self._app.route(f"{base_route}/<action_id>", methods=["DELETE"])
+        def delete_action(action_id):
+            if ActionScript.current_script is None:
+                return make_response({"error": "No current script found!"}, 500)
+
+            ActionScript.current_script.remove_action(action_id)
+
+            return make_response("", 200)

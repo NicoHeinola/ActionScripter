@@ -1,8 +1,14 @@
 @import "styles/variables.scss";
 
 .basic-button {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+
     border: none;
-    padding: 10px;
+    padding: 6px;
     border-radius: $global-border-radius;
 
     background: $button-color-1;
@@ -20,5 +26,10 @@
 
     &:active {
         filter: brightness(70%);
+    }
+
+    .image {
+        height: 100%;
+        aspect-ratio: 1;
     }
 }

@@ -13,7 +13,7 @@ const actionsSlice = createSlice({
             state.allActions.push(action.payload);
         },
         removeAction: (state, actionId) => {
-            state.allActions = state.allActions.filter(action => action.id !== actionId);
+            state.allActions = state.allActions.filter(action => action.id !== actionId.payload);
         },
         setActions: (state, actions) => {
             state.allActions = [...actions.payload];
@@ -26,9 +26,14 @@ const addActionCall = (actionType) => async (dispatch) => {
     dispatch(actionsSlice.actions.addAction(response.data));
 };
 
+const removeActionCall = (actionId) => async (dispatch) => {
+    const response = await actionAPI.removeAction(actionId);
+    dispatch(actionsSlice.actions.removeAction(actionId));
+};
+
 const setActionsCall = (actions) => async (dispatch) => {
     dispatch(actionsSlice.actions.setActions(actions));
 };
 
-export { addActionCall, setActionsCall };
+export { addActionCall, removeActionCall, setActionsCall };
 export default actionsSlice.reducer;

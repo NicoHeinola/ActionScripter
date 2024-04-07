@@ -10,7 +10,7 @@ class Action(ABC):
 
     def __init__(self) -> None:
         # Used to keep track of which action this one is
-        self._id: str = Action.current_action_id
+        self._id: int = Action.current_action_id
         Action.current_action_id += 1
 
         # How long to wait until this action starts

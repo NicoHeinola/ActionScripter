@@ -4,7 +4,7 @@ import TextInput from "components/inputs/TextInput";
 import { useEffect, useMemo, useState } from "react";
 
 import { connect } from 'react-redux';
-import { addActionCall } from "store/reducers/actionsReducer";
+import { addActionCall, removeActionCall } from "store/reducers/actionsReducer";
 
 import "styles/views/scripteditorview.scss";
 
@@ -28,12 +28,16 @@ const ScriptEditorView = (props) => {
         filterActions();
     }, [actionFilterKeyword, actionTypes])
 
-    const addNewAction = async () => {
+    const addNewAction = () => {
         if (selectedActionType === "") {
             return;
         }
 
         props.addActionCall(selectedActionType);
+    }
+
+    const removeAction = (id) => {
+        props.removeActionCall(id);
     }
 
     return (
@@ -62,6 +66,10 @@ const ScriptEditorView = (props) => {
                                     <td className="action-data">{action["type"]}</td>
                                     <td className="action-data">{action["start-delay-ms"]}</td>
                                     <td className="action-data">{action["end-delay-ms"]}</td>
+                                    <td className="action-data buttons">
+                                        <BasicButton className="button" icon={"images/icons/edit.png"} />
+                                        <BasicButton onClick={() => removeAction(action.id)} className="button" icon={"images/icons/delete.png"} />
+                                    </td>
                                 </tr>)}
                         </tbody>
                     </table>
@@ -78,7 +86,7 @@ const mapStateToProps = (state) => {
 };
 
 const mapDispatchToProps = {
-    addActionCall
+    addActionCall, removeActionCall
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ScriptEditorView);

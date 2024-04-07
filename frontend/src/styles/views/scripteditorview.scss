@@ -16,6 +16,7 @@
         padding: 50px;
 
         .actions {
+            position: relative;
             display: flex;
             flex-direction: row;
             width: 100%;
@@ -26,13 +27,29 @@
             }
 
             .add-button {
+                position: relative;
                 aspect-ratio: 1;
+                height: 100%;
             }
         }
     }
 
     .action-table {
         width: 100%;
+
+        .action-row {
+            .action-data {
+                &.buttons {
+                    display: flex;
+                    flex-direction: row;
+                    gap: 20px;
+                    
+                    .button {
+                        height: 40px;
+                    }
+                }
+            }
+        }
     }
 
 }

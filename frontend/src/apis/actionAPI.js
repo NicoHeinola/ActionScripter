@@ -11,7 +11,7 @@ const addAction = (actionType) => {
 }
 
 const removeAction = (actionId) => {
-    return axiosInstance.delete(`${BASE_ROUTE}`, { "id": actionId }).then(response => {
+    return axiosInstance.delete(`${BASE_ROUTE}/${actionId}`).then(response => {
         return response;
     }).catch(e => {
         throw e;

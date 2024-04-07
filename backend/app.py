@@ -9,7 +9,7 @@ from controllers.actions.action_script_controller import ActionScriptController
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app)
 
 action_controller: ActionController = ActionController(app)
 action_script_controller: ActionScriptController = ActionScriptController(app)
