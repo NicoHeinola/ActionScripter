@@ -4,13 +4,13 @@ import "styles/views/nofileselectedview.scss"
 import actionScriptAPI from "apis/actionScriptAPI";
 
 import { connect } from 'react-redux';
-import { setActions } from "store/reducers/actionsReducer";
+import { setActionsCall } from "store/reducers/actionsReducer";
 
 const NoFileSelectedView = (props) => {
 
     const newEmptyActionScript = () => {
         actionScriptAPI.newActionScript();
-        props.setActions([]);
+        props.setActionsCall([]);
     }
 
     return (
@@ -42,7 +42,7 @@ const mapStateToProps = (state) => {
 };
 
 const mapDispatchToProps = {
-    setActions
+    setActionsCall
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(NoFileSelectedView);

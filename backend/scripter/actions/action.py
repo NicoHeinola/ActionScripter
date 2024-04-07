@@ -20,7 +20,11 @@ class Action(ABC):
         self._end_delay_ms: int = 50
 
         # Name to display to the frontend
-        self._name: str = f"Action {self._id}"
+        self._name: str = f"Action {self._id + 1}"
+
+    @staticmethod
+    def reset_current_id() -> None:
+        Action.current_action_id = 0
 
     @abstractmethod
     def do_action(self) -> bool:

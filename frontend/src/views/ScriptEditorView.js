@@ -4,8 +4,7 @@ import TextInput from "components/inputs/TextInput";
 import { useEffect, useMemo, useState } from "react";
 
 import { connect } from 'react-redux';
-import actionAPI from "apis/actionAPI";
-import { addAction, removeAction } from "store/reducers/actionsReducer";
+import { addActionCall } from "store/reducers/actionsReducer";
 
 import "styles/views/scripteditorview.scss";
 
@@ -34,8 +33,7 @@ const ScriptEditorView = (props) => {
             return;
         }
 
-        let response = await actionAPI.addAction(selectedActionType);
-        props.addAction(response.data);
+        props.addActionCall(selectedActionType);
     }
 
     return (
@@ -80,7 +78,7 @@ const mapStateToProps = (state) => {
 };
 
 const mapDispatchToProps = {
-    addAction, removeAction
+    addActionCall
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ScriptEditorView);
