@@ -44,8 +44,8 @@ const ScriptEditorView = (props) => {
                     <SelectBox onSelect={setSelectedActionType} className="action-list" placeholder="Actions" options={filteredActions} />
                     <BasicButton onClick={addNewAction} className="add-button">Add</BasicButton>
                 </div>
-                <ActionList />
             </div>
+            <ActionList />
         </div>
     );
 }

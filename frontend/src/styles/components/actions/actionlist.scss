@@ -1,8 +1,12 @@
 @import "styles/variables.scss";
 
 .action-table {
+    position: relative;
 
     backdrop-filter: $global-darkened-box-brightness;
+
+    width: 100%;
+    overflow-y: auto;
 
     .headers {
         display: grid;
@@ -12,7 +16,7 @@
         padding: 10px;
         gap: 10px;
         overflow-x: auto;
-        border-bottom: 3px solid black;
+        border-bottom: 3px solid rgba(0, 0, 0, 0.4);
 
         .center {
             justify-self: center;

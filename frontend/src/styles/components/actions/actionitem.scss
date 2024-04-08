@@ -1,40 +1,43 @@
-.action-item {
-    display: grid;
-    grid-template-columns: 50px repeat(5, minmax(80px, 1fr));
-    width: 100%;
-    min-height: 50px;
-    padding: 10px;
-    gap: 10px;
-    overflow-x: auto;
+.action-item-container {
 
-    .data {
-        display: flex;
-        align-items: center;
-        overflow: hidden;
-        word-break: break-all;
+    .action-item {
+        display: grid;
+        grid-template-columns: 50px repeat(5, minmax(80px, 1fr));
+        width: 100%;
+        min-height: 50px;
+        padding: 10px;
+        gap: 10px;
+        overflow-x: auto;
 
-        &.drag {
-            cursor: grab;
-
-            &:active {
-                cursor: grabbing;
-            }
-        }
-
-        .icon {
-            height: 40px;
-            margin: auto;
-        }
-
-        &.buttons {
+        .data {
             display: flex;
-            flex-direction: row;
-            justify-content: center;
             align-items: center;
-            gap: 10px;
+            overflow: hidden;
+            word-break: break-all;
 
-            .button {
-                height: 35px;
+            &.drag {
+                cursor: grab;
+
+                &:active {
+                    cursor: grabbing;
+                }
+            }
+
+            .icon {
+                height: 40px;
+                margin: auto;
+            }
+
+            &.buttons {
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                align-items: center;
+                gap: 10px;
+
+                .button {
+                    height: 35px;
+                }
             }
         }
     }

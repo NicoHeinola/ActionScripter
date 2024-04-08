@@ -15,7 +15,7 @@ const ActionItem = (props) => {
     }
 
     return (
-        <Reorder.Item value={action} dragListener={false} dragControls={dragControls}>
+        <Reorder.Item value={action} dragListener={false} dragControls={dragControls} className="action-item-container">
             <div className={"action-item" + ((props.className) ? ` ${props.className}` : "")}>
                 <div onPointerDown={(e) => dragControls.start(e)} className="data drag">
                     <img alt="Drag Icon" draggable="false" className="icon" src="images/icons/drag.png"></img>
