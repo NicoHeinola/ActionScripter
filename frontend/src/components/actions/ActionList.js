@@ -33,11 +33,13 @@ const ActionList = (props) => {
                 <div className="header">End Delay (ms)</div>
                 <div className="header center">Actions</div>
             </div>
-            <Reorder.Group style={{ overflowY: "hidden" }} values={props.allActions} onReorder={onReorder}>
-                {props.allActions.map((action, index) =>
-                    <ActionItem data={action} key={`action-item-${action.id}`} />
-                )}
-            </Reorder.Group>
+            <div className="actions">
+                <Reorder.Group style={{ overflowY: "auto", height: "100%" }} values={props.allActions} onReorder={onReorder}>
+                    {props.allActions.map((action, index) =>
+                        <ActionItem data={action} key={`action-item-${action.id}`} />
+                    )}
+                </Reorder.Group>
+            </div>
         </div>
     )
 }
