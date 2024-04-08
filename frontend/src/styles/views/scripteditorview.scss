@@ -33,23 +33,4 @@
             }
         }
     }
-
-    .action-table {
-        width: 100%;
-
-        .action-row {
-            .action-data {
-                &.buttons {
-                    display: flex;
-                    flex-direction: row;
-                    gap: 20px;
-                    
-                    .button {
-                        height: 40px;
-                    }
-                }
-            }
-        }
-    }
-
 }

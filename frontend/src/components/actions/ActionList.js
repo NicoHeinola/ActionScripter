@@ -1,0 +1,56 @@
+import "styles/components/actions/actionlist.scss";
+
+import { connect } from 'react-redux';
+import { Reorder } from "framer-motion";
+import ActionItem from "./ActionItem";
+import { swapActionIndexesCall } from "store/reducers/actionsReducer";
+
+const ActionList = (props) => {
+
+    const onReorder = (reorderedActions) => {
+        // Compare the reordered list of indexes with the original order
+        const swappedItems = [];
+        for (let i = 0; i < reorderedActions.length; i++) {
+            if (reorderedActions[i] !== props.allActions[i]) {
+                swappedItems.push(i);
+            }
+        }
+
+        if (swappedItems.length < 2) {
+            return;
+        }
+
+        props.swapActionIndexesCall(swappedItems[0], swappedItems[1]);
+    };
+
+    return (
+        <div className="action-table">
+            <div className="headers row">
+                <div className="header"></div>
+                <div className="header">Name</div>
+                <div className="header">Type</div>
+                <div className="header">Start Delay (ms)</div>
+                <div className="header">End Delay (ms)</div>
+                <div className="header center">Actions</div>
+            </div>
+            <Reorder.Group style={{ overflowY: "hidden" }} values={props.allActions} onReorder={onReorder}>
+                {props.allActions.map((action, index) =>
+                    <ActionItem data={action} key={`action-item-${action.id}`} />
+                )}
+            </Reorder.Group>
+        </div>
+    )
+}
+
+
+const mapStateToProps = (state) => {
+    return {
+        allActions: state.actions.allActions,
+    };
+};
+
+const mapDispatchToProps = {
+    swapActionIndexesCall
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(ActionList);

@@ -6,6 +6,7 @@
 
     font-family: $main-font-family;
     color: $site-text-color-1;
+
 }
 
 #root,
@@ -15,12 +16,13 @@ body {
     width: 100vw;
     height: 100vh;
     background: $site-color-1;
+    overflow-x: hidden;
 }
 
 
 ::-webkit-scrollbar {
     position: absolute;
-    height: 0;
+    height: 5px;
     width: 5px;
     background: rgba(94, 94, 94, 0.541);
 }
@@ -48,10 +50,13 @@ h4,
 h5,
 h6,
 p,
+ul,
+li,
 a {
     margin: 0;
     padding: 0;
     text-decoration: none;
+    list-style-type: none;
 }
 
 h1 {

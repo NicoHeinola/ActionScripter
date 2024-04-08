@@ -17,6 +17,12 @@ const actionsSlice = createSlice({
         },
         setActions: (state, actions) => {
             state.allActions = [...actions.payload];
+        },
+        swapActionIndexes: (state, indexesToSwap) => {
+            const [actionAIndex, actionBIndex] = indexesToSwap.payload;
+            let newActions = [...state.allActions];
+            [newActions[actionAIndex], newActions[actionBIndex]] = [newActions[actionBIndex], newActions[actionAIndex]];
+            state.allActions = newActions;
         }
     },
 });
@@ -27,13 +33,19 @@ const addActionCall = (actionType) => async (dispatch) => {
 };
 
 const removeActionCall = (actionId) => async (dispatch) => {
-    const response = await actionAPI.removeAction(actionId);
+    await actionAPI.removeAction(actionId);
     dispatch(actionsSlice.actions.removeAction(actionId));
 };
 
 const setActionsCall = (actions) => async (dispatch) => {
+    await actionAPI.setActions(actions);
     dispatch(actionsSlice.actions.setActions(actions));
 };
 
-export { addActionCall, removeActionCall, setActionsCall };
+const swapActionIndexesCall = (indexA, indexB) => async (dispatch) => {
+    await actionAPI.swapActionIndexes(indexA, indexB);
+    dispatch(actionsSlice.actions.swapActionIndexes([indexA, indexB]));
+};
+
+export { addActionCall, removeActionCall, setActionsCall, swapActionIndexesCall };
 export default actionsSlice.reducer;

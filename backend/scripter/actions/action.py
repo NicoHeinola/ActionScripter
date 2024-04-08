@@ -6,7 +6,8 @@ class Action(ABC):
     current_action_id: int = 0
 
     # A type to display to the frontend
-    action_type: str = "Missing Action Type"
+    action_type = "missing-action-type"
+    action_type_display_name = "Missing action type"
 
     def __init__(self) -> None:
         # Used to keep track of which action this one is
@@ -22,15 +23,38 @@ class Action(ABC):
         # Name to display to the frontend
         self._name: str = f"Action {self._id + 1}"
 
+    def __str__(self) -> str:
+        serialized_data: dict = self.serialize()
+        string: str = f"{self.__class__.__name__}: ("
+
+        for key, value in serialized_data.items():
+            string += f"{key}: {value}, "
+
+        string += ")"
+        return string
+
     @staticmethod
     def reset_current_id() -> None:
+        """
+        Sets the current action id to it's initial value. This should be done when a new script is created.
+        """
         Action.current_action_id = 0
 
     @abstractmethod
     def do_action(self) -> bool:
+        """
+        Performs the actions of this such as a mouse click, mouse move event, keyboard event and such.
+
+        :return: If succeeded in doing the action.
+        """
         pass
 
     def serialize(self) -> dict:
+        """
+        Converts this class into a dictionary of data.
+
+        :return: Dictionary that represents this class.
+        """
         data: dict = {}
         data["name"] = self._name
         data["id"] = self._id
@@ -40,6 +64,11 @@ class Action(ABC):
         return data
 
     def deserialize(self, data: dict) -> None:
+        """
+        Initializes this classes values using a dictionary.
+
+        :param data: A dictionary that represents this class; usually created in serialize().
+        """
         if "name" in data:
             self._name = data["name"]
 

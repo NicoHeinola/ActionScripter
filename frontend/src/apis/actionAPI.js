@@ -26,5 +26,27 @@ const updateAction = (actionId) => {
     })
 }
 
-const functions = { addAction, updateAction, removeAction };
+const swapActionIndexes = (indexA, indexB) => {
+    return axiosInstance.post(`${BASE_ROUTE}/swap`, { "index-a": indexA, "index-b": indexB }).then(response => {
+        return response;
+    }).catch(e => {
+        throw e;
+    })
+}
+
+const setActions = (actions) => {
+    return axiosInstance.post(`${BASE_ROUTE}/overwrite`, { "actions": actions }).then(response => {
+        return response;
+    }).catch(e => {
+        throw e;
+    })
+}
+
+const functions = {
+    addAction,
+    updateAction,
+    removeAction,
+    setActions,
+    swapActionIndexes
+};
 export default functions;

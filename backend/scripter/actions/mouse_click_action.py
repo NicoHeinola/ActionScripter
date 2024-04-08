@@ -2,7 +2,8 @@ from .action import Action
 
 
 class MouseClickAction(Action):
-    action_type = "Mouse Click"
+    action_type = "mouse-click"
+    action_type_display_name = "Mouse Click"
 
     def __init__(self) -> None:
         super().__init__()
