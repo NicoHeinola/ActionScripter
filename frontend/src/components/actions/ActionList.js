@@ -6,9 +6,8 @@ import ActionItem from "./ActionItem";
 import { swapActionIndexesCall } from "store/reducers/actionsReducer";
 
 const ActionList = (props) => {
-
     const onReorder = (reorderedActions) => {
-        // Compare the reordered list of indexes with the original order
+        // Find what items were swapped
         const swappedItems = [];
         for (let i = 0; i < reorderedActions.length; i++) {
             if (reorderedActions[i] !== props.allActions[i]) {
@@ -29,8 +28,9 @@ const ActionList = (props) => {
                 <div className="header"></div>
                 <div className="header">Name</div>
                 <div className="header">Type</div>
-                <div className="header">Start Delay (ms)</div>
-                <div className="header">End Delay (ms)</div>
+                <div className="header">Start delay (ms)</div>
+                <div className="header">End delay (ms)</div>
+                <div className="header">Loop count</div>
                 <div className="header center">Actions</div>
             </div>
             <div className="actions">

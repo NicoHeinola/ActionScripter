@@ -31,8 +31,9 @@
 
             .add-button {
                 position: relative;
-                aspect-ratio: 1;
                 height: 100%;
+                width: initial;
+                aspect-ratio: 1;
             }
         }
     }

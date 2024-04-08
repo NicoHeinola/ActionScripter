@@ -17,6 +17,9 @@ class ActionScript:
         # Contains all the actions in order.
         self._actions: List[Action] = []
 
+    def get_actions(self) -> List[Action]:
+        return self._actions
+
     def add_action(self, action: Action) -> None:
         """
         Adds an action to this class' actions.
@@ -43,11 +46,12 @@ class ActionScript:
 
         return new_action
 
-    def remove_action(self, action_id: int) -> None:
+    def remove_action(self, action_id: int) -> int:
         """
         Removes an action from this class' action list.
 
         :param action_id: Id of the action to remove.
+        :return: Index of removed action
         """
 
         action_index: int = None
@@ -61,6 +65,7 @@ class ActionScript:
             return
 
         self._actions.pop(action_index)
+        return action_index
 
     def set_actions_with_dict(self, actions: List[dict]) -> None:
         """

@@ -18,8 +18,8 @@ const removeAction = (actionId) => {
     })
 }
 
-const updateAction = (actionId) => {
-    return axiosInstance.post(`${BASE_ROUTE}`, { "id": actionId }).then(response => {
+const updateAction = (updatedAction) => {
+    return axiosInstance.put(`${BASE_ROUTE}/${updatedAction.id}`, updatedAction).then(response => {
         return response;
     }).catch(e => {
         throw e;

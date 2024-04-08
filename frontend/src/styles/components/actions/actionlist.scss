@@ -3,12 +3,12 @@
 .action-table {
     position: relative;
 
-    backdrop-filter: $global-darkened-box-brightness;
-
     width: 100%;
     height: 100%;
+    padding-bottom: 10px;
 
     overflow: hidden;
+    background: $global-darkened-bg;
 
     .actions {
         position: relative;
@@ -18,7 +18,7 @@
 
     .headers {
         display: grid;
-        grid-template-columns: 50px repeat(5, minmax(80px, 1fr));
+        grid-template-columns: 50px repeat(4, minmax(80px, 1fr)) 50px minmax(80px, 1fr);
         width: 100%;
         min-height: 50px;
         padding: 10px;

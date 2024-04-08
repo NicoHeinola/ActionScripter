@@ -12,6 +12,29 @@ const actionsSlice = createSlice({
         addAction: (state, action) => {
             state.allActions.push(action.payload);
         },
+        updateAction: (state, updatedAction) => {
+            let newAllActions = [...state.allActions];
+            let indexOfUpdatedAction = null;
+
+            for (let i = 0; i < newAllActions.length; i++) {
+                let action = newAllActions[i];
+
+                if (action.id !== updatedAction.payload.id) {
+                    continue;
+                }
+
+                indexOfUpdatedAction = i;
+                break;
+            }
+
+            if (indexOfUpdatedAction === null) {
+                return;
+            }
+
+            newAllActions[indexOfUpdatedAction] = updatedAction.payload;
+
+            state.allActions = newAllActions;
+        },
         removeAction: (state, actionId) => {
             state.allActions = state.allActions.filter(action => action.id !== actionId.payload);
         },
@@ -32,6 +55,11 @@ const addActionCall = (actionType) => async (dispatch) => {
     dispatch(actionsSlice.actions.addAction(response.data));
 };
 
+const updateActionCall = (updatedAction) => async (dispatch) => {
+    await actionAPI.updateAction(updatedAction);
+    dispatch(actionsSlice.actions.updateAction(updatedAction));
+};
+
 const removeActionCall = (actionId) => async (dispatch) => {
     await actionAPI.removeAction(actionId);
     dispatch(actionsSlice.actions.removeAction(actionId));
@@ -47,5 +75,5 @@ const swapActionIndexesCall = (indexA, indexB) => async (dispatch) => {
     dispatch(actionsSlice.actions.swapActionIndexes([indexA, indexB]));
 };
 
-export { addActionCall, removeActionCall, setActionsCall, swapActionIndexesCall };
+export { addActionCall, updateActionCall, removeActionCall, setActionsCall, swapActionIndexesCall };
 export default actionsSlice.reducer;

@@ -6,6 +6,24 @@
     flex-direction: column;
     gap: 2px;
     border-radius: $global-border-radius;
+    width: 100%;
+    transition: all 0.2s;
+
+    &.disabled {
+        filter: brightness(35%);
+
+        cursor: not-allowed;
+
+        .bg {
+            opacity: 0.20 !important;
+        }
+
+        .input-container {
+            .input {
+                cursor: not-allowed;
+            }
+        }
+    }
 
     &:hover {
         .bg {

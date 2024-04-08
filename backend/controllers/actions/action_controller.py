@@ -1,3 +1,4 @@
+from typing import List
 from flask import make_response, request
 from controllers.base_controller import BaseController
 from scripter.action_script import ActionScript
@@ -66,5 +67,22 @@ class ActionController(BaseController):
             index_b: int = data["index-b"]
 
             ActionScript.current_script.swap_actions(index_a, index_b)
+
+            return make_response("", 200)
+
+        @self._app.route(f"{base_route}/<action_id>", methods=["PUT"])
+        def update_action(action_id):
+            if ActionScript.current_script is None:
+                return make_response({"error": "No current script found!"}, 500)
+
+            updated_action_data: dict = request.get_json()
+            action_id: int = updated_action_data["id"]
+            actions: List[Action] = ActionScript.current_script.get_actions()
+
+            for action in actions:
+                if action._id != action_id:
+                    continue
+
+                action.deserialize(updated_action_data)
 
             return make_response("", 200)

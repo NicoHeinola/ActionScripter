@@ -16,7 +16,7 @@ const NoFileSelectedView = (props) => {
     return (
         <div className="no-file-selected-view">
             <div className="selection-buttons">
-                <Link to={"/script-editor"}><BasicButton onClick={newEmptyActionScript} className="button">Create a new script</BasicButton></Link>
+                <Link className="button" to={"/script-editor"}><BasicButton onClick={newEmptyActionScript}>Create a new script</BasicButton></Link>
                 <BasicButton className="button">Open a script from disk</BasicButton>
             </div>
             <div className="recent-scripts">

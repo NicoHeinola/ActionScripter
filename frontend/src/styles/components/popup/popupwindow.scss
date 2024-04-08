@@ -1,0 +1,50 @@
+@import "styles/variables.scss";
+
+.popup-window {
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 500;
+
+    pointer-events: all;
+
+    transition: all 0.2s;
+
+    &.hidden {
+        opacity: 0;
+        pointer-events: none;
+
+        &>.bg {
+            pointer-events: none;
+        }
+    }
+
+    .items {
+        position: relative;
+        z-index: 10;
+
+        max-height: 80vh;
+        overflow-y: auto;
+
+        background: $site-color-1;
+        border-radius: $global-border-radius;
+    }
+
+    &>.bg {
+        position: absolute;
+        width: 100vw;
+        height: 100vh;
+        left: 0;
+        top: 0;
+        background: black;
+        opacity: 0.6;
+        pointer-events: all;
+    }
+}

@@ -23,6 +23,9 @@ class Action(ABC):
         # Name to display to the frontend
         self._name: str = f"Action {self._id + 1}"
 
+        # How many this action is performed
+        self._loop_count: int = 1
+
     def __str__(self) -> str:
         serialized_data: dict = self.serialize()
         string: str = f"{self.__class__.__name__}: ("
@@ -61,6 +64,8 @@ class Action(ABC):
         data["start-delay-ms"] = self._start_delay_ms
         data["end-delay-ms"] = self._end_delay_ms
         data["type"] = self.action_type
+        data["type-display-name"] = self.action_type_display_name
+        data["loop-count"] = self._loop_count
         return data
 
     def deserialize(self, data: dict) -> None:
@@ -81,3 +86,6 @@ class Action(ABC):
 
         if "end-delay-ms" in data:
             self._end_delay_ms = data["end-delay-ms"]
+
+        if "loop-count" in data:
+            self._loop_count = data["loop-count"]
