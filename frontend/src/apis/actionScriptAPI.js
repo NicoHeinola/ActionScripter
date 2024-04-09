@@ -2,6 +2,14 @@ import axiosInstance from "./axiosInstance";
 
 const BASE_ROUTE = "/action-script"
 
+const getActionScript = () => {
+    return axiosInstance.get(`${BASE_ROUTE}`).then(response => {
+        return response;
+    }).catch(e => {
+        throw e;
+    })
+}
+
 const newActionScript = () => {
     return axiosInstance.post(`${BASE_ROUTE}`).then(response => {
         return response;
@@ -10,5 +18,44 @@ const newActionScript = () => {
     })
 }
 
-const functions = { newActionScript };
+const updateActionScript = (scriptData) => {
+    return axiosInstance.put(`${BASE_ROUTE}`, scriptData).then(response => {
+        return response;
+    }).catch(e => {
+        throw e;
+    })
+}
+
+const startActionScript = () => {
+    return axiosInstance.post(`${BASE_ROUTE}/start`).then(response => {
+        return response;
+    }).catch(e => {
+        throw e;
+    })
+}
+
+const pauseActionScript = () => {
+    return axiosInstance.post(`${BASE_ROUTE}/pause`).then(response => {
+        return response;
+    }).catch(e => {
+        throw e;
+    })
+}
+
+const stopActionScript = () => {
+    return axiosInstance.post(`${BASE_ROUTE}/stop`).then(response => {
+        return response;
+    }).catch(e => {
+        throw e;
+    })
+}
+
+const functions = {
+    getActionScript,
+    newActionScript,
+    updateActionScript,
+    startActionScript,
+    pauseActionScript,
+    stopActionScript,
+};
 export default functions; 

@@ -1,22 +1,26 @@
 import BasicButton from "components/inputs/BasicButton";
-import { Link } from "react-router-dom";
 import "styles/views/nofileselectedview.scss"
 import actionScriptAPI from "apis/actionScriptAPI";
+import { useNavigate } from 'react-router-dom';
 
 import { connect } from 'react-redux';
 import { setActionsCall } from "store/reducers/actionsReducer";
+import { getScriptCall } from "store/reducers/actionScriptReducer";
 
 const NoFileSelectedView = (props) => {
+    const navigate = useNavigate();
 
     const newEmptyActionScript = () => {
         actionScriptAPI.newActionScript();
         props.setActionsCall([]);
+        props.getScriptCall();
+        navigate('/script-editor');
     }
 
     return (
         <div className="no-file-selected-view">
             <div className="selection-buttons">
-                <Link className="button" to={"/script-editor"}><BasicButton onClick={newEmptyActionScript}>Create a new script</BasicButton></Link>
+                <BasicButton className="button" onClick={newEmptyActionScript}>Create a new script</BasicButton>
                 <BasicButton className="button">Open a script from disk</BasicButton>
             </div>
             <div className="recent-scripts">
@@ -42,7 +46,8 @@ const mapStateToProps = (state) => {
 };
 
 const mapDispatchToProps = {
-    setActionsCall
+    setActionsCall,
+    getScriptCall,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(NoFileSelectedView);

@@ -4,21 +4,27 @@
     position: relative;
     display: flex;
     flex-direction: row;
+    align-items: center;
     gap: 10px;
     width: 100%;
+    height: 50px;
 
     padding: 10px;
     border-radius: $global-border-radius;
     box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.2);
     transition: all 0.2s;
 
-    &:hover {
+    &:hover:not(.checked) {
         cursor: pointer;
         box-shadow: 2px 2px 4px 0 rgba(0, 0, 0, 0.3);
 
         .bg {
             opacity: 0.15;
         }
+    }
+
+    &.checked {
+        box-shadow: none;
     }
 
     .bg {

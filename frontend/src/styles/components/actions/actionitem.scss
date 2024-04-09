@@ -1,3 +1,5 @@
+@import "styles/variables.scss";
+
 .action-item-container {
     width: 100%;
 
@@ -9,6 +11,16 @@
         padding: 10px;
         gap: 10px;
         overflow-x: auto;
+        transition: all 0.2s;
+
+        &.performing {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        &.disabled {
+            filter: brightness(100%);
+            background: rgba(0, 0, 0, 0.1);
+        }
 
         .data {
             display: flex;
@@ -38,6 +50,7 @@
 
                 .button {
                     height: 35px;
+                    width: 35px;
                 }
             }
         }

@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
-import random
+from scripter.event_emitter import EventEmitter
 
 
-class Action(ABC):
+class Action(ABC, EventEmitter):
     current_action_id: int = 0
 
     # A type to display to the frontend
@@ -15,10 +15,10 @@ class Action(ABC):
         Action.current_action_id += 1
 
         # How long to wait until this action starts
-        self._start_delay_ms: int = 0
+        self._start_delay_ms: int = 50
 
         # How long to wait for the next action when this is finished
-        self._end_delay_ms: int = 50
+        self._end_delay_ms: int = 0
 
         # Name to display to the frontend
         self._name: str = f"Action {self._id + 1}"
@@ -82,10 +82,10 @@ class Action(ABC):
             Action.current_action_id = max(self._id, Action.current_action_id)
 
         if "start-delay-ms" in data:
-            self._start_delay_ms = data["start-delay-ms"]
+            self._start_delay_ms = int(data["start-delay-ms"])
 
         if "end-delay-ms" in data:
-            self._end_delay_ms = data["end-delay-ms"]
+            self._end_delay_ms = int(data["end-delay-ms"])
 
         if "loop-count" in data:
-            self._loop_count = data["loop-count"]
+            self._loop_count = int(data["loop-count"])

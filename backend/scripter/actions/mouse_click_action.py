@@ -12,7 +12,7 @@ class MouseClickAction(Action):
         self._click_x: int = 0
         self._click_y: int = 0
 
-    def do_action() -> bool:
+    def do_action(self) -> bool:
         print("Mouse is clicking!")
 
     def serialize(self) -> dict:

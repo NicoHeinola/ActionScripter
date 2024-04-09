@@ -33,7 +33,7 @@ const SelectBox = (props) => {
                 <p className="selected-value-text">{selectedText}</p>
                 <p className={"placeholder" + ((selectedText !== null) ? " value" : "") + ((isOpen) ? " open" : "")}>{props.placeholder}</p>
                 <div className="arrow-container">
-                    <img className={"image" + ((isOpen) ? " open" : "")} src="images/icons/arrow-down.png" alt="arrow-down" />
+                    <img className={"image" + ((isOpen) ? " open" : "")} src="images/icons/arrow_down.png" alt="Down arrow" />
                 </div>
             </div>
             <div className="underlines">

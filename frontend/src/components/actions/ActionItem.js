@@ -17,6 +17,9 @@ const ActionItem = (props) => {
     const popupWindow = useRef(null);
     const actionEditForm = useRef(null);
 
+    const canModify = props.currentScript["play-state"] === "stopped";
+    const performingActionClass = (canModify) ? "" : (props.performing) ? "performing" : "disabled";
+
     const removeAction = (id) => {
         props.removeActionCall(id);
     }
@@ -33,14 +36,23 @@ const ActionItem = (props) => {
         actionEditForm.current.resetActionData();
     }
 
+    const startDragging = (e) => {
+        // We can't modify anything when the actions are running
+        if (!canModify) {
+            return;
+        }
+
+        dragControls.start(e);
+    }
+
     return (
         <div className="action-item-wrapper">
             <PopupWindow onManualClose={onPopupClose} ref={popupWindow}>
                 <ActionEditForm ref={actionEditForm} onCancel={closeEditWindow} actionType={action.type} actionData={action}></ActionEditForm>
             </PopupWindow>
             <Reorder.Item value={action} dragListener={false} dragControls={dragControls} className="action-item-container">
-                <div className={"action-item" + ((props.className) ? ` ${props.className}` : "")}>
-                    <div onPointerDown={(e) => dragControls.start(e)} className="data drag">
+                <div className={"action-item" + ((props.className) ? ` ${props.className}` : "") + ` ${performingActionClass}`}>
+                    <div onPointerDown={startDragging} className="data drag">
                         <img alt="Drag Icon" draggable="false" className="icon" src="images/icons/drag.png"></img>
                     </div>
                     <div className="data">{action["name"]}</div>
@@ -49,8 +61,8 @@ const ActionItem = (props) => {
                     <div className="data">{action["end-delay-ms"]}</div>
                     <div className="data">{action["loop-count"]}</div>
                     <div className="data buttons">
-                        <BasicButton onClick={openEditWindow} className="button" icon="images/icons/edit.png"></BasicButton>
-                        <BasicButton onClick={() => removeAction(action.id)} className="button" icon="images/icons/delete.png"></BasicButton>
+                        <BasicButton disabled={!canModify} onClick={openEditWindow} className="button" icon="images/icons/edit.png"></BasicButton>
+                        <BasicButton disabled={!canModify} onClick={() => removeAction(action.id)} className="button" icon="images/icons/delete.png"></BasicButton>
                     </div>
                 </div>
             </Reorder.Item>
@@ -63,6 +75,7 @@ const ActionItem = (props) => {
 const mapStateToProps = (state) => {
     return {
         allActions: state.actions.allActions,
+        currentScript: state.actionScript.currentScript,
     };
 };
 

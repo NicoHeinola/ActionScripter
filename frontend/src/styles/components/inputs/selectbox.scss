@@ -6,6 +6,7 @@
     flex-direction: column;
     gap: 2px;
     border-radius: $global-border-radius;
+    height: 50px;
 
     &:hover {
         .bg {
@@ -74,7 +75,7 @@
     .input-container {
         position: relative;
         width: 100%;
-        height: 50px;
+        height: 100%;
         padding: 0 20px;
         padding-bottom: 5px;
 
@@ -111,8 +112,8 @@
         }
 
         .selected-value-text {
-            position: relative;
-            top: calc(100% - 20px);
+            position: absolute;
+            top: calc(50% - 3px);
             pointer-events: none;
             max-width: calc(100% - 30px);
             overflow-x: hidden;
@@ -143,17 +144,17 @@
     }
 
     .underlines {
-        position: relative;
+        position: absolute;
         width: 100%;
         height: 3px;
         pointer-events: none;
+        bottom: 0;
 
         .underline {
             position: absolute;
             width: 100%;
             height: 100%;
             left: 0;
-            top: 0;
 
             border-radius: 50px;
             background: $input-color-1;

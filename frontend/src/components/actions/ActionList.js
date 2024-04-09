@@ -4,8 +4,27 @@ import { connect } from 'react-redux';
 import { Reorder } from "framer-motion";
 import ActionItem from "./ActionItem";
 import { swapActionIndexesCall } from "store/reducers/actionsReducer";
+import socket from "socket/socketManager";
+import { useEffect, useState } from "react";
 
 const ActionList = (props) => {
+    const [currentActionIndex, setCurrentActionIndex] = useState(0)
+
+    useEffect(() => {
+        socket.on("performed-action", (actionIndex) => {
+            setCurrentActionIndex(actionIndex);
+        });
+
+        socket.on("finished-actions", () => {
+            setCurrentActionIndex(0);
+        });
+
+        return (() => {
+            socket.off("performed-action");
+            socket.off("finished-actions");
+        })
+    }, []);
+
     const onReorder = (reorderedActions) => {
         // Find what items were swapped
         const swappedItems = [];
@@ -36,7 +55,7 @@ const ActionList = (props) => {
             <div className="actions">
                 <Reorder.Group style={{ overflowY: "auto", height: "100%" }} values={props.allActions} onReorder={onReorder}>
                     {props.allActions.map((action, index) =>
-                        <ActionItem data={action} key={`action-item-${action.id}`} />
+                        <ActionItem performing={index === currentActionIndex} data={action} key={`action-item-${action.id}`} />
                     )}
                 </Reorder.Group>
             </div>
