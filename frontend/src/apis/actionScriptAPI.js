@@ -10,6 +10,14 @@ const getActionScript = () => {
     })
 }
 
+const getSerializedActionScript = () => {
+    return axiosInstance.get(`${BASE_ROUTE}/serialize`).then(response => {
+        return response;
+    }).catch(e => {
+        throw e;
+    })
+}
+
 const newActionScript = () => {
     return axiosInstance.post(`${BASE_ROUTE}`).then(response => {
         return response;
@@ -52,6 +60,7 @@ const stopActionScript = () => {
 
 const functions = {
     getActionScript,
+    getSerializedActionScript,
     newActionScript,
     updateActionScript,
     startActionScript,

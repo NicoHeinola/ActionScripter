@@ -42,6 +42,8 @@
         opacity: 0.05;
         pointer-events: none;
         transition: all 0.2s;
+        border-top-left-radius: $global-border-radius;
+        border-top-right-radius: $global-border-radius;
 
         &.active {
             opacity: 0.2 !important;
@@ -99,6 +101,7 @@
         width: 100%;
         height: 3px;
         bottom: 0;
+        border-radius: $global-border-radius;
 
         .underline {
             position: absolute;
@@ -107,7 +110,7 @@
             left: 0;
             top: 0;
 
-            border-radius: 50px;
+            border-radius: $global-border-radius;
             background: $input-color-1;
             opacity: 0.4;
 

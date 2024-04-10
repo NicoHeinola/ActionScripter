@@ -16,7 +16,14 @@ class ActionScriptController(BaseController):
             if ActionScript.current_script is None:
                 create_new_action_script()
 
-            return make_response(ActionScript.current_script.serialize(), 200)
+            return make_response(ActionScript.current_script.serialize(False), 200)
+
+        @self._app.route(f"{base_route}/serialize", methods=["GET"])
+        def get_serialized_current_script():
+            if ActionScript.current_script is None:
+                return make_response({"error": "There is no script to serialize!"}, 500)
+
+            return make_response(ActionScript.current_script.serialize(True), 200)
 
         @self._app.route(f"{base_route}", methods=["POST"])
         def create_new_action_script():

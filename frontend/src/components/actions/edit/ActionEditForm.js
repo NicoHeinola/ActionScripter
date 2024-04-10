@@ -52,11 +52,11 @@ const ActionEditForm = forwardRef((props, ref) => {
     return (
         <div className="action-edit-form">
             <GroupBox title="Default" className="box">
-                <TextInput onChange={e => onDataChanged("name", e.target.value)} value={actionData["name"]} placeholder="Action name" />
+                <TextInput onChange={newValue => onDataChanged("name", newValue)} value={actionData["name"]} placeholder="Action name" />
                 <div className="row">
-                    <TextInput min="0" type="number" onChange={e => onDataChanged("start-delay-ms", e.target.value)} value={actionData["start-delay-ms"]} placeholder="Start delay (ms)" />
-                    <TextInput min="0" type="number" onChange={e => onDataChanged("end-delay-ms", e.target.value)} value={actionData["end-delay-ms"]} placeholder="End delay (ms)" />
-                    <TextInput min="0" type="number" onChange={e => onDataChanged("loop-count", e.target.value)} value={actionData["loop-count"]} placeholder="Loop count" />
+                    <TextInput min="0" type="number" onChange={newValue => onDataChanged("start-delay-ms", newValue)} value={actionData["start-delay-ms"]} placeholder="Start delay (ms)" />
+                    <TextInput min="0" type="number" onChange={newValue => onDataChanged("end-delay-ms", newValue)} value={actionData["end-delay-ms"]} placeholder="End delay (ms)" />
+                    <TextInput min="0" type="number" onChange={newValue => onDataChanged("loop-count", newValue)} value={actionData["loop-count"]} placeholder="Loop count" />
                 </div>
             </GroupBox>
             {component}

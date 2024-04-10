@@ -41,13 +41,8 @@ const getScriptCall = () => async (dispatch) => {
 };
 
 const updateScriptCall = (scriptData) => async (dispatch) => {
-    let newScriptData = { ...scriptData };
-
-    // Actions are updated elsewhere
-    delete newScriptData["actions"];
-
-    await actionScriptAPI.updateActionScript(newScriptData);
-    dispatch(actionScriptSlice.actions.setCurrentScript(newScriptData));
+    await actionScriptAPI.updateActionScript(scriptData);
+    dispatch(actionScriptSlice.actions.setCurrentScript(scriptData));
 };
 
 export {

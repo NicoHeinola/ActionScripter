@@ -206,6 +206,7 @@ class ActionScript(EventEmitter):
         self._actions = []
 
         for action in actions:
+            print(action, type(action))
             action_type: str = action["type"]
 
             if action_type not in ActionScript.all_actions:

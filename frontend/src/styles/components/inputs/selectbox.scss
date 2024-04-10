@@ -25,6 +25,7 @@
         opacity: 0.05;
         pointer-events: none;
         transition: all 0.2s;
+        border-radius: $global-border-radius;
 
         &.open {
             opacity: 0.2 !important;

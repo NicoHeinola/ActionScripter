@@ -6,11 +6,13 @@ import ScriptEditorView from 'views/ScriptEditorView';
 
 import { Provider } from 'react-redux';
 import store from "store/store";
+import SaveManager from 'components/save/SaveManager';
 
 function App() {
   return (
     <Provider store={store}>
       <BrowserRouter>
+        <SaveManager />
         <Routes>
           <Route path='/' element={<NoFileSelectedView />} />
           <Route index path='/script-editor' element={<ScriptEditorView />} />
