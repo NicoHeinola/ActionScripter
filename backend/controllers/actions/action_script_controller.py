@@ -1,10 +1,16 @@
+from datetime import datetime
+import json
+import os
 from threading import Thread
 import time
-from flask import make_response, request
+from typing import List
+from flask import jsonify, make_response, request
 from controllers.base_controller import BaseController
+from models.recent_script_model import RecentScript
 from scripter.action_script import ActionScript
 from scripter.actions.action import Action
 from flask_socketio import emit
+from database.database import db
 
 
 class ActionScriptController(BaseController):
@@ -77,3 +83,126 @@ class ActionScriptController(BaseController):
             ActionScript.current_script.stop()
 
             return make_response("", 200)
+
+        @self._app.route(f"{base_route}/recent", methods=["POST"])
+        def new_recent_action_script():
+            data: dict = request.get_json()
+
+            if "path" not in data:
+                return make_response({"error": "Missing path!"}, 400)
+
+            path: str = data["path"].replace("\\", "/")
+
+            if ActionScript.current_script is not None:
+                ActionScript.current_script._latest_save_path = path
+
+            recent_script: RecentScript = RecentScript.query.filter_by(path=path).first()
+
+            if recent_script is not None:
+                recent_script.updated_at = datetime.now()
+            else:
+                recent_script = RecentScript()
+                recent_script.path = path
+
+            db.session.add(recent_script)
+            db.session.commit()
+
+            return make_response("", 200)
+
+        @self._app.route(f"{base_route}/recent", methods=["GET"])
+        def get_recent_action_scripts():
+            clean_recent_action_scripts()
+            recent_scripts: List[RecentScript] = RecentScript.query.order_by(RecentScript.updated_at.desc()).limit(20).all()
+            return make_response(jsonify([recent_script.serialize for recent_script in recent_scripts]), 200)
+
+        @self._app.route(f"{base_route}/clean", methods=["POST"])
+        def clean_recent_action_scripts():
+            """
+            Simply removes non-existing recent action scripts
+            """
+
+            recent_scripts: List[RecentScript] = RecentScript.query.order_by(RecentScript.updated_at.desc()).limit(20).all()
+            for recent_script in recent_scripts:
+                if os.path.exists(recent_script.path):
+                    continue
+
+                db.session.delete(recent_script)
+
+            db.session.commit()
+
+            return make_response("", 200)
+
+        @self._app.route(f"{base_route}/save-as", methods=["POST"])
+        def save_as():
+            if ActionScript.current_script is None:
+                return make_response({"error": "No current script found!"}, 500)
+
+            ActionScript.current_script.save_as()
+
+            path: str = ActionScript.current_script._latest_save_path
+            recent_script: RecentScript = RecentScript.query.filter_by(path=path).first()
+
+            if recent_script is not None:
+                recent_script.updated_at = datetime.now()
+            else:
+                recent_script = RecentScript()
+                recent_script.path = path
+
+            db.session.add(recent_script)
+            db.session.commit()
+
+            return make_response({"save-path": ActionScript.current_script._latest_save_path}, 200)
+
+        @self._app.route(f"{base_route}/save", methods=["POST"])
+        def save():
+            if ActionScript.current_script is None:
+                return make_response({"error": "No current script found!"}, 500)
+
+            if not os.path.exists(ActionScript.current_script._latest_save_path):
+                return save_as()
+
+            ActionScript.current_script.save()
+
+            path: str = ActionScript.current_script._latest_save_path
+            recent_script: RecentScript = RecentScript.query.filter_by(path=path).first()
+
+            if recent_script is not None:
+                recent_script.updated_at = datetime.now()
+            else:
+                recent_script = RecentScript()
+                recent_script.path = path
+
+            db.session.add(recent_script)
+            db.session.commit()
+
+            return make_response({"save-path": ActionScript.current_script._latest_save_path}, 200)
+
+        @self._app.route(f"{base_route}/load", methods=["POST"])
+        def load():
+            data: dict = request.get_json()
+
+            if "path" not in data:
+                return make_response({"error": "Missing path!"}, 400)
+            path: str = data["path"]
+
+            if not os.path.exists(path):
+                return make_response({"error": "Path doesn't exist!"}, 400)
+
+            action_script: ActionScript = None
+            if ActionScript.current_script is not None:
+                # If action script already exists, we can simply use the existing one
+                action_script = ActionScript.current_script
+            else:
+                # If action script doesn't exist, create one
+                create_new_action_script()
+                action_script = ActionScript.current_script
+
+            # Set the save location
+            action_script._latest_save_path = path
+
+            # Load json data and deserialize the action script with it
+            with open(path, "r") as file:
+                file_data_json = json.load(file)
+                action_script.deserialize(file_data_json)
+
+            return make_response(action_script.serialize(True), 200)

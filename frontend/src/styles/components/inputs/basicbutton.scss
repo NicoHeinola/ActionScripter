@@ -22,6 +22,10 @@
 
     cursor: pointer;
 
+    &.cancel {
+        background: $button-color-1-cancel;
+    }
+
     .bg {
         position: absolute;
         left: 0;

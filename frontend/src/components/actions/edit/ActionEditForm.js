@@ -61,7 +61,7 @@ const ActionEditForm = forwardRef((props, ref) => {
             </GroupBox>
             {component}
             <div className="row">
-                <BasicButton onClick={onCancel}>Cancel</BasicButton>
+                <BasicButton className="cancel" onClick={onCancel}>Cancel</BasicButton>
                 <BasicButton onClick={save}>Save</BasicButton>
             </div>
         </div>

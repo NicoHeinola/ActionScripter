@@ -1,22 +1,14 @@
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 
-import actionScriptAPI from "apis/actionScriptAPI.js";
+import { connect } from 'react-redux';
+import { saveActionScriptCall } from "store/reducers/actionScriptReducer";
 
-const SaveManager = () => {
-    const handleSaveFile = async () => {
-        const fileName = "Action Script.acsc";
+const SaveManager = (props) => {
 
-        const fileContent = JSON.stringify((await actionScriptAPI.getSerializedActionScript()).data);
-        const blob = new Blob([fileContent], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', fileName);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-    };
+    const saveActionScriptCall = props.saveActionScriptCall;
+    const handleSaveFile = useCallback(() => {
+        saveActionScriptCall();
+    }, [saveActionScriptCall]);
 
     useEffect(() => {
         const handleKeyDown = (event) => {
@@ -31,7 +23,7 @@ const SaveManager = () => {
         return () => {
             document.removeEventListener('keydown', handleKeyDown);
         };
-    }, [])
+    }, [handleSaveFile])
 
     return (
         <div className="save-manager">
@@ -40,4 +32,13 @@ const SaveManager = () => {
     )
 };
 
-export default SaveManager;
+
+const mapStateToProps = (state) => {
+    return {};
+};
+
+const mapDispatchToProps = {
+    saveActionScriptCall
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(SaveManager);

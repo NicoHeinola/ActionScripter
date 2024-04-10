@@ -1,3 +1,4 @@
+import json
 from operator import index
 from threading import Thread
 import time
@@ -7,6 +8,7 @@ from flask_socketio import SocketIO
 from scripter.actions.action import Action
 from scripter.actions.mouse_click_action import MouseClickAction
 from scripter.event_emitter import EventEmitter
+from tkinter import filedialog
 
 
 class ActionScript(EventEmitter):
@@ -42,6 +44,9 @@ class ActionScript(EventEmitter):
         # This thread handles running this script
         self._play_thread: Thread = None
         self._thread_should_be_stopped: bool = False
+
+        # Where this script was last saved. Used for automatically saving without having to manually pick the location
+        self._latest_save_path: str = ""
 
     def is_playing(self) -> bool:
         return self._play_state == "playing"
@@ -206,7 +211,6 @@ class ActionScript(EventEmitter):
         self._actions = []
 
         for action in actions:
-            print(action, type(action))
             action_type: str = action["type"]
 
             if action_type not in ActionScript.all_actions:
@@ -270,3 +274,17 @@ class ActionScript(EventEmitter):
             for action_data in data["actions"]:
                 action: Action = self.create_action_with_type(action_data["type"])
                 action.deserialize(action_data)
+
+    def save_as(self) -> None:
+        file_path: str = filedialog.asksaveasfilename(defaultextension=".acsc", filetypes=[("ActionScript Files", "*.acsc"), ("All Files", "*.*")])
+
+        if not file_path:
+            return
+
+        self._latest_save_path = file_path
+
+        self.save()
+
+    def save(self) -> None:
+        with open(self._latest_save_path, 'w') as file:
+            file.write(json.dumps(self.serialize(True)))

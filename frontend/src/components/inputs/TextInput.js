@@ -1,9 +1,20 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "styles/components/inputs/textinput.scss";
 
 const TextInput = (props) => {
-    const [value, setValue] = useState((props.value !== undefined) ? props.value : "");
+    const propValue = props.value;
+
+    const [value, setValue] = useState((propValue !== undefined) ? propValue : "");
     const [isInputActive, setIsInputActive] = useState(false);
+
+
+    useEffect(() => {
+        if (propValue === value || propValue === undefined) {
+            return
+        }
+
+        setValue(propValue);
+    }, [propValue, value])
 
     const valueChanged = (e) => {
         let newValue = e.target.value;

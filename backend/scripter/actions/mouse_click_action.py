@@ -17,7 +17,7 @@ class MouseClickAction(Action):
         self._click_x: int = 0
         self._click_y: int = 0
 
-        # What mouse button to click with (left, right, middle, x, x1, x2, ...)
+        # What mouse button to click with (left, right, middle)
         self._click_button: str = "left"
 
     def do_action(self) -> bool:

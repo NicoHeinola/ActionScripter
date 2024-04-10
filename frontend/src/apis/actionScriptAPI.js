@@ -10,6 +10,22 @@ const getActionScript = () => {
     })
 }
 
+const getRecentActionScripts = () => {
+    return axiosInstance.get(`${BASE_ROUTE}/recent`).then(response => {
+        return response;
+    }).catch(e => {
+        throw e;
+    })
+}
+
+const newRecentActionScript = (scriptPath) => {
+    return axiosInstance.post(`${BASE_ROUTE}/recent`, { "path": scriptPath }).then(response => {
+        return response;
+    }).catch(e => {
+        throw e;
+    })
+}
+
 const getSerializedActionScript = () => {
     return axiosInstance.get(`${BASE_ROUTE}/serialize`).then(response => {
         return response;
@@ -58,6 +74,30 @@ const stopActionScript = () => {
     })
 }
 
+const saveActionScript = () => {
+    return axiosInstance.post(`${BASE_ROUTE}/save`).then(response => {
+        return response;
+    }).catch(e => {
+        throw e;
+    })
+}
+
+const saveAsActionScript = () => {
+    return axiosInstance.post(`${BASE_ROUTE}/save-as`).then(response => {
+        return response;
+    }).catch(e => {
+        throw e;
+    })
+}
+
+const loadActionScript = (path) => {
+    return axiosInstance.post(`${BASE_ROUTE}/load`, { "path": path }).then(response => {
+        return response;
+    }).catch(e => {
+        throw e;
+    })
+}
+
 const functions = {
     getActionScript,
     getSerializedActionScript,
@@ -66,5 +106,10 @@ const functions = {
     startActionScript,
     pauseActionScript,
     stopActionScript,
+    getRecentActionScripts,
+    newRecentActionScript,
+    saveActionScript,
+    saveAsActionScript,
+    loadActionScript
 };
 export default functions; 

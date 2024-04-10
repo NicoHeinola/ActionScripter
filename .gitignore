@@ -30,4 +30,7 @@ yarn-error.log*
 /tools/frontpacker/dist/
 *.env
 
+# Backend
 *.pyc
+/backend/instance
+*.db

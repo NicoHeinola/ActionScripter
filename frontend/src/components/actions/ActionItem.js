@@ -62,7 +62,7 @@ const ActionItem = (props) => {
                     <div className="data">{action["loop-count"]}</div>
                     <div className="data buttons">
                         <BasicButton disabled={!canModify} onClick={openEditWindow} className="button" icon="images/icons/edit.png"></BasicButton>
-                        <BasicButton disabled={!canModify} onClick={() => removeAction(action.id)} className="button" icon="images/icons/delete.png"></BasicButton>
+                        <BasicButton disabled={!canModify} onClick={() => removeAction(action.id)} className="button cancel" icon="images/icons/delete.png"></BasicButton>
                     </div>
                 </div>
             </Reorder.Item>
