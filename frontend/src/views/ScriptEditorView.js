@@ -93,13 +93,13 @@ const ScriptEditorView = (props) => {
             <ActionList />
             <div className="playstate-actions">
                 {(props.currentScript["play-state"] !== "playing") ?
-                    <BasicButton onClick={startScript} className="play-button">{props.currentScript["play-state"] === "stopped" ? "Start" : "Continue"}</BasicButton>
+                    <BasicButton disabled={props.allActions.length === 0} onClick={startScript} className="play-button">{props.currentScript["play-state"] === "stopped" ? "Start" : "Continue"}</BasicButton>
                     :
                     <BasicButton onClick={pauseScript} className="play-button">Pause</BasicButton>
                 }
                 <BasicButton disabled={props.currentScript["play-state"] === "stopped"} onClick={stopScript} className="play-button">Stop</BasicButton>
                 <BasicButton disabled={props.currentScript["play-state"] !== "stopped"} onClick={switchScriptLoopType} className="repeat-button" icon={`images/icons/${props.currentScript["loop-type"] === 'infinite' ? "loop_infinite.png" : "loop_x_times.png"}`}></BasicButton>
-                <TextInput disabled={props.currentScript["play-state"] !== "stopped" || props.currentScript["loop-type"] === 'infinite'} onChange={e => setScriptLoopCount(e.target.value)} value={props.currentScript["loop-count"]} className="input" type="number" placeholder="Loop Count" />
+                <TextInput min="0" disabled={props.currentScript["play-state"] !== "stopped" || props.currentScript["loop-type"] === 'infinite'} onChange={e => setScriptLoopCount(e.target.value)} value={props.currentScript["loop-count"]} className="input" type="number" placeholder="Loop Count" />
             </div>
         </div>
     );

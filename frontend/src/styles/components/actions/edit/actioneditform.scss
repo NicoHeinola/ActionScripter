@@ -5,14 +5,22 @@
     padding: 20px;
     gap: 15px;
 
-    width: 500px;
-    max-width: 100%;
+    max-height: 80vh;
+    width: 700px;
+    max-width: 80vw;
+    min-width: 450px;
 
     .row {
         display: flex;
         flex-direction: row;
         justify-content: space-between;
-        gap: 10px;
+        gap: 15px;
         width: 100%;
+    }
+
+    .box {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
     }
 }

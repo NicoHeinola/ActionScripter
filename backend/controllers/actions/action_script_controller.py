@@ -20,6 +20,10 @@ class ActionScriptController(BaseController):
 
         @self._app.route(f"{base_route}", methods=["POST"])
         def create_new_action_script():
+            if ActionScript.current_script is not None:
+                # We want to stop the script if it is playing
+                ActionScript.current_script.stop()
+
             new_script: ActionScript = ActionScript()
             new_script.on("performed-action", lambda current_action_index: self._socket.emit("performed-action", current_action_index))
             new_script.on("finished-actions", lambda: self._socket.emit("finished-actions"))

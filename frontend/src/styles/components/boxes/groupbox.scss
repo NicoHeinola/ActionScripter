@@ -1,0 +1,60 @@
+@import "styles/variables.scss";
+
+.group-box {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+
+    $border-type: 2px solid $group-box-border-color;
+
+    .borders {
+        position: absolute;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+
+        border: $border-type;
+        border-top: none;
+
+        >.text-container {
+            position: relative;
+            height: min-content;
+            padding: 0 10px;
+
+            &.no-title {
+                display: none;
+            }
+
+            >.text {
+                position: absolute;
+                transform: translateY(-50%);
+            }
+
+            >.hidden-text {
+                visibility: hidden;
+                pointer-events: none;
+                user-select: none;
+                white-space: nowrap;
+            }
+        }
+
+        .border-top-left {
+            height: 0px;
+            width: 50px;
+
+            border-bottom: $border-type;
+        }
+
+        .border-top-right {
+            height: 0px;
+            width: 100%;
+            border-bottom: $border-type;
+        }
+    }
+}
