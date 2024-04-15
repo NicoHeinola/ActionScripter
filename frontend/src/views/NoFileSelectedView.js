@@ -7,6 +7,7 @@ import { connect } from 'react-redux';
 import { setActionsCall } from "store/reducers/actionsReducer";
 import { getRecentScriptsCall, getScriptCall, loadActionScriptCall, newRecentScriptCall, updateScriptCall } from "store/reducers/actionScriptReducer";
 import { useEffect } from "react";
+import { motion } from "framer-motion";
 
 const NoFileSelectedView = (props) => {
     const navigate = useNavigate();
@@ -36,7 +37,12 @@ const NoFileSelectedView = (props) => {
             // Read the contents of that file
             let reader = new FileReader();
             reader.onload = function (e) {
-                let contents = JSON.parse(e.target.result);
+                let contents = null;
+                try {
+                    contents = JSON.parse(e.target.result);
+                } catch {
+                    return;
+                }
 
                 // Create a new action script according to the opened file
                 actionScriptAPI.newActionScript();
@@ -66,7 +72,11 @@ const NoFileSelectedView = (props) => {
     }, [getRecentScriptsCall])
 
     return (
-        <div className="no-file-selected-view">
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="no-file-selected-view page">
             <div className="selection-buttons">
                 <BasicButton className="button" onClick={newEmptyActionScript}>Create a new script</BasicButton>
                 <BasicButton className="button" onClick={selectFileFromDisk}>Open a script from disk</BasicButton>
@@ -84,7 +94,7 @@ const NoFileSelectedView = (props) => {
                     </div>
                 </div>
             </div>
-        </div>
+        </motion.div>
     );
 }
 

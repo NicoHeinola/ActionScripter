@@ -7,17 +7,21 @@ import ScriptEditorView from 'views/ScriptEditorView';
 import { Provider } from 'react-redux';
 import store from "store/store";
 import SaveManager from 'components/save/SaveManager';
+import NavigationMenu from 'components/navigation/NavigationMenu';
 
 function App() {
   return (
     <Provider store={store}>
       <BrowserRouter>
-        <SaveManager />
-        <Routes>
-          <Route path='/' element={<NoFileSelectedView />} />
-          <Route index path='/script-editor' element={<ScriptEditorView />} />
-          <Route index path='*' element={<MissingPageView />} />
-        </Routes>
+        <div className='app'>
+          <SaveManager />
+          <NavigationMenu />
+          <Routes>
+            <Route path='/' element={<NoFileSelectedView />} />
+            <Route index path='/script-editor' element={<ScriptEditorView />} />
+            <Route index path='*' element={<MissingPageView />} />
+          </Routes>
+        </div>
       </BrowserRouter>
     </Provider>
   );

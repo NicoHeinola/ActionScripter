@@ -11,8 +11,12 @@ import "styles/views/scripteditorview.scss";
 import { getScriptCall, pauseScriptCall, startScriptCall, stopScriptCall, updateScriptCall } from "store/reducers/actionScriptReducer";
 
 import socket from "socket/socketManager";
+import { useNavigate } from 'react-router-dom';
+import { motion } from "framer-motion";
 
 const ScriptEditorView = (props) => {
+    const navigate = useNavigate();
+
     let actionTypes = useMemo(() => [
         { "text": "Mouse Click", "value": "mouse-click" },
     ], []);
@@ -90,8 +94,31 @@ const ScriptEditorView = (props) => {
         props.updateScriptCall(updatedScript);
     }
 
+    if (props.currentScript["missing-script"]) {
+        return (
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="script-editor-view page">
+                <div className="missing-script">
+                    <div className="text-container">
+                        <p>No script found!</p>
+                        <p>Please create or select one first.</p>
+                    </div>
+                    <BasicButton className="button" onClick={() => window.history.back()}>Go back</BasicButton>
+                    <BasicButton className="button" onClick={() => navigate("/")}>Home</BasicButton>
+                </div>
+            </motion.div>
+        )
+    }
+
     return (
-        <div className="script-editor-view">
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="script-editor-view page">
             <div className="add-action-container">
                 <div className="actions">
                     <TextInput onChange={newValue => setActionFilterKeyword(newValue)} type={"text"} placeholder={"Filter Actions"}></TextInput>
@@ -110,7 +137,7 @@ const ScriptEditorView = (props) => {
                 <BasicButton disabled={props.currentScript["play-state"] !== "stopped"} onClick={switchScriptLoopType} className="repeat-button" icon={`images/icons/${props.currentScript["loop-type"] === 'infinite' ? "loop_infinite.png" : "loop_x_times.png"}`}></BasicButton>
                 <TextInput min="0" value={props.currentScript["loop-count"]} onChange={newValue => setScriptLoopCount(newValue)} className="input" type="number" placeholder="Loop Count" disabled={props.currentScript["play-state"] !== "stopped" || props.currentScript["loop-type"] === 'infinite'} />
             </div>
-        </div>
+        </motion.div>
     );
 }
 

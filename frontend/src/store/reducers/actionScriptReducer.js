@@ -4,7 +4,8 @@ import { setActionsCall } from './actionsReducer';
 
 const initialState = {
     currentScript: {
-        "loop-count": -1
+        "loop-count": -1,
+        "missing-script": true,
     },
     recentScripts: []
 };

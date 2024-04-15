@@ -79,7 +79,7 @@ class Action(ABC, EventEmitter):
 
         if "id" in data:
             self._id = data["id"]
-            Action.current_action_id = max(self._id, Action.current_action_id)
+            Action.current_action_id = max(self._id + 1, Action.current_action_id)
 
         if "start-delay-ms" in data:
             self._start_delay_ms = int(data["start-delay-ms"])

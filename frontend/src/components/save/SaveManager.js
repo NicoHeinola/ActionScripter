@@ -26,9 +26,7 @@ const SaveManager = (props) => {
     }, [handleSaveFile])
 
     return (
-        <div className="save-manager">
-
-        </div>
+        <></>
     )
 };
 

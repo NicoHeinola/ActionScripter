@@ -6,10 +6,28 @@
     align-items: center;
     position: relative;
     width: 100%;
+    min-width: 200px;
     height: 100%;
 
     padding: 50px;
     gap: 20px;
+
+    .missing-script {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        gap: 10px;
+
+        .text-container {
+            text-align: center;
+        }
+
+        .button {
+            height: 30px;
+        }
+    }
 
     .playstate-actions {
         display: flex;

@@ -65,7 +65,7 @@ const MouseClickActionForm = (props) => {
         return () => {
             socket.off("picked-mouse-position", onPickedMousePosition);
         };
-    }, [pickButtonCountdownStarted]);
+    }, [pickButtonCountdownStarted, props]);
 
     const nameClickPositionType = `click-position-type-${actionData.id}`;
     const nameClickType = `click-button-${actionData.id}`;
