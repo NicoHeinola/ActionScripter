@@ -11,6 +11,7 @@ from scripter.action_script import ActionScript
 from scripter.actions.action import Action
 from flask_socketio import emit
 from database.database import db
+from utils.sleep import socket_supported_sleep
 
 
 class ActionScriptController(BaseController):
@@ -62,7 +63,7 @@ class ActionScriptController(BaseController):
             if ActionScript.current_script is None:
                 return make_response({"error": "No current script found!"}, 500)
 
-            ActionScript.current_script.start_socket_thread(self._socket)
+            self._socket.start_background_task(target=lambda: ActionScript.current_script.start(lambda a, b=None: socket_supported_sleep(self._socket, a, b)))
 
             return make_response("", 200)
 

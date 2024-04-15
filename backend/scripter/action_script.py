@@ -2,13 +2,15 @@ import json
 from operator import index
 from threading import Thread
 import time
-from typing import Dict, List
+from typing import Callable, Dict, List
 
 from flask_socketio import SocketIO
 from scripter.actions.action import Action
 from scripter.actions.mouse_click_action import MouseClickAction
 from scripter.event_emitter import EventEmitter
 from tkinter import filedialog
+
+from utils.sleep import socket_supported_sleep
 
 
 class ActionScript(EventEmitter):
@@ -41,10 +43,6 @@ class ActionScript(EventEmitter):
         # What action is currently playing
         self._action_index: int = 0
 
-        # This thread handles running this script
-        self._play_thread: Thread = None
-        self._thread_should_be_stopped: bool = False
-
         # Where this script was last saved. Used for automatically saving without having to manually pick the location
         self._latest_save_path: str = ""
 
@@ -60,26 +58,10 @@ class ActionScript(EventEmitter):
     def get_actions(self) -> List[Action]:
         return self._actions
 
-    def _play_handler(self, socket: SocketIO) -> None:
+    def play_handler(self, sleep_handler: Callable[float, Callable]) -> None:
         """
         Performs all actions.
         """
-
-        def sleep_in_parts(sleep_time_ms: float, parts_ms=500):
-            """
-            We want to sleep in parts since we might have to stop this thread during a sleep cycle.
-
-            :param sleep_time_ms: How long we should sleep in total
-            :param parts_ms: How long each sleep cycle lasts at most
-            """
-            sleeping_left: float = sleep_time_ms
-            while sleeping_left > 0:
-                if self._thread_should_be_stopped:
-                    return
-
-                sleep_amount: float = min(parts_ms, sleeping_left)
-                socket.sleep(sleep_amount / 1000.0)
-                sleeping_left -= sleep_amount
 
         while self._current_loop_count <= self._loop_count or self._loop_type == "infinite":
 
@@ -90,9 +72,9 @@ class ActionScript(EventEmitter):
                 for i in range(action._loop_count):
                     if action._start_delay_ms > 0:
                         # Wait for the action to start
-                        sleep_in_parts(action._start_delay_ms)
+                        sleep_handler(action._start_delay_ms, lambda: not self.is_playing())
 
-                    if self._thread_should_be_stopped:
+                    if not self.is_playing():
                         return
 
                     # Perform the actual action
@@ -100,9 +82,9 @@ class ActionScript(EventEmitter):
 
                     if action._end_delay_ms > 0:
                         # Wait for the action to end
-                        sleep_in_parts(action._end_delay_ms)
+                        sleep_handler(action._end_delay_ms, lambda: not self.is_playing())
 
-                if self._thread_should_be_stopped:
+                if not self.is_playing():
                     return
 
                 # Inform that the next action will be played soon
@@ -113,43 +95,29 @@ class ActionScript(EventEmitter):
             self._current_loop_count += 1
             self.emit("performed-action", self._action_index)
 
-            if self._thread_should_be_stopped:
+            if not self.is_playing():
                 return
 
-        self._play_thread = None
         self.stop()
         self.emit("finished-actions")
 
-    def start_socket_thread(self, socket: SocketIO) -> None:
+    def start(self, sleep_handler: Callable[float, Callable]) -> None:
         if self.is_playing():
             return
 
-        self._play_thread = socket.start_background_task(target=lambda: self._play_handler(socket))
-
         self._play_state = "playing"
+        self.play_handler(sleep_handler)
 
     def pause(self) -> None:
         if not self.is_playing():
             return
 
-        self._thread_should_be_stopped = True
-        if self._play_thread is not None:
-            self._play_thread.join()
-
-        self._play_thread = None
-        self._thread_should_be_stopped = False
         self._play_state = "paused"
 
     def stop(self) -> None:
         if self.is_stopped():
             return
 
-        self._thread_should_be_stopped = True
-        if self._play_thread is not None:
-            self._play_thread.join()
-
-        self._play_thread = None
-        self._thread_should_be_stopped = False
         self._play_state = "stopped"
         self._action_index = 0
         self._current_loop_count = 0
