@@ -8,17 +8,17 @@
     padding-bottom: 10px;
 
     overflow: hidden;
-    background: $global-darkened-bg;
+    background: $action-list-color;
 
     .actions {
         position: relative;
         height: calc(100% - 50px);
-        overflow-y: auto;
+        overflow-y: scroll;
     }
 
     .headers {
         display: grid;
-        grid-template-columns: 50px repeat(4, minmax(80px, 1fr)) 50px minmax(80px, 1fr);
+        grid-template-columns: 50px repeat(4, minmax(80px, 1fr)) 50px 120px;
         width: 100%;
         min-height: 50px;
         padding: 10px;

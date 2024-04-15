@@ -8,7 +8,8 @@ import socket from "socket/socketManager";
 import { useEffect, useState } from "react";
 
 const ActionList = (props) => {
-    const [currentActionIndex, setCurrentActionIndex] = useState(0)
+    const [currentActionIndex, setCurrentActionIndex] = useState(0);
+    const [selectedActionIds, setSelectedActionIds] = useState({});
 
     useEffect(() => {
         socket.on("performed-action", (actionIndex) => {
@@ -41,6 +42,50 @@ const ActionList = (props) => {
         props.swapActionIndexesCall(swappedItems[0], swappedItems[1]);
     };
 
+    const moveActionUp = (id) => {
+        let index = props.allActions.findIndex(action => action.id === id);
+
+        // Couldn't find action index
+        if (index === null) {
+            return;
+        }
+
+        // If action would go out of bounds
+        if (index - 1 < 0) {
+            return
+        }
+
+        props.swapActionIndexesCall(index, index - 1);
+    }
+
+    const moveActionDown = (id) => {
+        let index = props.allActions.findIndex((action) => action.id === id);
+
+        // Couldn't find action index
+        if (index === null) {
+            return;
+        }
+
+        // If action would go out of bounds
+        if (index + 1 >= props.allActions.length) {
+            return
+        }
+
+        props.swapActionIndexesCall(index, index + 1);
+    }
+
+    const selectActionItem = (id) => {
+        const newSelectedActionIds = { ...selectedActionIds };
+        newSelectedActionIds[`${id}`] = null;
+        setSelectedActionIds(newSelectedActionIds);
+    }
+
+    const unselectActionItem = (id) => {
+        const newSelectedActionIds = { ...selectedActionIds };
+        delete newSelectedActionIds[`${id}`];
+        setSelectedActionIds(newSelectedActionIds);
+    }
+
     return (
         <div className="action-table">
             <div className="headers row">
@@ -53,9 +98,9 @@ const ActionList = (props) => {
                 <div className="header center">Actions</div>
             </div>
             <div className="actions">
-                <Reorder.Group style={{ overflowY: "auto", height: "100%" }} values={props.allActions} onReorder={onReorder}>
+                <Reorder.Group style={{ height: "100%" }} values={props.allActions} onReorder={onReorder}>
                     {props.allActions.map((action, index) =>
-                        <ActionItem performing={index === currentActionIndex} data={action} key={`action-item-${action.id}`} />
+                        <ActionItem moveDown={() => moveActionDown(action.id)} moveUp={() => moveActionUp(action.id)} onUnselect={() => unselectActionItem(action.id)} onSelect={() => selectActionItem(action.id)} performing={index === currentActionIndex} data={action} key={`action-item-${action.id}`} />
                     )}
                 </Reorder.Group>
             </div>

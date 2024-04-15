@@ -65,6 +65,8 @@ class ActionScript(EventEmitter):
 
         while self._current_loop_count <= self._loop_count or self._loop_type == "infinite":
 
+            self.emit("performed-action", self._action_index)
+
             # Loop through each action that user has created (or start at where we left before pausing)
             for action in self._actions[self._action_index:]:
 
@@ -93,7 +95,6 @@ class ActionScript(EventEmitter):
 
             self._action_index = 0
             self._current_loop_count += 1
-            self.emit("performed-action", self._action_index)
 
             if not self.is_playing():
                 return

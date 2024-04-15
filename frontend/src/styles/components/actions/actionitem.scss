@@ -1,17 +1,32 @@
 @import "styles/variables.scss";
 
 .action-item-container {
+    position: relative;
     width: 100%;
+    background: $action-list-color;
 
     .action-item {
-        display: grid;
-        grid-template-columns: 50px repeat(4, minmax(80px, 1fr)) 50px minmax(80px, 1fr);
-        width: 100%;
-        min-height: 50px;
-        padding: 10px;
-        gap: 10px;
-        overflow-x: auto;
+        display: flex;
+        flex-direction: row;
         transition: all 0.2s;
+        overflow-x: auto;
+
+        &.selected {
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        &.hover {
+            background: rgba(255, 255, 255, 0.03);
+            cursor: pointer;
+
+            &.selected {
+                background: rgba(255, 255, 255, 0.08);
+            }
+        }
+
+        &.context-menu-open {
+            background: rgba(196, 255, 255, 0.10) !important;
+        }
 
         &.performing {
             background: rgba(255, 255, 255, 0.05);
@@ -20,6 +35,35 @@
         &.disabled {
             filter: brightness(100%);
             background: rgba(0, 0, 0, 0.1);
+        }
+
+        .drag-items {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            max-width: 60px;
+            min-width: 60px;
+            transition: all 0.2s;
+        }
+
+        .other-items {
+            position: relative;
+            display: grid;
+            grid-template-columns: repeat(4, minmax(80px, 1fr)) 50px;
+            width: 100%;
+            min-height: 50px;
+            padding: 10px;
+            gap: 10px;
+            transition: all 0.2s;
+        }
+
+        .action-buttons {
+            position: relative;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            min-width: 120px;
         }
 
         .data {
