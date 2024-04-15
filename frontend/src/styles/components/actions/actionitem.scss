@@ -10,6 +10,10 @@
         flex-direction: row;
         transition: all 0.2s;
         overflow-x: auto;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
 
         &.selected {
             background: rgba(255, 255, 255, 0.04);

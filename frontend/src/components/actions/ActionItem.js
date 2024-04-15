@@ -23,7 +23,7 @@ const ActionItem = (props) => {
     const canModify = props.currentScript["play-state"] === "stopped";
     const performingActionClass = (canModify) ? "" : (props.performing) ? "performing" : "disabled";
 
-    const [isSelected, setIsSelected] = useState(false);
+    const isSelected = props.isSelected === true ? true : false;
 
     const removeAction = () => {
         props.removeActionCall(action.id);
@@ -71,17 +71,23 @@ const ActionItem = (props) => {
         }
 
         e.preventDefault();
+
+        // If we want to modify multiple at the same time
+        if (e.shiftKey) {
+            return;
+        }
+
         contextMenuRef.current.setOpen(true);
         contextMenuRef.current.setPosition(e.clientX + 10, e.clientY - 10);
         setContextMenuOpen(true);
     }
 
     const setSelectionOfThisAction = (select) => {
-        if (props.onSelect) {
+        if (select && props.onSelect) {
             props.onSelect();
+        } else if (props.onUnselect) {
+            props.onUnselect()
         }
-
-        setIsSelected(select);
     }
 
     const contextMenuItems = [
