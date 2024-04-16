@@ -4,7 +4,7 @@ import TextInput from "components/inputs/TextInput";
 import { useEffect, useMemo, useState } from "react";
 
 import { connect } from 'react-redux';
-import { createActionCall, removeActionCall, setActionsCall, swapActionIndexesCall } from "store/reducers/actionsReducer";
+import { createActionCall, removeActionCall, swapActionIndexesCall } from "store/reducers/actionsReducer";
 import ActionList from "components/actions/ActionList";
 
 import "styles/views/scripteditorview.scss";
@@ -154,7 +154,6 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = {
     createActionCall,
     removeActionCall,
-    setActionsCall,
     swapActionIndexesCall,
     startScriptCall,
     pauseScriptCall,

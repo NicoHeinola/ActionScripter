@@ -3,7 +3,7 @@ import "styles/components/actions/actionlist.scss";
 import { connect } from 'react-redux';
 import { Reorder } from "framer-motion";
 import ActionItem from "./ActionItem";
-import { addActionsCall, removeActionCall, setActionsCall, swapActionIndexesCall } from "store/reducers/actionsReducer";
+import { addActionsCall, removeActionCall, swapActionIndexesCall } from "store/reducers/actionsReducer";
 import socket from "socket/socketManager";
 import { useCallback, useEffect, useRef, useState } from "react";
 import ContextMenu from "components/contextmenu/contextMenu";
@@ -320,7 +320,8 @@ const ActionList = (props) => {
         },
     ]
 
-    const loadingIconElements = <l-ring class={(!props.isLoadingActions) ? "hidden" : ""} size="40" stroke="5" bg-opacity="0" speed="2" color="white" />;
+    const loadingIconElementMedium = <l-ring class={(!props.isLoadingActions) ? "hidden" : ""} size="40" stroke="5" bg-opacity="0" speed="2" color="white" />;
+    const loadingIconElementSmall = <l-ring class={(!props.isLoadingActions) ? "hidden" : ""} size="25" stroke="4" bg-opacity="0" speed="2" color="white" />;
     const isStopped = props.currentScript["play-state"] === "stopped";
 
     return (
@@ -345,7 +346,7 @@ const ActionList = (props) => {
                     )}
                 </Reorder.Group>
                 <div className="centered-loading-icon">
-                    {loadingIconElements}
+                    {loadingIconElementMedium}
                 </div>
             </div>
             <div className="pages-container">
@@ -357,7 +358,7 @@ const ActionList = (props) => {
                     ))}
                 </div>
                 <div className="centered-loading-icon">
-                    {loadingIconElements}
+                    {loadingIconElementSmall}
                 </div>
             </div>
         </div >
@@ -376,7 +377,6 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = {
     swapActionIndexesCall,
     removeActionCall,
-    setActionsCall,
     addActionsCall
 };
 

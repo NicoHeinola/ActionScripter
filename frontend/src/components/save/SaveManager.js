@@ -1,19 +1,32 @@
 import { useCallback, useEffect } from "react";
 
 import { connect } from 'react-redux';
-import { saveActionScriptCall } from "store/reducers/actionScriptReducer";
+import { saveActionScriptCall, saveAsActionScriptCall } from "store/reducers/actionScriptReducer";
 
 const SaveManager = (props) => {
 
     const saveActionScriptCall = props.saveActionScriptCall;
+    const saveAsActionScriptCall = props.saveAsActionScriptCall;
+
     const handleSaveFile = useCallback(() => {
         saveActionScriptCall();
     }, [saveActionScriptCall]);
 
+    const handleSaveAsFile = useCallback(() => {
+        saveAsActionScriptCall();
+    }, [saveAsActionScriptCall]);
+
     useEffect(() => {
         const handleKeyDown = (event) => {
-            if (event.ctrlKey && event.key === 's') {
+            if (event.ctrlKey && event.key.toLowerCase() === 's') {
                 event.preventDefault();
+
+
+                if (event.shiftKey) {
+                    handleSaveAsFile();
+                    return;
+                }
+
                 handleSaveFile();
             }
         };
@@ -23,7 +36,7 @@ const SaveManager = (props) => {
         return () => {
             document.removeEventListener('keydown', handleKeyDown);
         };
-    }, [handleSaveFile])
+    }, [handleSaveFile, handleSaveAsFile])
 
     return (
         <></>
@@ -36,7 +49,8 @@ const mapStateToProps = (state) => {
 };
 
 const mapDispatchToProps = {
-    saveActionScriptCall
+    saveActionScriptCall,
+    saveAsActionScriptCall
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(SaveManager);

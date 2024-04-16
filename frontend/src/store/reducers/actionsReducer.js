@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import actionAPI from "apis/actionAPI";
+import { setScriptIsModifiedCall } from './actionScriptReducer';
 
 const initialState = {
     allActions: [],
@@ -65,6 +66,7 @@ const createActionCall = (actionType) => async (dispatch) => {
     const response = await actionAPI.createAction(actionType);
     let actionData = response.data;
     dispatch(actionsSlice.actions.addActions([actionData]));
+    dispatch(setScriptIsModifiedCall(true));
     return actionData;
 };
 
@@ -77,16 +79,19 @@ const addActionsCall = (actionDatas, index = -1) => async (dispatch) => {
     } else {
         dispatch(actionsSlice.actions.addActionsAt({ "actions": addedActions, "index": index }));
     }
+    dispatch(setScriptIsModifiedCall(true));
 };
 
 const updateActionCall = (updatedAction) => async (dispatch) => {
     await actionAPI.updateAction(updatedAction);
     dispatch(actionsSlice.actions.updateAction(updatedAction));
+    dispatch(setScriptIsModifiedCall(true));
 };
 
 const removeActionCall = (actionId) => async (dispatch) => {
     await actionAPI.removeAction(actionId);
     dispatch(actionsSlice.actions.removeAction(actionId));
+    dispatch(setScriptIsModifiedCall(true));
 };
 
 const setActionsCall = (actions) => async (dispatch) => {
@@ -97,6 +102,7 @@ const setActionsCall = (actions) => async (dispatch) => {
 const swapActionIndexesCall = (indexA, indexB) => async (dispatch) => {
     await actionAPI.swapActionIndexes(indexA, indexB);
     dispatch(actionsSlice.actions.swapActionIndexes([indexA, indexB]));
+    dispatch(setScriptIsModifiedCall(true));
 };
 
 export {

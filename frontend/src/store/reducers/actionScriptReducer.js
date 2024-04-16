@@ -8,7 +8,8 @@ const initialState = {
         "loop-count": -1,
         "missing-script": true,
     },
-    recentScripts: []
+    recentScripts: [],
+    scriptIsModified: false,
 };
 
 const actionScriptSlice = createSlice({
@@ -26,7 +27,10 @@ const actionScriptSlice = createSlice({
         },
         setIsLoadingActions: (state, isLoadingActions) => {
             state.isLoadingActions = isLoadingActions.payload;
-        }
+        },
+        setScriptIsModified: (state, isModified) => {
+            state.scriptIsModified = isModified.payload;
+        },
     },
 });
 
@@ -53,6 +57,7 @@ const getScriptCall = () => async (dispatch) => {
 const updateScriptCall = (scriptData) => async (dispatch) => {
     await actionScriptAPI.updateActionScript(scriptData);
     dispatch(actionScriptSlice.actions.setCurrentScript(scriptData));
+    dispatch(actionScriptSlice.actions.setScriptIsModified(true));
 };
 
 const getRecentScriptsCall = () => async (dispatch) => {
@@ -68,11 +73,13 @@ const newRecentScriptCall = (scriptPath) => async (dispatch) => {
 const saveActionScriptCall = (scriptPath) => async (dispatch) => {
     await actionScriptAPI.saveActionScript(scriptPath);
     dispatch(getRecentScriptsCall());
+    dispatch(actionScriptSlice.actions.setScriptIsModified(false));
 };
 
 const saveAsActionScriptCall = (scriptPath) => async (dispatch) => {
     await actionScriptAPI.saveAsActionScript(scriptPath);
     dispatch(getRecentScriptsCall());
+    dispatch(actionScriptSlice.actions.setScriptIsModified(false));
 };
 
 const loadActionScriptCall = (scriptPath) => async (dispatch) => {
@@ -82,7 +89,12 @@ const loadActionScriptCall = (scriptPath) => async (dispatch) => {
     await dispatch(setActionsCall(loadedScript["actions"]));
     await dispatch(getScriptCall());
     dispatch(actionScriptSlice.actions.setIsLoadingActions(false));
+    dispatch(actionScriptSlice.actions.setScriptIsModified(false));
 };
+
+const setScriptIsModifiedCall = (isModified) => async (dispatch) => {
+    dispatch(actionScriptSlice.actions.setScriptIsModified(isModified));
+}
 
 export {
     startScriptCall,
@@ -95,5 +107,6 @@ export {
     saveActionScriptCall,
     saveAsActionScriptCall,
     loadActionScriptCall,
+    setScriptIsModifiedCall
 };
 export default actionScriptSlice.reducer;

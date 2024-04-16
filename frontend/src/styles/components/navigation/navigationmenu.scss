@@ -85,17 +85,13 @@
                     cursor: pointer;
 
                     .icon-wrapper {
-                        background: rgba(255, 255, 255, 0.15);
-
-                        .icon {
-                            bottom: 2px;
-                        }
+                        background: rgba(255, 255, 255, 0.1);
                     }
                 }
 
                 &.active {
                     .icon-wrapper {
-                        background: rgba(255, 255, 255, 0.3);
+                        scale: 1.2;
                     }
                 }
 
@@ -104,6 +100,20 @@
                     border-radius: $global-border-radius;
                     transition: all 0.2s;
 
+                    &.alert {
+                        &::after {
+                            position: absolute;
+                            content: "*";
+                            right: 2px;
+                            top: 2px;
+                            color: $warning-active-color;
+                            text-shadow: -1px -1px 2px #000,
+                                1px -1px 2px #000,
+                                -1px 1px 2px #000,
+                                1px 1px 2px #000;
+                        }
+                    }
+
                     .icon {
                         position: relative;
                         padding: 7px;
@@ -111,6 +121,7 @@
                         bottom: 0;
                         object-fit: contain;
                         transition: all 0.2s;
+                        border-radius: $global-border-radius;
                     }
                 }
             }

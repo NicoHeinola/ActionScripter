@@ -1,6 +1,6 @@
 import "styles/components/actions/actionitem.scss";
 
-import { createActionCall, removeActionCall, setActionsCall, swapActionIndexesCall } from "store/reducers/actionsReducer";
+import { createActionCall, removeActionCall, swapActionIndexesCall } from "store/reducers/actionsReducer";
 import { connect } from 'react-redux';
 import { Reorder, useDragControls } from "framer-motion";
 import BasicButton from "components/inputs/BasicButton";
@@ -212,7 +212,6 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = {
     createActionCall,
     removeActionCall,
-    setActionsCall,
     swapActionIndexesCall
 };
 
