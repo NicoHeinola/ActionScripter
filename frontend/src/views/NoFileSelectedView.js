@@ -62,7 +62,7 @@ const NoFileSelectedView = (props) => {
         input.click();
     }
 
-    const openRecentFile = (path) => {
+    const openRecentFile = async (path) => {
         props.loadActionScriptCall(path);
         navigate('/script-editor');
     }

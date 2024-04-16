@@ -5,11 +5,15 @@ import { Reorder } from "framer-motion";
 import ActionItem from "./ActionItem";
 import { addActionsCall, removeActionCall, setActionsCall, swapActionIndexesCall } from "store/reducers/actionsReducer";
 import socket from "socket/socketManager";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import ContextMenu from "components/contextmenu/contextMenu";
 import clipboardUtil from "utils/clipboardUtil";
 import PopupWindow from "components/popup/PopupWindow";
 import ActionEditForm from "./edit/ActionEditForm";
+import BasicButton from "components/inputs/BasicButton";
+import { ring } from 'ldrs'
+
+ring.register()
 
 const ActionList = (props) => {
     const [currentActionIndex, setCurrentActionIndex] = useState(0);
@@ -21,6 +25,54 @@ const ActionList = (props) => {
     const popupWindow = useRef(null);
     const actionEditForm = useRef(null);
     const [openedAction, setOpenedAction] = useState({});
+
+    const actionsPerPage = 50;
+    const [currentPage, setCurrentPage] = useState(0);
+    const pages = Math.ceil(props.allActions.length / actionsPerPage);
+    const activeActions = props.allActions.slice(currentPage * actionsPerPage, (currentPage + 1) * actionsPerPage)
+
+    const onPerformedAction = useCallback((actionIndex) => {
+        setCurrentActionIndex(actionIndex);
+
+        // What page the index falls into
+        const page = Math.floor(actionIndex / actionsPerPage);
+
+        // Change the page if the page is different from the current one
+        if (page !== currentPage) {
+            setCurrentPage(page);
+        }
+    }, [currentPage])
+
+    const onFinishedActions = useCallback(() => {
+        setCurrentActionIndex(0);
+    }, []);
+
+    useEffect(() => {
+        socket.on("performed-action", onPerformedAction);
+
+        socket.on("finished-actions", onFinishedActions);
+
+        return (() => {
+            socket.off("performed-action", onPerformedAction);
+            socket.off("finished-actions", onFinishedActions);
+        })
+    }, [onPerformedAction, onFinishedActions]);
+
+    const onReorder = (reorderedActions) => {
+        // Find what items were swapped
+        const swappedItems = [];
+        for (let i = 0; i < reorderedActions.length; i++) {
+            if (reorderedActions[i] !== activeActions[i]) {
+                swappedItems.push((currentPage * actionsPerPage) + i);
+            }
+        }
+
+        if (swappedItems.length < 2) {
+            return;
+        }
+
+        props.swapActionIndexesCall(swappedItems[0], swappedItems[1]);
+    };
 
     const closeEditWindow = () => {
         popupWindow.current.setVisible(false);
@@ -35,37 +87,6 @@ const ActionList = (props) => {
         popupWindow.current.setVisible(true);
         setOpenedAction({ ...action });
     }
-
-    useEffect(() => {
-        socket.on("performed-action", (actionIndex) => {
-            setCurrentActionIndex(actionIndex);
-        });
-
-        socket.on("finished-actions", () => {
-            setCurrentActionIndex(0);
-        });
-
-        return (() => {
-            socket.off("performed-action");
-            socket.off("finished-actions");
-        })
-    }, []);
-
-    const onReorder = (reorderedActions) => {
-        // Find what items were swapped
-        const swappedItems = [];
-        for (let i = 0; i < reorderedActions.length; i++) {
-            if (reorderedActions[i] !== props.allActions[i]) {
-                swappedItems.push(i);
-            }
-        }
-
-        if (swappedItems.length < 2) {
-            return;
-        }
-
-        props.swapActionIndexesCall(swappedItems[0], swappedItems[1]);
-    };
 
     const moveActionUp = async (id) => {
         let index = props.allActions.findIndex(action => action.id === id);
@@ -299,6 +320,9 @@ const ActionList = (props) => {
         },
     ]
 
+    const loadingIconElements = <l-ring class={(!props.isLoadingActions) ? "hidden" : ""} size="40" stroke="5" bg-opacity="0" speed="2" color="white" />;
+    const isStopped = props.currentScript["play-state"] === "stopped";
+
     return (
         <div className="action-table">
             <PopupWindow ref={popupWindow} onManualClose={onPopupClose} >
@@ -316,12 +340,27 @@ const ActionList = (props) => {
             </div>
             <div className="actions" onMouseUp={onRightClick}>
                 <Reorder.Group ref={actionGroupRef} values={props.allActions} onReorder={onReorder}>
-                    {props.allActions.map((action, index) =>
-                        <ActionItem onOpenEditWindow={openEditWindow} onPaste={() => onPaste(index + 1)} ref={(el) => actionRefs.current[action.id] = el} isSelected={selectedActionIds.includes(action.id)} moveDown={() => moveActionDown(action.id)} moveUp={() => moveActionUp(action.id)} onUnselect={() => unselectActionItem(action.id)} onSelect={() => selectActionItem(action.id)} performing={index === currentActionIndex} data={action} key={`action-item-${action.id}`} />
+                    {activeActions.map((action, index) =>
+                        <ActionItem onOpenEditWindow={openEditWindow} onPaste={() => onPaste((actionsPerPage * currentPage) + index + 1)} ref={(el) => actionRefs.current[action.id] = el} isSelected={selectedActionIds.includes(action.id)} moveDown={() => moveActionDown(action.id)} moveUp={() => moveActionUp(action.id)} onUnselect={() => unselectActionItem(action.id)} onSelect={() => selectActionItem(action.id)} performing={(actionsPerPage * currentPage + index) === currentActionIndex} data={action} key={`action-item-${action.id}`} />
                     )}
                 </Reorder.Group>
+                <div className="centered-loading-icon">
+                    {loadingIconElements}
+                </div>
             </div>
-        </div>
+            <div className="pages-container">
+                <div className="pages">
+                    {Array.from({ length: pages }, (_, index) => (
+                        <div className={"page" + ((currentPage === index) ? " active" : "")} key={`page-${index}`}>
+                            <BasicButton disabled={!isStopped} className="page-button" onClick={() => setCurrentPage(index)}>P{index + 1}</BasicButton>
+                        </div>
+                    ))}
+                </div>
+                <div className="centered-loading-icon">
+                    {loadingIconElements}
+                </div>
+            </div>
+        </div >
     )
 }
 
@@ -329,6 +368,8 @@ const ActionList = (props) => {
 const mapStateToProps = (state) => {
     return {
         allActions: state.actions.allActions,
+        isLoadingActions: state.actionScript.isLoadingActions,
+        currentScript: state.actionScript.currentScript,
     };
 };
 

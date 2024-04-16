@@ -10,22 +10,18 @@ const actionsSlice = createSlice({
     initialState,
     reducers: {
         addActions: (state, actions) => {
-            let newActions = [...state.allActions]
             for (let action of actions.payload) {
-                newActions.push(action);
+                state.allActions.push(action);
             }
-            state.allActions = newActions;
         },
         addActionsAt: (state, data) => {
             const actions = data.payload["actions"];
             let index = data.payload["index"];
 
-            let newActions = [...state.allActions]
             for (let action of actions) {
-                newActions.splice(index, 0, action);
+                state.allActions.splice(index, 0, action);
                 index++;
             }
-            state.allActions = newActions;
         },
         updateAction: (state, updatedAction) => {
             let newAllActions = [...state.allActions];
@@ -68,7 +64,7 @@ const actionsSlice = createSlice({
 const createActionCall = (actionType) => async (dispatch) => {
     const response = await actionAPI.createAction(actionType);
     let actionData = response.data;
-    dispatch(actionsSlice.actions.addAction(actionData));
+    dispatch(actionsSlice.actions.addActions([actionData]));
     return actionData;
 };
 

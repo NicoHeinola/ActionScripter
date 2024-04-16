@@ -3,6 +3,7 @@ import actionScriptAPI from "apis/actionScriptAPI";
 import { setActionsCall } from './actionsReducer';
 
 const initialState = {
+    isLoadingActions: false,
     currentScript: {
         "loop-count": -1,
         "missing-script": true,
@@ -22,6 +23,9 @@ const actionScriptSlice = createSlice({
         },
         setRecentScripts: (state, recentScripts) => {
             state.recentScripts = recentScripts.payload;
+        },
+        setIsLoadingActions: (state, isLoadingActions) => {
+            state.isLoadingActions = isLoadingActions.payload;
         }
     },
 });
@@ -72,9 +76,12 @@ const saveAsActionScriptCall = (scriptPath) => async (dispatch) => {
 };
 
 const loadActionScriptCall = (scriptPath) => async (dispatch) => {
+    dispatch(actionScriptSlice.actions.setIsLoadingActions(true));
+    await dispatch(setActionsCall([]));
     const loadedScript = (await actionScriptAPI.loadActionScript(scriptPath)).data;
-    dispatch(setActionsCall(loadedScript["actions"]));
-    dispatch(getScriptCall());
+    await dispatch(setActionsCall(loadedScript["actions"]));
+    await dispatch(getScriptCall());
+    dispatch(actionScriptSlice.actions.setIsLoadingActions(false));
 };
 
 export {
