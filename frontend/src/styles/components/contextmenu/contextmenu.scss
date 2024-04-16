@@ -8,6 +8,11 @@
     border-radius: $global-border-radius;
     transition-duration: 0;
 
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
     &.closed {
         opacity: 0;
         pointer-events: none;
@@ -26,10 +31,16 @@
             margin: 2px 0;
             padding: 7px;
             border-radius: $global-border-radius;
+            transition: all 0.1s;
 
-            &:hover {
+            &:hover:not(.disabled) {
                 background: rgba(255, 255, 255, 0.13);
                 cursor: pointer;
+            }
+
+            &.disabled {
+                opacity: 0.4;
+                cursor: not-allowed;
             }
         }
 

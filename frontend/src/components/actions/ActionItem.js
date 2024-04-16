@@ -139,6 +139,11 @@ const ActionItem = forwardRef((props, ref) => {
             "type": "separator",
         },
         {
+            "name": "cut",
+            "text": "Cut",
+            "onClick": cut
+        },
+        {
             "name": "copy",
             "text": "Copy",
             "onClick": copy
@@ -147,11 +152,6 @@ const ActionItem = forwardRef((props, ref) => {
             "name": "paste",
             "text": "Paste",
             "onClick": paste
-        },
-        {
-            "name": "cut",
-            "text": "Cut",
-            "onClick": cut
         },
         {
             "name": "sep-1",

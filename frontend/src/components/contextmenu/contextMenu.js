@@ -45,6 +45,10 @@ const ContextMenu = forwardRef((props, ref) => {
     }));
 
     const onItemClicked = (item) => {
+        if (item.disabled === true) {
+            return;
+        }
+
         if (item.onClick) {
             item.onClick();
         }
@@ -54,7 +58,7 @@ const ContextMenu = forwardRef((props, ref) => {
         <div ref={clickRef} className={"context-menu" + ((isOpen) ? " open" : " closed") + ((props.className) ? ` ${props.className}` : "")} style={{ left: positionX, top: positionY }}>
             <div className="items">
                 {props.items.map(item =>
-                    <div onClick={() => onItemClicked(item)} className={((item.type === "separator") ? "separator" : "item")} key={`context-menu-item-${item.name}`} >
+                    <div onClick={() => onItemClicked(item)} className={((item.type === "separator") ? "separator" : "item") + ((item.disabled === true) ? " disabled" : "")} key={`context-menu-item-${item.name}`} >
                         <p className="text">{item.text}</p>
                     </div>
                 )}

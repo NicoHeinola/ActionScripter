@@ -192,11 +192,40 @@ const ActionList = (props) => {
         contextMenuRef.current.setOpen(false);
     }
 
+    const copyAll = () => {
+        let actionsToCopy = props.allActions.filter(action => selectedActionIds.includes(action.id));
+        clipboardUtil.copyActions(actionsToCopy);
+        contextMenuRef.current.setOpen(false);
+    }
+
+    const paste = (index = -1) => {
+        let copiedActions = clipboardUtil.getCopiedActions();
+        if (!copiedActions) {
+            return;
+        }
+
+        for (let action of copiedActions) {
+            props.addActionCall(action, index);
+        }
+    }
+
+    const cutAll = () => {
+        copyAll();
+        deleteAllSelectedActions();
+        contextMenuRef.current.setOpen(false);
+    }
+
+    const onPaste = (index = -1) => {
+        paste(index);
+        contextMenuRef.current.setOpen(false);
+    }
+
     const contextMenuItems = [
         {
-            "name": "delete-all",
+            "name": "delete-selected",
             "text": "Delete all",
-            "onClick": deleteAllSelectedActions
+            "onClick": deleteAllSelectedActions,
+            "disabled": selectedActionIds.length === 0,
         },
         {
             "name": "sep-2",
@@ -210,34 +239,47 @@ const ActionList = (props) => {
         {
             "name": "unselect-all",
             "text": "Unselect all",
-            "onClick": unselectAllActions
+            "onClick": unselectAllActions,
+            "disabled": selectedActionIds.length === 0,
+        },
+        {
+            "name": "sep-3",
+            "type": "separator",
+        },
+        {
+            "name": "cut-selected",
+            "text": "Cut all",
+            "onClick": cutAll,
+            "disabled": selectedActionIds.length === 0,
+        },
+        {
+            "name": "copy-selected",
+            "text": "Copy all",
+            "onClick": copyAll,
+            "disabled": selectedActionIds.length === 0,
+        },
+        {
+            "name": "paste",
+            "text": "Paste",
+            "onClick": onPaste
         },
         {
             "name": "sep-1",
             "type": "separator",
         },
         {
-            "name": "move-up",
+            "name": "move-selected-up",
             "text": "Move all up",
-            "onClick": moveAllSelectedActionsUp
+            "onClick": moveAllSelectedActionsUp,
+            "disabled": selectedActionIds.length === 0,
         },
         {
-            "name": "move-down",
+            "name": "move-selected-down",
             "text": "Move all down",
-            "onClick": moveAllSelectedActionsDown
+            "onClick": moveAllSelectedActionsDown,
+            "disabled": selectedActionIds.length === 0,
         },
     ]
-
-    const onPaste = (index = -1) => {
-        let copiedActions = clipboardUtil.getCopiedActions();
-        if (!copiedActions) {
-            return;
-        }
-
-        for (let action of copiedActions) {
-            props.addActionCall(action, index);
-        }
-    }
 
     return (
         <div className="action-table">
