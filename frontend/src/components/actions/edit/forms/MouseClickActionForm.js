@@ -72,14 +72,14 @@ const MouseClickActionForm = (props) => {
 
     return (
         <div className="mouse-click-action-form">
-            <GroupBox title="Click button" className="box">
+            <GroupBox title="Button" className="box">
                 <div className="row">
                     <RadioButton value={"left"} currentValue={clickType} text="Left" onChange={handleClickTypeChange} type="radio" name={nameClickType} />
                     <RadioButton value={"middle"} currentValue={clickType} text="Middle" onChange={handleClickTypeChange} type="radio" name={nameClickType} />
                     <RadioButton value={"right"} currentValue={clickType} text="Right" onChange={handleClickTypeChange} type="radio" name={nameClickType} />
                 </div>
             </GroupBox>
-            <GroupBox title="Click position" className="box">
+            <GroupBox title="Position" className="box">
                 <div className="row">
                     <RadioButton value={"click-at-coordinates"} currentValue={actionData["click-position-type"]} text="Coordinates" onChange={handleClickPositionTypeChange} type="radio" name={nameClickPositionType} />
                     <RadioButton value={"click-at-mouse-position"} currentValue={actionData["click-position-type"]} text="Current position" onChange={handleClickPositionTypeChange} type="radio" name={nameClickPositionType} />
