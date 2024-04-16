@@ -31,31 +31,37 @@ class ActionController(BaseController):
             return make_response(added_action.serialize(), 200)
 
         @self._app.route(f"{base_route}/add", methods=["POST"])
-        def add_new_action():
+        def add_new_actions():
             if ActionScript.current_script is None:
                 return make_response({"error": "No current script found!"}, 500)
 
             data: dict = request.get_json()
 
-            if not "action" in data:
+            if not "actions" in data:
                 return make_response({"error": "action param missing!"}, 400)
 
             index: int = -1
             if "index" in data:
                 index = int(data["index"])
 
-            action_data: dict = data["action"]
-            action_data.pop("id")
+            action_datas: dict = data["actions"]
 
-            new_action: Action = ActionScript.current_script.create_action_with_type(action_data["type"])
-            new_action.deserialize(action_data)
+            new_actions = []
 
-            if index != -1:
-                ActionScript.current_script.add_action_at(new_action, index)
-            else:
-                ActionScript.current_script.add_action(new_action)
+            # Add the actions
+            for action_data in action_datas:
+                action_data.pop("id")
 
-            return make_response(new_action.serialize(), 200)
+                new_action: Action = ActionScript.current_script.create_action_with_type(action_data["type"])
+                new_action.deserialize(action_data)
+                new_actions.append(new_action.serialize())
+
+                if index != -1:
+                    ActionScript.current_script.add_action_at(new_action, index)
+                else:
+                    ActionScript.current_script.add_action(new_action)
+
+            return make_response(new_actions, 200)
 
         @self._app.route(f"{base_route}/<action_id>", methods=["DELETE"])
         def delete_action(action_id: int):

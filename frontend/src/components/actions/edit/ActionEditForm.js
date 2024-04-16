@@ -1,7 +1,7 @@
 import "styles/components/actions/edit/actioneditform.scss";
 import MouseClickActionForm from "./forms/MouseClickActionForm";
 import TextInput from "components/inputs/TextInput";
-import { forwardRef, useImperativeHandle, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 import BasicButton from "components/inputs/BasicButton";
 import { updateActionCall } from "store/reducers/actionsReducer";
 import { connect } from 'react-redux';
@@ -10,6 +10,10 @@ import GroupBox from "components/boxes/GroupBox";
 const ActionEditForm = forwardRef((props, ref) => {
 
     const [actionData, setActionData] = useState(props.actionData);
+
+    useEffect(() => {
+        setActionData({ ...props.actionData });
+    }, [props.actionData]);
 
     const onDataChanged = (newDatas) => {
         let newActionData = { ...actionData }

@@ -3,11 +3,13 @@ import "styles/components/actions/actionlist.scss";
 import { connect } from 'react-redux';
 import { Reorder } from "framer-motion";
 import ActionItem from "./ActionItem";
-import { addActionCall, removeActionCall, setActionsCall, swapActionIndexesCall } from "store/reducers/actionsReducer";
+import { addActionsCall, removeActionCall, setActionsCall, swapActionIndexesCall } from "store/reducers/actionsReducer";
 import socket from "socket/socketManager";
 import { useEffect, useRef, useState } from "react";
 import ContextMenu from "components/contextmenu/contextMenu";
 import clipboardUtil from "utils/clipboardUtil";
+import PopupWindow from "components/popup/PopupWindow";
+import ActionEditForm from "./edit/ActionEditForm";
 
 const ActionList = (props) => {
     const [currentActionIndex, setCurrentActionIndex] = useState(0);
@@ -15,6 +17,24 @@ const ActionList = (props) => {
     const contextMenuRef = useRef(null);
     const actionGroupRef = useRef(null);
     const actionRefs = useRef({});
+
+    const popupWindow = useRef(null);
+    const actionEditForm = useRef(null);
+    const [openedAction, setOpenedAction] = useState({});
+
+    const closeEditWindow = () => {
+        popupWindow.current.setVisible(false);
+    }
+
+    const onPopupClose = () => {
+        actionEditForm.current.resetActionData();
+    }
+
+    const openEditWindow = (action) => {
+        contextMenuRef.current.setOpen(false);
+        popupWindow.current.setVisible(true);
+        setOpenedAction({ ...action });
+    }
 
     useEffect(() => {
         socket.on("performed-action", (actionIndex) => {
@@ -204,9 +224,7 @@ const ActionList = (props) => {
             return;
         }
 
-        for (let action of copiedActions) {
-            props.addActionCall(action, index);
-        }
+        props.addActionsCall(copiedActions, index);
     }
 
     const cutAll = () => {
@@ -283,6 +301,9 @@ const ActionList = (props) => {
 
     return (
         <div className="action-table">
+            <PopupWindow ref={popupWindow} onManualClose={onPopupClose} >
+                <ActionEditForm ref={actionEditForm} onCancel={closeEditWindow} actionType={openedAction.type} actionData={openedAction}></ActionEditForm>
+            </PopupWindow>
             <ContextMenu ref={contextMenuRef} items={contextMenuItems} />
             <div className="headers row">
                 <div className="header"></div>
@@ -296,7 +317,7 @@ const ActionList = (props) => {
             <div className="actions" onMouseUp={onRightClick}>
                 <Reorder.Group ref={actionGroupRef} values={props.allActions} onReorder={onReorder}>
                     {props.allActions.map((action, index) =>
-                        <ActionItem onPaste={() => onPaste(index + 1)} ref={(el) => actionRefs.current[action.id] = el} isSelected={selectedActionIds.includes(action.id)} moveDown={() => moveActionDown(action.id)} moveUp={() => moveActionUp(action.id)} onUnselect={() => unselectActionItem(action.id)} onSelect={() => selectActionItem(action.id)} performing={index === currentActionIndex} data={action} key={`action-item-${action.id}`} />
+                        <ActionItem onOpenEditWindow={openEditWindow} onPaste={() => onPaste(index + 1)} ref={(el) => actionRefs.current[action.id] = el} isSelected={selectedActionIds.includes(action.id)} moveDown={() => moveActionDown(action.id)} moveUp={() => moveActionUp(action.id)} onUnselect={() => unselectActionItem(action.id)} onSelect={() => selectActionItem(action.id)} performing={index === currentActionIndex} data={action} key={`action-item-${action.id}`} />
                     )}
                 </Reorder.Group>
             </div>
@@ -315,7 +336,7 @@ const mapDispatchToProps = {
     swapActionIndexesCall,
     removeActionCall,
     setActionsCall,
-    addActionCall
+    addActionsCall
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ActionList);

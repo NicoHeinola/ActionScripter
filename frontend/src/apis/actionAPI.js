@@ -10,8 +10,8 @@ const createAction = (actionType) => {
     })
 }
 
-const addAction = (actionData, index) => {
-    return axiosInstance.post(`${BASE_ROUTE}/add`, { "action": actionData, "index": index }).then(response => {
+const addActions = (actionDatas, index) => {
+    return axiosInstance.post(`${BASE_ROUTE}/add`, { "actions": actionDatas, "index": index }).then(response => {
         return response;
     }).catch(e => {
         throw e;
@@ -56,6 +56,6 @@ const functions = {
     removeAction,
     setActions,
     swapActionIndexes,
-    addAction
+    addActions
 };
 export default functions;

@@ -9,13 +9,23 @@ const actionsSlice = createSlice({
     name: 'actions',
     initialState,
     reducers: {
-        addAction: (state, action) => {
-            state.allActions.push(action.payload);
+        addActions: (state, actions) => {
+            let newActions = [...state.allActions]
+            for (let action of actions.payload) {
+                newActions.push(action);
+            }
+            state.allActions = newActions;
         },
-        addActionAt: (state, data) => {
-            const action = data.payload["action"];
-            const index = data.payload["index"];
-            state.allActions.splice(index, 0, action);
+        addActionsAt: (state, data) => {
+            const actions = data.payload["actions"];
+            let index = data.payload["index"];
+
+            let newActions = [...state.allActions]
+            for (let action of actions) {
+                newActions.splice(index, 0, action);
+                index++;
+            }
+            state.allActions = newActions;
         },
         updateAction: (state, updatedAction) => {
             let newAllActions = [...state.allActions];
@@ -62,17 +72,16 @@ const createActionCall = (actionType) => async (dispatch) => {
     return actionData;
 };
 
-const addActionCall = (actionData, index = -1) => async (dispatch) => {
-    const response = await actionAPI.addAction(actionData, index);
-    const addedAction = response.data;
+const addActionsCall = (actionDatas, index = -1) => async (dispatch) => {
+    const response = await actionAPI.addActions(actionDatas, index);
+    const addedActions = response.data;
 
     if (index === -1) {
-        dispatch(actionsSlice.actions.addAction(addedAction));
+        dispatch(actionsSlice.actions.addActions(addedActions));
     } else {
-        dispatch(actionsSlice.actions.addActionAt({ "action": addedAction, "index": index }));
+        dispatch(actionsSlice.actions.addActionsAt({ "actions": addedActions, "index": index }));
     }
 };
-
 
 const updateActionCall = (updatedAction) => async (dispatch) => {
     await actionAPI.updateAction(updatedAction);
@@ -100,6 +109,6 @@ export {
     removeActionCall,
     setActionsCall,
     swapActionIndexesCall,
-    addActionCall
+    addActionsCall
 };
 export default actionsSlice.reducer;

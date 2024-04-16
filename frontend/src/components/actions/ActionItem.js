@@ -6,8 +6,6 @@ import { Reorder, useDragControls } from "framer-motion";
 import BasicButton from "components/inputs/BasicButton";
 
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
-import PopupWindow from "components/popup/PopupWindow";
-import ActionEditForm from "./edit/ActionEditForm";
 import ContextMenu from "components/contextmenu/contextMenu";
 import clipboardUtil from "utils/clipboardUtil";
 
@@ -15,8 +13,6 @@ const ActionItem = forwardRef((props, ref) => {
     const action = props.data;
     const dragControls = useDragControls();
 
-    const popupWindow = useRef(null);
-    const actionEditForm = useRef(null);
     const contextMenuRef = useRef(null);
     const [contextMenuOpen, setContextMenuOpen] = useState(false);
     const [isHovering, setIsHovering] = useState(false);
@@ -32,16 +28,7 @@ const ActionItem = forwardRef((props, ref) => {
 
     const openEditWindow = () => {
         setContextMenuOpen(false);
-        contextMenuRef.current.setOpen(false);
-        popupWindow.current.setVisible(true);
-    }
-
-    const closeEditWindow = () => {
-        popupWindow.current.setVisible(false);
-    }
-
-    const onPopupClose = () => {
-        actionEditForm.current.resetActionData();
+        props.onOpenEditWindow(action);
     }
 
     const moveUp = () => {
@@ -187,9 +174,6 @@ const ActionItem = forwardRef((props, ref) => {
     return (
         <div className="action-item-wrapper">
             <ContextMenu onClose={() => setContextMenuOpen(false)} ref={contextMenuRef} items={contextMenuItems} />
-            <PopupWindow onManualClose={onPopupClose} ref={popupWindow}>
-                <ActionEditForm ref={actionEditForm} onCancel={closeEditWindow} actionType={action.type} actionData={action}></ActionEditForm>
-            </PopupWindow>
             <Reorder.Item onDragEnd={onDragEnd} onDrag={onDrag} value={action} dragListener={false} dragControls={dragControls} className="action-item-container">
                 <div className={"action-item" + ((isHovering) ? " hover" : "") + ((contextMenuOpen === true) ? " context-menu-open" : "") + ((isSelected) ? " selected" : "") + ((props.className) ? ` ${props.className}` : "") + ` ${performingActionClass}`} onMouseUp={onRightClick} >
                     <div className="drag-items">
