@@ -71,13 +71,23 @@ const newRecentScriptCall = (scriptPath) => async (dispatch) => {
 };
 
 const saveActionScriptCall = (scriptPath) => async (dispatch) => {
-    await actionScriptAPI.saveActionScript(scriptPath);
+    const response = await actionScriptAPI.saveActionScript(scriptPath);
+
+    if (response.data["save-path"] === "") {
+        return;
+    }
+
     dispatch(getRecentScriptsCall());
     dispatch(actionScriptSlice.actions.setScriptIsModified(false));
 };
 
 const saveAsActionScriptCall = (scriptPath) => async (dispatch) => {
-    await actionScriptAPI.saveAsActionScript(scriptPath);
+    const response = await actionScriptAPI.saveAsActionScript(scriptPath);
+
+    if (response.data["save-path"] === "") {
+        return;
+    }
+
     dispatch(getRecentScriptsCall());
     dispatch(actionScriptSlice.actions.setScriptIsModified(false));
 };

@@ -138,7 +138,10 @@ class ActionScriptController(BaseController):
             if ActionScript.current_script is None:
                 return make_response({"error": "No current script found!"}, 500)
 
-            ActionScript.current_script.save_as()
+            saved_path = ActionScript.current_script.save_as()
+
+            if saved_path is None:
+                return make_response({"save-path": ""}, 200)
 
             path: str = ActionScript.current_script._latest_save_path
             recent_script: RecentScript = RecentScript.query.filter_by(path=path).first()

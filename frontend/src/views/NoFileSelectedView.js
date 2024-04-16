@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { connect } from 'react-redux';
 import { setActionsCall } from "store/reducers/actionsReducer";
-import { getRecentScriptsCall, getScriptCall, loadActionScriptCall, newRecentScriptCall, updateScriptCall } from "store/reducers/actionScriptReducer";
+import { getRecentScriptsCall, getScriptCall, loadActionScriptCall, newRecentScriptCall, setScriptIsModifiedCall, updateScriptCall } from "store/reducers/actionScriptReducer";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 
@@ -17,6 +17,7 @@ const NoFileSelectedView = (props) => {
         actionScriptAPI.newActionScript();
         props.setActionsCall([]);
         props.getScriptCall();
+        props.setScriptIsModifiedCall(true);
         navigate('/script-editor');
     }
 
@@ -55,6 +56,7 @@ const NoFileSelectedView = (props) => {
                 props.getScriptCall();
                 navigate('/script-editor');
                 props.newRecentScriptCall(file.path);
+                props.setScriptIsModifiedCall(false);
             };
             reader.readAsText(file);
         }
@@ -111,6 +113,7 @@ const mapDispatchToProps = {
     getRecentScriptsCall,
     newRecentScriptCall,
     loadActionScriptCall,
+    setScriptIsModifiedCall
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(NoFileSelectedView);

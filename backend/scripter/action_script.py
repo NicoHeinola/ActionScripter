@@ -259,11 +259,13 @@ class ActionScript(EventEmitter):
         file_path: str = filedialog.asksaveasfilename(defaultextension=".acsc", filetypes=[("ActionScript Files", "*.acsc"), ("All Files", "*.*")])
 
         if not file_path:
-            return
+            return None
 
         self._latest_save_path = file_path
 
         self.save()
+
+        return file_path
 
     def save(self) -> None:
         with open(self._latest_save_path, 'w') as file:
