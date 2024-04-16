@@ -3,16 +3,18 @@ import "styles/components/actions/actionlist.scss";
 import { connect } from 'react-redux';
 import { Reorder } from "framer-motion";
 import ActionItem from "./ActionItem";
-import { removeActionCall, setActionsCall, swapActionIndexesCall } from "store/reducers/actionsReducer";
+import { addActionCall, removeActionCall, setActionsCall, swapActionIndexesCall } from "store/reducers/actionsReducer";
 import socket from "socket/socketManager";
 import { useEffect, useRef, useState } from "react";
 import ContextMenu from "components/contextmenu/contextMenu";
+import clipboardUtil from "utils/clipboardUtil";
 
 const ActionList = (props) => {
     const [currentActionIndex, setCurrentActionIndex] = useState(0);
     const [selectedActionIds, setSelectedActionIds] = useState([]);
     const contextMenuRef = useRef(null);
     const actionGroupRef = useRef(null);
+    const actionRefs = useRef({});
 
     useEffect(() => {
         socket.on("performed-action", (actionIndex) => {
@@ -45,7 +47,7 @@ const ActionList = (props) => {
         props.swapActionIndexesCall(swappedItems[0], swappedItems[1]);
     };
 
-    const moveActionUp = (id) => {
+    const moveActionUp = async (id) => {
         let index = props.allActions.findIndex(action => action.id === id);
 
         // Couldn't find action index
@@ -58,12 +60,12 @@ const ActionList = (props) => {
             return null;
         }
 
-        props.swapActionIndexesCall(index, index - 1);
+        await props.swapActionIndexesCall(index, index - 1);
 
         return index - 1;
     }
 
-    const moveActionDown = (id) => {
+    const moveActionDown = async (id) => {
         let index = props.allActions.findIndex((action) => action.id === id);
 
         // Couldn't find action index
@@ -76,7 +78,7 @@ const ActionList = (props) => {
             return null;
         }
 
-        props.swapActionIndexesCall(index, index + 1);
+        await props.swapActionIndexesCall(index, index + 1);
 
         return index + 1;
     }
@@ -105,11 +107,6 @@ const ActionList = (props) => {
             return;
         }
 
-        // If no actions are selected we can't open the menu
-        if (selectedActionIds.length === 0) {
-            return;
-        }
-
         contextMenuRef.current.setOpen(true);
         contextMenuRef.current.setPosition(e.clientX + 10, e.clientY - 10);
     }
@@ -122,7 +119,7 @@ const ActionList = (props) => {
         contextMenuRef.current.setOpen(false);
     }
 
-    const moveAllSelectedActionsUp = () => {
+    const moveAllSelectedActionsUp = async () => {
         let selectedIdsSorted = [];
 
         for (let action of props.allActions) {
@@ -143,7 +140,7 @@ const ActionList = (props) => {
                 continue;
             }
 
-            let newIndex = moveActionUp(id);
+            let newIndex = await moveActionUp(id);
 
             // We didn't move so we found the limit
             if (newIndex === null) {
@@ -152,7 +149,7 @@ const ActionList = (props) => {
         }
     }
 
-    const moveAllSelectedActionsDown = () => {
+    const moveAllSelectedActionsDown = async () => {
         let selectedIdsSorted = [];
 
         for (let action of props.allActions) {
@@ -175,7 +172,7 @@ const ActionList = (props) => {
                 continue;
             }
 
-            let newIndex = moveActionDown(id);
+            let newIndex = await moveActionDown(id);
 
             // We didn't move so we found the limit
             if (newIndex === null) {
@@ -184,11 +181,36 @@ const ActionList = (props) => {
         }
     }
 
+    const selectAllActions = () => {
+        let newSelectedActionIds = props.allActions.map(action => action.id);
+        setSelectedActionIds(newSelectedActionIds);
+        contextMenuRef.current.setOpen(false);
+    }
+
+    const unselectAllActions = () => {
+        setSelectedActionIds([]);
+        contextMenuRef.current.setOpen(false);
+    }
+
     const contextMenuItems = [
         {
             "name": "delete-all",
             "text": "Delete all",
             "onClick": deleteAllSelectedActions
+        },
+        {
+            "name": "sep-2",
+            "type": "separator",
+        },
+        {
+            "name": "select-all",
+            "text": "Select all",
+            "onClick": selectAllActions
+        },
+        {
+            "name": "unselect-all",
+            "text": "Unselect all",
+            "onClick": unselectAllActions
         },
         {
             "name": "sep-1",
@@ -206,6 +228,16 @@ const ActionList = (props) => {
         },
     ]
 
+    const onPaste = (index = -1) => {
+        let copiedActions = clipboardUtil.getCopiedActions();
+        if (!copiedActions) {
+            return;
+        }
+
+        for (let action of copiedActions) {
+            props.addActionCall(action, index);
+        }
+    }
 
     return (
         <div className="action-table">
@@ -222,7 +254,7 @@ const ActionList = (props) => {
             <div className="actions" onMouseUp={onRightClick}>
                 <Reorder.Group ref={actionGroupRef} values={props.allActions} onReorder={onReorder}>
                     {props.allActions.map((action, index) =>
-                        <ActionItem isSelected={selectedActionIds.includes(action.id)} moveDown={() => moveActionDown(action.id)} moveUp={() => moveActionUp(action.id)} onUnselect={() => unselectActionItem(action.id)} onSelect={() => selectActionItem(action.id)} performing={index === currentActionIndex} data={action} key={`action-item-${action.id}`} />
+                        <ActionItem onPaste={() => onPaste(index + 1)} ref={(el) => actionRefs.current[action.id] = el} isSelected={selectedActionIds.includes(action.id)} moveDown={() => moveActionDown(action.id)} moveUp={() => moveActionUp(action.id)} onUnselect={() => unselectActionItem(action.id)} onSelect={() => selectActionItem(action.id)} performing={index === currentActionIndex} data={action} key={`action-item-${action.id}`} />
                     )}
                 </Reorder.Group>
             </div>
@@ -241,6 +273,7 @@ const mapDispatchToProps = {
     swapActionIndexesCall,
     removeActionCall,
     setActionsCall,
+    addActionCall
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ActionList);

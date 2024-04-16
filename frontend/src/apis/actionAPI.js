@@ -2,8 +2,16 @@ import axiosInstance from "./axiosInstance";
 
 const BASE_ROUTE = "/action"
 
-const addAction = (actionType) => {
+const createAction = (actionType) => {
     return axiosInstance.post(`${BASE_ROUTE}`, { "action-type": actionType }).then(response => {
+        return response;
+    }).catch(e => {
+        throw e;
+    })
+}
+
+const addAction = (actionData, index) => {
+    return axiosInstance.post(`${BASE_ROUTE}/add`, { "action": actionData, "index": index }).then(response => {
         return response;
     }).catch(e => {
         throw e;
@@ -43,10 +51,11 @@ const setActions = (actions) => {
 }
 
 const functions = {
-    addAction,
+    createAction,
     updateAction,
     removeAction,
     setActions,
-    swapActionIndexes
+    swapActionIndexes,
+    addAction
 };
 export default functions;

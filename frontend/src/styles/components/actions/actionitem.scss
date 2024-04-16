@@ -8,7 +8,7 @@
     .action-item {
         display: flex;
         flex-direction: row;
-        transition: all 0.2s;
+        transition: all 0.1s;
         overflow-x: auto;
         -webkit-user-select: none;
         -moz-user-select: none;
@@ -16,11 +16,11 @@
         user-select: none;
 
         &.selected {
-            background: rgba(255, 255, 255, 0.04);
+            background: rgba(255, 255, 255, 0.06);
         }
 
-        &.hover {
-            background: rgba(255, 255, 255, 0.03);
+        &.hover:not(.performing):not(.disabled) {
+            background: rgba(255, 255, 255, 0.02);
             cursor: pointer;
 
             &.selected {
@@ -33,12 +33,24 @@
         }
 
         &.performing {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(152, 171, 255, 0.05) !important;
         }
 
         &.disabled {
             filter: brightness(100%);
             background: rgba(0, 0, 0, 0.1);
+        }
+
+        &.disabled,
+        &.performing {
+            .drag-items {
+                &:hover {
+                    .data {
+                        scale: 1;
+                        cursor: default;
+                    }
+                }
+            }
         }
 
         .drag-items {
@@ -48,6 +60,13 @@
             max-width: 60px;
             min-width: 60px;
             transition: all 0.2s;
+            background: $action-list-color;
+
+            &:hover {
+                .data {
+                    scale: 1.15;
+                }
+            }
         }
 
         .other-items {
@@ -75,6 +94,7 @@
             align-items: center;
             overflow: hidden;
             word-break: break-all;
+            transition: all 0.2s;
 
             &.drag {
                 cursor: grab;

@@ -12,6 +12,11 @@ const actionsSlice = createSlice({
         addAction: (state, action) => {
             state.allActions.push(action.payload);
         },
+        addActionAt: (state, data) => {
+            const action = data.payload["action"];
+            const index = data.payload["index"];
+            state.allActions.splice(index, 0, action);
+        },
         updateAction: (state, updatedAction) => {
             let newAllActions = [...state.allActions];
             let indexOfUpdatedAction = null;
@@ -50,10 +55,24 @@ const actionsSlice = createSlice({
     },
 });
 
-const addActionCall = (actionType) => async (dispatch) => {
-    const response = await actionAPI.addAction(actionType);
-    dispatch(actionsSlice.actions.addAction(response.data));
+const createActionCall = (actionType) => async (dispatch) => {
+    const response = await actionAPI.createAction(actionType);
+    let actionData = response.data;
+    dispatch(actionsSlice.actions.addAction(actionData));
+    return actionData;
 };
+
+const addActionCall = (actionData, index = -1) => async (dispatch) => {
+    const response = await actionAPI.addAction(actionData, index);
+    const addedAction = response.data;
+
+    if (index === -1) {
+        dispatch(actionsSlice.actions.addAction(addedAction));
+    } else {
+        dispatch(actionsSlice.actions.addActionAt({ "action": addedAction, "index": index }));
+    }
+};
+
 
 const updateActionCall = (updatedAction) => async (dispatch) => {
     await actionAPI.updateAction(updatedAction);
@@ -75,5 +94,12 @@ const swapActionIndexesCall = (indexA, indexB) => async (dispatch) => {
     dispatch(actionsSlice.actions.swapActionIndexes([indexA, indexB]));
 };
 
-export { addActionCall, updateActionCall, removeActionCall, setActionsCall, swapActionIndexesCall };
+export {
+    createActionCall,
+    updateActionCall,
+    removeActionCall,
+    setActionsCall,
+    swapActionIndexesCall,
+    addActionCall
+};
 export default actionsSlice.reducer;

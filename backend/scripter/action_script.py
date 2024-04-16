@@ -91,7 +91,9 @@ class ActionScript(EventEmitter):
 
                 # Inform that the next action will be played soon
                 self._action_index += 1
-                self.emit("performed-action", self._action_index)
+
+                if (self._action_index < len(self._actions)):
+                    self.emit("performed-action", self._action_index)
 
             self._action_index = 0
             self._current_loop_count += 1
@@ -131,6 +133,16 @@ class ActionScript(EventEmitter):
         """
         self._actions.append(action)
 
+    def add_action_at(self, action: Action, index: int) -> None:
+        """
+        Adds an action to this class' action list at an index
+
+        :param action: Action to add
+        :param index: Index to add the action to
+        """
+
+        self._actions.insert(index, action)
+
     def create_action_with_type(self, action_type: str) -> Action:
         """
         Creates a new action and adds it to this class' action list.
@@ -144,8 +156,6 @@ class ActionScript(EventEmitter):
 
         action_class: Action = ActionScript.all_actions[action_type]
         new_action: Action = action_class()
-
-        self.add_action(new_action)
 
         return new_action
 
@@ -243,6 +253,7 @@ class ActionScript(EventEmitter):
             for action_data in data["actions"]:
                 action: Action = self.create_action_with_type(action_data["type"])
                 action.deserialize(action_data)
+                self.add_action(action)
 
     def save_as(self) -> None:
         file_path: str = filedialog.asksaveasfilename(defaultextension=".acsc", filetypes=[("ActionScript Files", "*.acsc"), ("All Files", "*.*")])

@@ -1,16 +1,17 @@
 import "styles/components/actions/actionitem.scss";
 
-import { addActionCall, removeActionCall, setActionsCall, swapActionIndexesCall } from "store/reducers/actionsReducer";
+import { createActionCall, removeActionCall, setActionsCall, swapActionIndexesCall } from "store/reducers/actionsReducer";
 import { connect } from 'react-redux';
 import { Reorder, useDragControls } from "framer-motion";
 import BasicButton from "components/inputs/BasicButton";
 
-import { useRef, useState } from "react";
+import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import PopupWindow from "components/popup/PopupWindow";
 import ActionEditForm from "./edit/ActionEditForm";
 import ContextMenu from "components/contextmenu/contextMenu";
+import clipboardUtil from "utils/clipboardUtil";
 
-const ActionItem = (props) => {
+const ActionItem = forwardRef((props, ref) => {
     const action = props.data;
     const dragControls = useDragControls();
 
@@ -64,6 +65,14 @@ const ActionItem = (props) => {
         dragControls.start(e);
     }
 
+    const onDragContainerPointerDown = (e) => {
+        if (props.onStartDragging) {
+            props.onStartDragging(e);
+        }
+
+        startDragging(e);
+    }
+
     const onRightClick = (e) => {
         // If button isn't rigth click
         if (e.button !== 2) {
@@ -83,11 +92,35 @@ const ActionItem = (props) => {
     }
 
     const setSelectionOfThisAction = (select) => {
+        if (!canModify) {
+            return;
+        }
+
         if (select && props.onSelect) {
             props.onSelect();
         } else if (props.onUnselect) {
             props.onUnselect()
         }
+    }
+
+    const copy = () => {
+        contextMenuRef.current.setOpen(false);
+        setContextMenuOpen(false);
+        clipboardUtil.copyActions([action]);
+    }
+
+    const paste = () => {
+        if (props.onPaste) {
+            props.onPaste();
+        }
+
+        contextMenuRef.current.setOpen(false);
+        setContextMenuOpen(false);
+    }
+
+    const cut = () => {
+        copy();
+        removeAction();
     }
 
     const contextMenuItems = [
@@ -100,6 +133,25 @@ const ActionItem = (props) => {
             "name": "delete",
             "text": "Delete",
             "onClick": removeAction
+        },
+        {
+            "name": "sep-2",
+            "type": "separator",
+        },
+        {
+            "name": "copy",
+            "text": "Copy",
+            "onClick": copy
+        },
+        {
+            "name": "paste",
+            "text": "Paste",
+            "onClick": paste
+        },
+        {
+            "name": "cut",
+            "text": "Cut",
+            "onClick": cut
         },
         {
             "name": "sep-1",
@@ -117,16 +169,31 @@ const ActionItem = (props) => {
         },
     ]
 
+    const onDrag = (e, info) => {
+        if (props.onDrag) {
+            props.onDrag(e, info);
+        }
+    }
+    const onDragEnd = (e, info) => {
+        if (props.onDragEnd) {
+            props.onDragEnd(e, info);
+        }
+    }
+
+    useImperativeHandle(ref, () => ({
+        startDragging
+    }));
+
     return (
         <div className="action-item-wrapper">
             <ContextMenu onClose={() => setContextMenuOpen(false)} ref={contextMenuRef} items={contextMenuItems} />
             <PopupWindow onManualClose={onPopupClose} ref={popupWindow}>
                 <ActionEditForm ref={actionEditForm} onCancel={closeEditWindow} actionType={action.type} actionData={action}></ActionEditForm>
             </PopupWindow>
-            <Reorder.Item value={action} dragListener={false} dragControls={dragControls} className="action-item-container">
+            <Reorder.Item onDragEnd={onDragEnd} onDrag={onDrag} value={action} dragListener={false} dragControls={dragControls} className="action-item-container">
                 <div className={"action-item" + ((isHovering) ? " hover" : "") + ((contextMenuOpen === true) ? " context-menu-open" : "") + ((isSelected) ? " selected" : "") + ((props.className) ? ` ${props.className}` : "") + ` ${performingActionClass}`} onMouseUp={onRightClick} >
                     <div className="drag-items">
-                        <div onPointerDown={startDragging} className="data drag">
+                        <div onPointerDown={onDragContainerPointerDown} className="data drag">
                             <img alt="Drag Icon" draggable="false" className="icon" src="images/icons/drag.png"></img>
                         </div>
                     </div>
@@ -148,7 +215,7 @@ const ActionItem = (props) => {
 
         </div>
     )
-}
+});
 
 
 const mapStateToProps = (state) => {
@@ -159,10 +226,10 @@ const mapStateToProps = (state) => {
 };
 
 const mapDispatchToProps = {
-    addActionCall,
+    createActionCall,
     removeActionCall,
     setActionsCall,
     swapActionIndexesCall
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(ActionItem);
+export default connect(mapStateToProps, mapDispatchToProps, null, { forwardRef: true })(ActionItem);
