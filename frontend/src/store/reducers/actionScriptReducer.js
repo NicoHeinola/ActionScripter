@@ -92,9 +92,13 @@ const saveAsActionScriptCall = (scriptPath) => async (dispatch) => {
     dispatch(actionScriptSlice.actions.setScriptIsModified(false));
 };
 
-const loadActionScriptCall = (scriptPath) => async (dispatch) => {
+const loadActionScriptCall = (scriptPath) => async (dispatch, getState) => {
     dispatch(actionScriptSlice.actions.setIsLoadingActions(true));
-    await dispatch(setActionsCall([]));
+
+    const state = getState(); // Accessing the current Redux state
+    const currentScriptIsMissing = state.actionScript.currentScript["missing-script"] === true
+
+    if (!currentScriptIsMissing) await dispatch(setActionsCall([]));
     const loadedScript = (await actionScriptAPI.loadActionScript(scriptPath)).data;
     await dispatch(setActionsCall(loadedScript["actions"]));
     await dispatch(getScriptCall());
