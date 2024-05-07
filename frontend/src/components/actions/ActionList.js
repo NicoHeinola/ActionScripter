@@ -3,7 +3,7 @@ import "styles/components/actions/actionlist.scss";
 import { connect } from 'react-redux';
 import { Reorder } from "framer-motion";
 import ActionItem from "./ActionItem";
-import { addActionsCall, removeActionCall, swapActionIndexesCall } from "store/reducers/actionsReducer";
+import { addActionsCall, removeActionCall, removeActionsCall, swapActionIndexesCall } from "store/reducers/actionsReducer";
 import socket from "socket/socketManager";
 import { useCallback, useEffect, useRef, useState } from "react";
 import ContextMenu from "components/contextmenu/contextMenu";
@@ -159,10 +159,7 @@ const ActionList = (props) => {
     }
 
     const deleteAllSelectedActions = () => {
-        for (let id of selectedActionIds) {
-            props.removeActionCall(id);
-        }
-
+        props.removeActionsCall(selectedActionIds);
         contextMenuRef.current.setOpen(false);
     }
 
@@ -384,6 +381,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = {
     swapActionIndexesCall,
     removeActionCall,
+    removeActionsCall,
     addActionsCall,
     loadSettingsCall
 };

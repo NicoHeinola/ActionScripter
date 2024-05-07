@@ -26,6 +26,15 @@ const removeAction = (actionId) => {
     })
 }
 
+const removeActions = (actionIds) => {
+    console.log(actionIds)
+    return axiosInstance.post(`${BASE_ROUTE}/remove`, { "actions": actionIds }).then(response => {
+        return response;
+    }).catch(e => {
+        throw e;
+    })
+}
+
 const updateAction = (updatedAction) => {
     return axiosInstance.put(`${BASE_ROUTE}/${updatedAction.id}`, updatedAction).then(response => {
         return response;
@@ -54,6 +63,7 @@ const functions = {
     createAction,
     updateAction,
     removeAction,
+    removeActions,
     setActions,
     swapActionIndexes,
     addActions

@@ -72,6 +72,23 @@ class ActionController(BaseController):
 
             return make_response("", 200)
 
+        @self._app.route(f"{base_route}/remove", methods=["POST"])
+        def delete_actions():
+            if ActionScript.current_script is None:
+                return make_response({"error": "No current script found!"}, 500)
+
+            data: dict = request.get_json()
+
+            if "actions" not in data:
+                return make_response({"error": "Missing actions!"}, 404)
+
+            actions: list = data["actions"]
+
+            for action_id in actions:
+                ActionScript.current_script.remove_action(int(action_id))
+
+            return make_response("", 200)
+
         @self._app.route(f"{base_route}/overwrite", methods=["POST"])
         def set_actions():
             if ActionScript.current_script is None:

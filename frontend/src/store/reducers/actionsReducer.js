@@ -50,6 +50,9 @@ const actionsSlice = createSlice({
         removeAction: (state, actionId) => {
             state.allActions = state.allActions.filter(action => action.id !== actionId.payload);
         },
+        removeActions: (state, actionIds) => {
+            state.allActions = state.allActions.filter(action => !actionIds.payload.includes(action.id));
+        },
         setActions: (state, actions) => {
             state.allActions = [...actions.payload];
         },
@@ -94,6 +97,12 @@ const removeActionCall = (actionId) => async (dispatch) => {
     dispatch(setScriptIsModifiedCall(true));
 };
 
+const removeActionsCall = (actionIds) => async (dispatch) => {
+    actionAPI.removeActions(actionIds);
+    dispatch(actionsSlice.actions.removeActions(actionIds));
+    dispatch(setScriptIsModifiedCall(true));
+};
+
 const setActionsCall = (actions) => async (dispatch) => {
     await actionAPI.setActions(actions);
     dispatch(actionsSlice.actions.setActions(actions));
@@ -109,6 +118,7 @@ export {
     createActionCall,
     updateActionCall,
     removeActionCall,
+    removeActionsCall,
     setActionsCall,
     swapActionIndexesCall,
     addActionsCall
