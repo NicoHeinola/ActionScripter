@@ -12,6 +12,7 @@ import PopupWindow from "components/popup/PopupWindow";
 import ActionEditForm from "./edit/ActionEditForm";
 import BasicButton from "components/inputs/BasicButton";
 import { ring } from 'ldrs'
+import { loadSettingsCall } from "store/reducers/settingsReducer";
 
 ring.register()
 
@@ -26,10 +27,15 @@ const ActionList = (props) => {
     const actionEditForm = useRef(null);
     const [openedAction, setOpenedAction] = useState({});
 
-    const actionsPerPage = 50;
+    const actionsPerPage = Number(props.allSettings["actions-per-page"]);
     const [currentPage, setCurrentPage] = useState(0);
     const pages = Math.ceil(props.allActions.length / actionsPerPage);
     const activeActions = props.allActions.slice(currentPage * actionsPerPage, (currentPage + 1) * actionsPerPage)
+
+    const loadSettingsCall = props.loadSettingsCall;
+    useEffect(() => {
+        loadSettingsCall();
+    }, [loadSettingsCall])
 
     const onPerformedAction = useCallback((actionIndex) => {
         setCurrentActionIndex(actionIndex);
@@ -41,7 +47,7 @@ const ActionList = (props) => {
         if (page !== currentPage) {
             setCurrentPage(page);
         }
-    }, [currentPage])
+    }, [currentPage, actionsPerPage])
 
     const onFinishedActions = useCallback(() => {
         setCurrentActionIndex(0);
@@ -371,13 +377,15 @@ const mapStateToProps = (state) => {
         allActions: state.actions.allActions,
         isLoadingActions: state.actionScript.isLoadingActions,
         currentScript: state.actionScript.currentScript,
+        allSettings: state.settings.allSettings,
     };
 };
 
 const mapDispatchToProps = {
     swapActionIndexesCall,
     removeActionCall,
-    addActionsCall
+    addActionsCall,
+    loadSettingsCall
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ActionList);

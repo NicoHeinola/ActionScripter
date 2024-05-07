@@ -1,0 +1,24 @@
+.settings-page-view {
+    position: relative;
+    width: 100%;
+    padding: 50px;
+
+    .settings {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        width: 100%;
+
+        .loading-bar {
+            background: white;
+        }
+
+        .group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+    }
+}

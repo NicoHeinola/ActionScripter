@@ -3,10 +3,15 @@
 .navigation-menu {
     position: relative;
 
-    min-width: 65px;
+    min-width: 55px;
     height: 100%;
 
     background: $nav-color;
+
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 
     .content {
         position: absolute;
@@ -77,7 +82,7 @@
 
                 width: max-content;
                 height: 40px;
-                gap: 15px;
+                gap: 150px;
 
                 transition: all 0.2s;
 
@@ -91,7 +96,7 @@
 
                 &.active {
                     .icon-wrapper {
-                        scale: 1.2;
+                        scale: 1.1;
                     }
                 }
 

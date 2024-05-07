@@ -49,12 +49,30 @@ const TextInput = (props) => {
         props.onChange(newValue);
     }
 
+    const onIconClicked = (icon) => {
+        if (!props.onIconClicked) {
+            return;
+        }
+
+        props.onIconClicked(icon.id);
+    }
+
     return (
         <div className={"text-input" + ((props.disabled) ? " disabled" : "") + ((props.className) ? ` ${props.className}` : "")}>
             <div className={"bg" + ((isInputActive) ? " active" : "")}></div>
             <div className="input-container">
                 <input value={value} onChange={valueChanged} disabled={props.disabled === true} min={props.min} max={props.max} onFocus={() => setIsInputActive(true)} onBlur={() => setIsInputActive(false)} type={props.type} className="input" />
                 <p className={"placeholder" + (((value !== "" && value !== null && value !== undefined) || isInputActive) ? " active-or-value" : "") + ((isInputActive) ? " active" : "")}>{props.placeholder}</p>
+            </div>
+            <div className="button-container">
+                {
+                    (props.icons) ?
+                        props.icons.map(icon =>
+                            <img key={icon.id} alt={icon.id} className="icon" onClick={() => onIconClicked(icon)} src={icon.src} />
+                        )
+                        :
+                        <></>
+                }
             </div>
             <div className="underlines">
                 <div className="underline" ></div>

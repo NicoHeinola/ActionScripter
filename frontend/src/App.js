@@ -8,6 +8,7 @@ import { Provider } from 'react-redux';
 import store from "store/store";
 import SaveManager from 'components/save/SaveManager';
 import NavigationMenu from 'components/navigation/NavigationMenu';
+import SettingsPageView from 'views/SettingsPageView';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
             <Route path='/' element={<NoFileSelectedView />} />
             <Route index path='/script-editor' element={<ScriptEditorView />} />
             <Route index path='*' element={<MissingPageView />} />
+            <Route index path='/settings' element={<SettingsPageView />} />
           </Routes>
         </div>
       </BrowserRouter>

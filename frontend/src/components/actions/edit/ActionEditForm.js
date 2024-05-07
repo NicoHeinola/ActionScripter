@@ -60,7 +60,7 @@ const ActionEditForm = forwardRef((props, ref) => {
 
     return (
         <div className="action-edit-form">
-            <GroupBox title="Default" className="box">
+            <GroupBox title="General" className="box">
                 <TextInput onChange={newValue => onDataChanged({ "name": newValue })} value={actionData["name"]} placeholder="Action name" />
                 <div className="row">
                     <TextInput min="0" type="number" onChange={newValue => onDataChanged({ "start-delay-ms": newValue })} value={actionData["start-delay-ms"]} placeholder="Start delay (ms)" />

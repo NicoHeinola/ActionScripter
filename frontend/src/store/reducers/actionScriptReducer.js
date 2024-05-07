@@ -95,7 +95,7 @@ const saveAsActionScriptCall = (scriptPath) => async (dispatch) => {
 const loadActionScriptCall = (scriptPath) => async (dispatch, getState) => {
     dispatch(actionScriptSlice.actions.setIsLoadingActions(true));
 
-    const state = getState(); // Accessing the current Redux state
+    const state = getState();
     const currentScriptIsMissing = state.actionScript.currentScript["missing-script"] === true
 
     if (!currentScriptIsMissing) await dispatch(setActionsCall([]));

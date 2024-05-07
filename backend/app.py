@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from flask_cors import CORS, cross_origin
 from controllers.actions.action_controller import ActionController
 from controllers.actions.action_script_controller import ActionScriptController
+from controllers.settings.setting_controller import SettingController
 from controllers.utils.util_controller import UtilController
 from database.database import db
 
@@ -27,6 +28,7 @@ db.init_app(app)
 action_controller: ActionController = ActionController(app, socketio)
 action_script_controller: ActionScriptController = ActionScriptController(app, socketio)
 util_controller: UtilController = UtilController(app, socketio)
+setting_controller: SettingController = SettingController(app, socketio)
 
 if __name__ == '__main__':
     with app.app_context():

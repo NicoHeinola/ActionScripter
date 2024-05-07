@@ -16,6 +16,12 @@ const NavigationMenu = (props) => {
             "to": "/script-editor",
             "class": (props.scriptIsModified === true) ? "alert" : ""
         },
+        {
+            "text": "Settings",
+            "icon": "images/icons/settings.png",
+            "to": "/settings",
+            "class": ""
+        },
     ];
 
     return (

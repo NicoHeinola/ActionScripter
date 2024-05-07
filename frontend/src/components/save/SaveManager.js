@@ -16,8 +16,15 @@ const SaveManager = (props) => {
         saveAsActionScriptCall();
     }, [saveAsActionScriptCall]);
 
+    const currentScript = props.currentScript;
+
     useEffect(() => {
         const handleKeyDown = (event) => {
+            // Can't save a non-existing script
+            if (currentScript["missing-script"] === true) {
+                return;
+            }
+
             if (event.ctrlKey && event.key.toLowerCase() === 's') {
                 event.preventDefault();
 
@@ -36,7 +43,7 @@ const SaveManager = (props) => {
         return () => {
             document.removeEventListener('keydown', handleKeyDown);
         };
-    }, [handleSaveFile, handleSaveAsFile])
+    }, [handleSaveFile, handleSaveAsFile, currentScript])
 
     return (
         <></>
@@ -45,7 +52,9 @@ const SaveManager = (props) => {
 
 
 const mapStateToProps = (state) => {
-    return {};
+    return {
+        currentScript: state.actionScript.currentScript,
+    };
 };
 
 const mapDispatchToProps = {
