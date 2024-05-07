@@ -145,10 +145,10 @@ class ActionScript(EventEmitter):
 
     def create_action_with_type(self, action_type: str) -> Action:
         """
-        Creates a new action and adds it to this class' action list.
+        Creates a new action.
 
         :param action_type: What type of action to add.
-        :return: Added action.
+        :return: Created action.
         """
 
         if action_type not in ActionScript.all_actions:
