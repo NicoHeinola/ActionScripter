@@ -166,7 +166,7 @@ const ActionList = (props) => {
         }
 
         if (isPressingShift) {
-            if (lastSelectedItemId === -1) {
+            if (lastSelectedItemId === -1 || lastSelectedItemId === id) {
                 setSelectedActionIds([id]);
                 setLastSelectedItemId(id);
                 return;
