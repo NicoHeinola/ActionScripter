@@ -21,6 +21,7 @@ const ActionItem = forwardRef((props, ref) => {
     const performingActionClass = (canModify) ? "" : (props.performing) ? "performing" : "disabled";
 
     const isSelected = props.isSelected === true ? true : false;
+    const index = props.index;
 
     const removeAction = () => {
         props.removeActionCall(action.id);
@@ -147,12 +148,14 @@ const ActionItem = forwardRef((props, ref) => {
         {
             "name": "move-up",
             "text": "Move up",
-            "onClick": moveUp
+            "onClick": moveUp,
+            "disabled": index === 0,
         },
         {
             "name": "move-down",
             "text": "Move down",
-            "onClick": moveDown
+            "onClick": moveDown,
+            "disabled": index === props.allActions.length - 1,
         },
     ]
 
