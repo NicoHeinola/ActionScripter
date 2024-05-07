@@ -10,7 +10,8 @@ from database.database import db
 
 class SettingController(BaseController):
     settings_default_values: Dict[str, str] = {
-        "actions-per-page": "50"
+        "actions-per-page": "50",
+        "mouse-location-picker-wait-delay-s": "3"
     }
 
     def _register_routes(self) -> None:

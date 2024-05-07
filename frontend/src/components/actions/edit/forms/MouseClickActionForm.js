@@ -6,12 +6,13 @@ import { useEffect, useState } from "react";
 import "styles/components/actions/edit/forms/mouseclickactionform.scss";
 import utilAPI from "apis/utilAPI";
 import socket from "socket/socketManager";
+import { connect } from 'react-redux';
 
 const MouseClickActionForm = (props) => {
     const actionData = props.actionData;
     const clickType = actionData["click-button"];
 
-    const countDownStartTime = 3;
+    const countDownStartTime = Number(props.allSettings["mouse-location-picker-wait-delay-s"]);
     const [pickButtonCountdown, setPickButtonCountdown] = useState(countDownStartTime);
     const [pickButtonCountdownStarted, setPickButtonCountdownStarted] = useState(false);
 
@@ -41,8 +42,8 @@ const MouseClickActionForm = (props) => {
                 return
             }
 
-            setPickButtonCountdown(prevCountdown => prevCountdown - 1);
-        }, 1000);
+            setPickButtonCountdown(prevCountdown => Math.max((prevCountdown - 0.1).toFixed(2), 0));
+        }, 100);
 
         return () => {
             clearInterval(interval);
@@ -94,4 +95,12 @@ const MouseClickActionForm = (props) => {
     )
 }
 
-export default MouseClickActionForm;
+const mapStateToProps = (state) => {
+    return {
+        allSettings: state.settings.allSettings,
+    };
+};
+
+const mapDispatchToProps = {};
+
+export default connect(mapStateToProps, mapDispatchToProps)(MouseClickActionForm);

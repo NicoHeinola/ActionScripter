@@ -48,6 +48,7 @@ const SettingsPageView = (props) => {
                         :
                         <GroupBox title="General" className="group">
                             <TextInput placeholder="Actions per page" onIconClicked={() => resetSetting("actions-per-page")} onChange={(newValue) => updateSetting("actions-per-page", newValue)} value={Number(allSettings["actions-per-page"])} icons={!hasSettingDefaultValue("actions-per-page") ? [{ id: "reset", src: "images/icons/reset.png" }] : []} type="number" min="1"></TextInput>
+                            <TextInput placeholder="Mouse location picker wait delay (seconds)" onIconClicked={() => resetSetting("mouse-location-picker-wait-delay-s")} onChange={(newValue) => updateSetting("mouse-location-picker-wait-delay-s", newValue)} value={Number(allSettings["mouse-location-picker-wait-delay-s"])} icons={!hasSettingDefaultValue("mouse-location-picker-wait-delay-s") ? [{ id: "reset", src: "images/icons/reset.png" }] : []} type="number" min="0"></TextInput>
                         </GroupBox>
                 }
             </div>
