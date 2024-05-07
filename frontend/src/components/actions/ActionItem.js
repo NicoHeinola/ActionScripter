@@ -78,18 +78,6 @@ const ActionItem = forwardRef((props, ref) => {
         setContextMenuOpen(true);
     }
 
-    const setSelectionOfThisAction = (select) => {
-        if (!canModify) {
-            return;
-        }
-
-        if (select && props.onSelect) {
-            props.onSelect();
-        } else if (props.onUnselect) {
-            props.onUnselect()
-        }
-    }
-
     const copy = () => {
         contextMenuRef.current.setOpen(false);
         setContextMenuOpen(false);
@@ -108,6 +96,18 @@ const ActionItem = forwardRef((props, ref) => {
     const cut = () => {
         copy();
         removeAction();
+    }
+
+    const onItemClicked = (e) => {
+        if (!canModify) {
+            return;
+        }
+
+        if (!props.onSelectionClick) {
+            return;
+        }
+
+        props.onSelectionClick(e, isSelected);
     }
 
     const contextMenuItems = [
@@ -181,7 +181,7 @@ const ActionItem = forwardRef((props, ref) => {
                             <img alt="Drag Icon" draggable="false" className="icon" src="images/icons/drag.png"></img>
                         </div>
                     </div>
-                    <div className="other-items" onClick={() => setSelectionOfThisAction(!isSelected)} onMouseLeave={() => setIsHovering(false)} onMouseEnter={() => setIsHovering(true)}>
+                    <div className="other-items" onClick={onItemClicked} onMouseLeave={() => setIsHovering(false)} onMouseEnter={() => setIsHovering(true)}>
                         <div className="data">{action["name"]}</div>
                         <div className="data">{action["type-display-name"]}</div>
                         <div className="data">{action["start-delay-ms"]}</div>

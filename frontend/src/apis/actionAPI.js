@@ -27,7 +27,6 @@ const removeAction = (actionId) => {
 }
 
 const removeActions = (actionIds) => {
-    console.log(actionIds)
     return axiosInstance.post(`${BASE_ROUTE}/remove`, { "actions": actionIds }).then(response => {
         return response;
     }).catch(e => {

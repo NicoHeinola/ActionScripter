@@ -11,6 +11,11 @@
     overflow: hidden;
     background: $action-list-color;
 
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
     .centered-loading-icon {
         position: absolute;
         left: 50%;

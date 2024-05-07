@@ -33,6 +33,9 @@ const ActionList = (props) => {
     const activeActions = props.allActions.slice(currentPage * actionsPerPage, (currentPage + 1) * actionsPerPage)
 
     const loadSettingsCall = props.loadSettingsCall;
+
+    const [lastSelectedItemId, setLastSelectedItemId] = useState(-1);
+
     useEffect(() => {
         loadSettingsCall();
     }, [loadSettingsCall])
@@ -139,6 +142,62 @@ const ActionList = (props) => {
     const unselectActionItem = (id) => {
         const newSelectedActionIds = selectedActionIds.filter(idInArray => idInArray !== id);
         setSelectedActionIds(newSelectedActionIds);
+    }
+
+    const onActionItemSelectionClick = (e, id, isSelected) => {
+
+        const isPressingCtrl = e.ctrlKey;
+        const isPressingShift = e.shiftKey;
+
+        // If user is not pressing anything, we want to override any other selection
+        if (!isPressingCtrl && !isPressingShift) {
+            setSelectedActionIds([id]);
+            setLastSelectedItemId(id);
+        }
+
+        // If pressing ctrl, allow selection of multiple things
+        if (isPressingCtrl) {
+            if (isSelected) {
+                unselectActionItem(id);
+            } else {
+                selectActionItem(id);
+                setLastSelectedItemId(id);
+            }
+        }
+
+        if (isPressingShift) {
+            if (lastSelectedItemId === -1) {
+                setSelectedActionIds([id]);
+                setLastSelectedItemId(id);
+                return;
+            }
+
+            // New list of the selected ids
+            let newSelectedIds = [];
+            if (isPressingCtrl) {
+                newSelectedIds = [...selectedActionIds];
+            }
+
+            let startedCounting = false;
+            for (let action of props.allActions) {
+                const isEither = action.id === lastSelectedItemId || action.id === id;
+                if (!isEither && !startedCounting) {
+                    continue;
+                }
+
+                if (!newSelectedIds.includes(action.id)) {
+                    newSelectedIds.push(action.id);
+                }
+
+                if (isEither && startedCounting) {
+                    break;
+                }
+
+                startedCounting = true;
+            }
+
+            setSelectedActionIds(newSelectedIds);
+        }
     }
 
     const onRightClick = (e) => {
@@ -345,7 +404,7 @@ const ActionList = (props) => {
             <div className="actions" onMouseUp={onRightClick}>
                 <Reorder.Group ref={actionGroupRef} values={props.allActions} onReorder={onReorder}>
                     {activeActions.map((action, index) =>
-                        <ActionItem onOpenEditWindow={openEditWindow} onPaste={() => onPaste((actionsPerPage * currentPage) + index + 1)} ref={(el) => actionRefs.current[action.id] = el} isSelected={selectedActionIds.includes(action.id)} moveDown={() => moveActionDown(action.id)} moveUp={() => moveActionUp(action.id)} onUnselect={() => unselectActionItem(action.id)} onSelect={() => selectActionItem(action.id)} performing={(actionsPerPage * currentPage + index) === currentActionIndex} data={action} key={`action-item-${action.id}`} />
+                        <ActionItem onOpenEditWindow={openEditWindow} onPaste={() => onPaste((actionsPerPage * currentPage) + index + 1)} ref={(el) => actionRefs.current[action.id] = el} isSelected={selectedActionIds.includes(action.id)} moveDown={() => moveActionDown(action.id)} moveUp={() => moveActionUp(action.id)} onSelectionClick={(e, isSelected) => onActionItemSelectionClick(e, action.id, isSelected)} performing={(actionsPerPage * currentPage + index) === currentActionIndex} data={action} key={`action-item-${action.id}`} />
                     )}
                 </Reorder.Group>
                 <div className="centered-loading-icon">

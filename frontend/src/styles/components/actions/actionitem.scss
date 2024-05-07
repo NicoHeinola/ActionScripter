@@ -15,16 +15,27 @@
         -ms-user-select: none;
         user-select: none;
 
+        /* When not hovering or pressing and just selected*/
         &.selected {
             background: rgba(255, 255, 255, 0.06);
         }
 
+        /* When hovering */
         &.hover:not(.performing):not(.disabled) {
             background: rgba(255, 255, 255, 0.02);
             cursor: pointer;
 
             &.selected {
                 background: rgba(255, 255, 255, 0.08);
+            }
+        }
+
+        /* When pressing down */
+        &:active:not(.performing):not(.disabled) {
+            background: rgba(255, 255, 255, 0.01);
+
+            &.selected {
+                background: rgba(255, 255, 255, 0.07);
             }
         }
 
