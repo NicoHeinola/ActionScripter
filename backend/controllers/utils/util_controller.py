@@ -1,5 +1,3 @@
-from threading import Thread
-from typing import Callable
 from flask import make_response, request
 import pyautogui
 from controllers.base_controller import BaseController

@@ -1,10 +1,7 @@
-from threading import Thread
-from typing import Callable, Dict
+from typing import Dict
 from flask import make_response, request
-import pyautogui
 from controllers.base_controller import BaseController
 from models.setting_model import Setting
-from utils.sleep import socket_supported_sleep
 from database.database import db
 
 

@@ -1,15 +1,12 @@
 from datetime import datetime
 import json
 import os
-from threading import Thread
-import time
 from typing import List
 from flask import jsonify, make_response, request
 from controllers.base_controller import BaseController
 from models.recent_script_model import RecentScript
 from scripter.action_script import ActionScript
 from scripter.actions.action import Action
-from flask_socketio import emit
 from database.database import db
 from utils.sleep import socket_supported_sleep
 

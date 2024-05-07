@@ -1,17 +1,10 @@
 import json
-from operator import index
-from threading import Thread
-import time
 from typing import Callable, Dict, List
 
-from flask_socketio import SocketIO
 from scripter.actions.action import Action
 from scripter.actions.mouse_click_action import MouseClickAction
 from scripter.event_emitter import EventEmitter
 from tkinter import filedialog
-
-from utils.sleep import socket_supported_sleep
-
 
 class ActionScript(EventEmitter):
     current_script = None
