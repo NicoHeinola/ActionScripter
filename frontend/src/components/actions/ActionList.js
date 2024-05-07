@@ -324,7 +324,7 @@ const ActionList = (props) => {
     const contextMenuItems = [
         {
             "name": "delete-selected",
-            "text": "Delete all",
+            "text": "Delete selected",
             "onClick": deleteAllSelectedActions,
             "disabled": selectedActionIds.length === 0,
         },
@@ -349,13 +349,13 @@ const ActionList = (props) => {
         },
         {
             "name": "cut-selected",
-            "text": "Cut all",
+            "text": "Cut selected",
             "onClick": cutAll,
             "disabled": selectedActionIds.length === 0,
         },
         {
             "name": "copy-selected",
-            "text": "Copy all",
+            "text": "Copy selected",
             "onClick": copyAll,
             "disabled": selectedActionIds.length === 0,
         },
@@ -370,13 +370,13 @@ const ActionList = (props) => {
         },
         {
             "name": "move-selected-up",
-            "text": "Move all up",
+            "text": "Move selected up",
             "onClick": moveAllSelectedActionsUp,
             "disabled": selectedActionIds.length === 0,
         },
         {
             "name": "move-selected-down",
-            "text": "Move all down",
+            "text": "Move selected down",
             "onClick": moveAllSelectedActionsDown,
             "disabled": selectedActionIds.length === 0,
         },
