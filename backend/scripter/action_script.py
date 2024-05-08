@@ -394,12 +394,6 @@ class ActionScript(EventEmitter):
         self._history_index += 1
 
     def save_history_change(self, modification_type: HistoryRecordEntry.ModificationType, modified_action_index: int, action_before_modification: Action, action_after_modification: Action) -> None:
-
-        print("--------------")
-        print(action_before_modification)
-        print(action_after_modification)
-        print("--------------")
-
         # Create copies of the modified actions
         action_after: Action = None
         action_before: Action = None
