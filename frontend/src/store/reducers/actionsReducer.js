@@ -114,6 +114,66 @@ const swapActionIndexesCall = (indexA, indexB) => async (dispatch) => {
     dispatch(setScriptIsModifiedCall(true));
 };
 
+const applyActionChangesUndoCall = (changes) => async (dispatch, getState) => {
+    if (changes.length === 0) {
+        return;
+    }
+
+    let state = getState();
+    let newActions = [...state.actions.allActions];
+    for (let change of changes) {
+        const type = change["type"];
+        const index = change["index"];
+        const actionBefore = change["action-before"];
+
+        switch (type) {
+            case "add":
+                newActions.splice(index, 1)
+                break;
+            case "modify":
+                newActions[index] = actionBefore
+                break;
+            case "delete":
+                newActions.splice(index, 0, actionBefore)
+                break;
+            default:
+                console.log(`Unhandled history modification type: ${type}`)
+        }
+    }
+
+    dispatch(actionsSlice.actions.setActions(newActions));
+}
+
+const applyActionChangesRedoCall = (changes) => async (dispatch, getState) => {
+    if (changes.length === 0) {
+        return;
+    }
+
+    let state = getState();
+    let newActions = [...state.actions.allActions];
+    for (let change of changes) {
+        const type = change["type"];
+        const index = change["index"];
+        const actionAfter = change["action-after"];
+
+        switch (type) {
+            case "add":
+                newActions.splice(index, 0, actionAfter)
+                break;
+            case "modify":
+                newActions[index] = actionAfter
+                break;
+            case "delete":
+                newActions.splice(index, 1)
+                break;
+            default:
+                console.log(`Unhandled history modification type: ${type}`)
+        }
+    }
+
+    dispatch(actionsSlice.actions.setActions(newActions));
+}
+
 export {
     createActionCall,
     updateActionCall,
@@ -121,6 +181,8 @@ export {
     removeActionsCall,
     setActionsCall,
     swapActionIndexesCall,
-    addActionsCall
+    addActionsCall,
+    applyActionChangesUndoCall,
+    applyActionChangesRedoCall
 };
 export default actionsSlice.reducer;

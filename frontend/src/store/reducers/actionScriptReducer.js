@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import actionScriptAPI from "apis/actionScriptAPI";
-import { setActionsCall } from './actionsReducer';
+import { setActionsCall, applyActionChangesUndoCall, applyActionChangesRedoCall } from './actionsReducer';
 
 const initialState = {
     isLoadingActions: false,
@@ -110,6 +110,24 @@ const setScriptIsModifiedCall = (isModified) => async (dispatch) => {
     dispatch(actionScriptSlice.actions.setScriptIsModified(isModified));
 }
 
+const undoHistoryCall = () => async (dispatch) => {
+    dispatch(actionScriptSlice.actions.setIsLoadingActions(true));
+    const response = await actionScriptAPI.undoHistory();
+    const changes = response.data;
+    await dispatch(applyActionChangesUndoCall(changes));
+    dispatch(actionScriptSlice.actions.setIsLoadingActions(false));
+    dispatch(actionScriptSlice.actions.setScriptIsModified(true));
+};
+
+const redoHistoryCall = () => async (dispatch) => {
+    dispatch(actionScriptSlice.actions.setIsLoadingActions(true));
+    const response = await actionScriptAPI.redoHistory();
+    const changes = response.data;
+    await dispatch(applyActionChangesRedoCall(changes));
+    dispatch(actionScriptSlice.actions.setIsLoadingActions(false));
+    dispatch(actionScriptSlice.actions.setScriptIsModified(true));
+};
+
 export {
     startScriptCall,
     pauseScriptCall,
@@ -121,6 +139,8 @@ export {
     saveActionScriptCall,
     saveAsActionScriptCall,
     loadActionScriptCall,
-    setScriptIsModifiedCall
+    setScriptIsModifiedCall,
+    undoHistoryCall,
+    redoHistoryCall
 };
 export default actionScriptSlice.reducer;

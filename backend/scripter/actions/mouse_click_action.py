@@ -37,8 +37,8 @@ class MouseClickAction(Action):
 
         return data
 
-    def deserialize(self, data: dict) -> None:
-        super().deserialize(data)
+    def deserializeBase(self, data: dict) -> None:
+        super().deserializeBase(data)
 
         if "click-position-type" in data:
             self._click_position_type = data["click-position-type"]

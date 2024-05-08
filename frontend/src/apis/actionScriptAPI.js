@@ -98,6 +98,22 @@ const loadActionScript = (path) => {
     })
 }
 
+const undoHistory = () => {
+    return axiosInstance.post(`${BASE_ROUTE}/undo`).then(response => {
+        return response;
+    }).catch(e => {
+        throw e;
+    })
+}
+
+const redoHistory = () => {
+    return axiosInstance.post(`${BASE_ROUTE}/redo`).then(response => {
+        return response;
+    }).catch(e => {
+        throw e;
+    })
+}
+
 const functions = {
     getActionScript,
     getSerializedActionScript,
@@ -110,6 +126,8 @@ const functions = {
     newRecentActionScript,
     saveActionScript,
     saveAsActionScript,
-    loadActionScript
+    loadActionScript,
+    undoHistory,
+    redoHistory
 };
 export default functions; 

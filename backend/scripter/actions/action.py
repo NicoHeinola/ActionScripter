@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import copy
 from scripter.event_emitter import EventEmitter
 
 
@@ -10,6 +11,8 @@ class Action(ABC, EventEmitter):
     action_type_display_name = "Missing action type"
 
     def __init__(self) -> None:
+        super().__init__()
+
         # Used to keep track of which action this one is
         self._id: int = Action.current_action_id
         Action.current_action_id += 1
@@ -69,11 +72,19 @@ class Action(ABC, EventEmitter):
         return data
 
     def deserialize(self, data: dict) -> None:
+        copy_before_deserialization = self.copy()
+
+        self.deserializeBase(data)
+
+        self.emit("deserialized", copy_before_deserialization, self)
+
+    def deserializeBase(self, data: dict) -> None:
         """
         Initializes this classes values using a dictionary.
 
         :param data: A dictionary that represents this class; usually created in serialize().
         """
+
         if "name" in data:
             self._name = data["name"]
 
@@ -89,3 +100,6 @@ class Action(ABC, EventEmitter):
 
         if "loop-count" in data:
             self._loop_count = int(data["loop-count"])
+
+    def copy(self):
+        return copy.deepcopy(self)

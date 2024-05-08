@@ -207,3 +207,21 @@ class ActionScriptController(BaseController):
                 action_script.deserialize(file_data_json)
 
             return make_response(action_script.serialize(True), 200)
+
+        @self._app.route(f"{base_route}/undo", methods=["POST"])
+        def undo():
+            if ActionScript.current_script is None:
+                return make_response({"error": "No current script found!"}, 500)
+
+            changes: List[dict] = ActionScript.current_script.undo_history()
+
+            return make_response(changes, 200)
+
+        @self._app.route(f"{base_route}/redo", methods=["POST"])
+        def redo():
+            if ActionScript.current_script is None:
+                return make_response({"error": "No current script found!"}, 500)
+
+            changes: List[dict] = ActionScript.current_script.redo_history()
+
+            return make_response(changes, 200)
