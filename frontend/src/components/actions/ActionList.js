@@ -447,7 +447,7 @@ const ActionList = (props) => {
                 break;
         }
 
-    }, [copyAll, paste, cutAll, selectAllActions, allActions, lastSelectedItemId]);
+    }, [copyAll, paste, cutAll, selectAllActions, allActions, lastSelectedItemId, multiSelectedItemAmount]);
 
     useEffect(() => {
         document.addEventListener("keydown", onKeyPress);
