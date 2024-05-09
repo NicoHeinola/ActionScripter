@@ -1,7 +1,7 @@
 import "styles/components/actions/edit/actioneditform.scss";
 import MouseClickActionForm from "./forms/MouseClickActionForm";
 import TextInput from "components/inputs/TextInput";
-import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from "react";
 import BasicButton from "components/inputs/BasicButton";
 import { updateActionCall } from "store/reducers/actionsReducer";
 import { connect } from 'react-redux';
@@ -26,28 +26,50 @@ const ActionEditForm = forwardRef((props, ref) => {
         setActionData(newActionData);
     }
 
-    const onCancel = () => {
+    const onCancelProp = props.onCancel;
+    const updateActionCall = props.updateActionCall;
+    const actionDataFromProps = props.actionData;
+
+    const resetActionData = useCallback(() => {
+        setActionData(actionDataFromProps);
+    }, [setActionData, actionDataFromProps]);
+
+    const onCancel = useCallback(() => {
         resetActionData();
 
-        if (!props.onCancel) {
+        if (!onCancelProp) {
             return;
         }
 
-        props.onCancel();
-    }
+        onCancelProp();
+    }, [onCancelProp, resetActionData]);
 
-    const resetActionData = () => {
-        setActionData(props.actionData);
-    }
-
-    const save = () => {
-        props.updateActionCall(actionData);
-        props.onCancel();
-    }
+    const save = useCallback(() => {
+        updateActionCall(actionData);
+        onCancelProp();
+    }, [onCancelProp, updateActionCall, actionData]);
 
     useImperativeHandle(ref, () => ({
         resetActionData
     }));
+
+    const handleKeyDown = useCallback((event) => {
+        const enterKeyCode = 13;
+        const escKeyCode = 27;
+
+        if (event.keyCode === enterKeyCode) {
+            save();
+        } else if (event.keyCode === escKeyCode) {
+            onCancel();
+        }
+    }, [save, onCancel]);
+
+    useEffect(() => {
+        document.addEventListener('keydown', handleKeyDown);
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [handleKeyDown]);
 
     let component = null;
     switch (props.actionType) {
