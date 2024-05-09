@@ -12,34 +12,56 @@ class HotkeyManager:
     def __init__(self, app: Flask, socketio: SocketIO) -> None:
         self._app = app
         self._socket: SocketIO = socketio
+
+        # Contains all currently pressed keys
         self._pressed_keys: dict = {}
+
+        # Informs the socket thread that it needs to send users a list of changed keys
         self._pressed_changed: bool = False
+
+        # If user needs the keys that he is pressing. Used to disable key-combinations
         self._is_user_listening_to_keybinds: bool = False
 
         # Holds functions that need to be ran in a socket thread
         self._hotkey_functions_to_run: list = []
-        self._is_running: bool = False
 
+        # If we are listening for keyevents
+        self._is_listening_to_keys: bool = False
+
+        # We need to perform the listening check when we open this app but we need to do it inside a socket thread. This is one way to do the check inside one.
         @self._socket.on('connect')
         def on_connect():
             self.hotkey_listening_check()
 
+        # Listens if user wants to disable hotkeys for a moment
         @self._socket.on('listening-for-keybinds')
         def on_listening_for_keybinds_change(is_listening: bool):
             self._is_user_listening_to_keybinds = is_listening
 
     def on_key_event(self, event) -> None:
+        """
+        Handles a key-event.
+
+        :param event: Key event
+        """
+
+        scan_code = str(event.scan_code)
         if event.event_type == keyboard.KEY_DOWN:
-            scan_code = str(event.scan_code)
+            # If we are already pressing that key
+            if scan_code in self._pressed_keys:
+                return
+
             self._pressed_keys[scan_code] = event.name
 
             # We don't want to check for key-combinations when user is trying to listen for the keypresses this sends
             if not self._is_user_listening_to_keybinds:
                 self.hotkey_check()
         elif event.event_type == keyboard.KEY_UP:
-            scan_code = str(event.scan_code)
-            self._pressed_keys.pop(scan_code)
+            # Remove the key from pressed keys if it's inside them
+            if scan_code in self._pressed_keys:
+                self._pressed_keys.pop(scan_code)
 
+        # Inform the socket thread of changed keys
         self._pressed_changed = True
 
     def hotkey_check(self) -> None:
@@ -103,12 +125,15 @@ class HotkeyManager:
         Tells frontend what keys are being pressed
         """
 
-        while self._is_running:
+        while self._is_listening_to_keys:
+
+            # If user hasn't pressed/released any keys
             if not self._pressed_changed:
                 self._socket.sleep(0.1)
                 continue
             self._pressed_changed = False
 
+            # Perform key-combinations
             for func in self._hotkey_functions_to_run:
                 func()
 
@@ -121,20 +146,32 @@ class HotkeyManager:
             self._socket.emit("pressing-keys", self._pressed_keys)
 
     def hotkey_listening_check(self) -> None:
+        """
+        Starts/stops listening to keys if needed.
+        """
+
         with self._app.app_context():
             hotkeys_enabled_setting: Setting = Setting.query.filter_by(name="hotkeys-enabled").first()
             hotkeys_enabled: bool = hotkeys_enabled_setting.value == "true"
 
-            if hotkeys_enabled and not self._is_running:
+            if hotkeys_enabled and not self._is_listening_to_keys:
                 self.start_listening_to_keys()
-            elif not hotkeys_enabled and self._is_running:
+            elif not hotkeys_enabled and self._is_listening_to_keys:
                 self.stop_listening_to_keys()
 
     def start_listening_to_keys(self) -> None:
-        self._is_running = True
+        """
+        Starts listening for keys
+        """
+
+        self._is_listening_to_keys = True
         self._socket.start_background_task(target=self.hotkey_emitter)
         keyboard.hook(self.on_key_event)
 
     def stop_listening_to_keys(self) -> None:
-        self._is_running = False
+        """
+        Stops listening to keys
+        """
+
+        self._is_listening_to_keys = False
         keyboard.unhook(self.on_key_event)
