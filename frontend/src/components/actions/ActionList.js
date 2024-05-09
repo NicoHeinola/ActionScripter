@@ -28,14 +28,17 @@ const ActionList = (props) => {
     const actionEditForm = useRef(null);
     const [openedAction, setOpenedAction] = useState({});
 
+    const allActions = props.allActions;
+
     const actionsPerPage = Number(props.allSettings["actions-per-page"]);
     const [currentPage, setCurrentPage] = useState(0);
-    const pages = Math.ceil(props.allActions.length / actionsPerPage);
-    const activeActions = props.allActions.slice(currentPage * actionsPerPage, (currentPage + 1) * actionsPerPage)
+    const pages = Math.ceil(allActions.length / actionsPerPage);
+    const activeActions = allActions.slice(currentPage * actionsPerPage, (currentPage + 1) * actionsPerPage)
 
     const loadSettingsCall = props.loadSettingsCall;
 
     const [lastSelectedItemId, setLastSelectedItemId] = useState(-1);
+    const [multiSelectedItemAmount, setMultiSelectedItemAmount] = useState(0);
 
     const [contextMenuOpenCount, setContextMenuOpenCount] = useState(0);
 
@@ -101,7 +104,7 @@ const ActionList = (props) => {
     }
 
     const moveActionUp = async (id) => {
-        let index = props.allActions.findIndex(action => action.id === id);
+        let index = allActions.findIndex(action => action.id === id);
 
         // Couldn't find action index
         if (index === null) {
@@ -119,7 +122,7 @@ const ActionList = (props) => {
     }
 
     const moveActionDown = async (id) => {
-        let index = props.allActions.findIndex((action) => action.id === id);
+        let index = allActions.findIndex((action) => action.id === id);
 
         // Couldn't find action index
         if (index === null) {
@@ -127,7 +130,7 @@ const ActionList = (props) => {
         }
 
         // If action would go out of bounds
-        if (index + 1 >= props.allActions.length) {
+        if (index + 1 >= allActions.length) {
             return null;
         }
 
@@ -156,6 +159,7 @@ const ActionList = (props) => {
         if (!isPressingCtrl && !isPressingShift) {
             setSelectedActionIds([id]);
             setLastSelectedItemId(id);
+            setMultiSelectedItemAmount(0);
         }
 
         // If pressing ctrl, allow selection of multiple things
@@ -165,6 +169,7 @@ const ActionList = (props) => {
             } else {
                 selectActionItem(id);
                 setLastSelectedItemId(id);
+                setMultiSelectedItemAmount(0);
             }
         }
 
@@ -172,6 +177,7 @@ const ActionList = (props) => {
             if (lastSelectedItemId === -1 || lastSelectedItemId === id) {
                 setSelectedActionIds([id]);
                 setLastSelectedItemId(id);
+                setMultiSelectedItemAmount(0);
                 return;
             }
 
@@ -182,13 +188,15 @@ const ActionList = (props) => {
             }
 
             let startedCounting = false;
-            for (let action of props.allActions) {
+            let multiselectedAmount = 0;
+            for (let action of allActions) {
                 const isEither = action.id === lastSelectedItemId || action.id === id;
                 if (!isEither && !startedCounting) {
                     continue;
                 }
 
                 if (!newSelectedIds.includes(action.id)) {
+                    multiselectedAmount++;
                     newSelectedIds.push(action.id);
                 }
 
@@ -199,6 +207,7 @@ const ActionList = (props) => {
                 startedCounting = true;
             }
 
+            setMultiSelectedItemAmount(multiselectedAmount);
             setSelectedActionIds(newSelectedIds);
         }
     }
@@ -220,15 +229,15 @@ const ActionList = (props) => {
         contextMenuRef.current.setPosition(e.clientX + 10, e.clientY - 10);
     }
 
-    const deleteAllSelectedActions = () => {
+    const deleteAllSelectedActions = useCallback(() => {
         props.removeActionsCall(selectedActionIds);
         contextMenuRef.current.setOpen(false);
-    }
+    }, [props, selectedActionIds]);
 
     const moveAllSelectedActionsUp = async () => {
         let selectedIdsSorted = [];
 
-        for (let action of props.allActions) {
+        for (let action of allActions) {
             let id = action.id;
 
             if (selectedActionIds.includes(id)) {
@@ -238,7 +247,7 @@ const ActionList = (props) => {
 
         let topIndex = -1;
         for (let id of selectedIdsSorted) {
-            let index = props.allActions.findIndex((action) => action.id === id);
+            let index = allActions.findIndex((action) => action.id === id);
 
             // If the next index would overlap with the limit, let's skip this one
             if (index - 1 === topIndex) {
@@ -258,7 +267,7 @@ const ActionList = (props) => {
     const moveAllSelectedActionsDown = async () => {
         let selectedIdsSorted = [];
 
-        for (let action of props.allActions) {
+        for (let action of allActions) {
             let id = action.id;
 
             if (selectedActionIds.includes(id)) {
@@ -270,7 +279,7 @@ const ActionList = (props) => {
 
         let bottomIndex = -1;
         for (let id of selectedIdsSorted) {
-            let index = props.allActions.findIndex((action) => action.id === id);
+            let index = allActions.findIndex((action) => action.id === id);
 
             // If the next index would overlap with the limit, let's skip this one
             if (index + 1 === bottomIndex) {
@@ -287,37 +296,38 @@ const ActionList = (props) => {
         }
     }
 
-    const selectAllActions = () => {
-        let newSelectedActionIds = props.allActions.map(action => action.id);
+    const selectAllActions = useCallback(() => {
+        let newSelectedActionIds = allActions.map(action => action.id);
         setSelectedActionIds(newSelectedActionIds);
         contextMenuRef.current.setOpen(false);
-    }
+    }, [allActions]);
 
     const unselectAllActions = () => {
         setSelectedActionIds([]);
         contextMenuRef.current.setOpen(false);
+        setLastSelectedItemId(-1);
     }
 
-    const copyAll = () => {
-        let actionsToCopy = props.allActions.filter(action => selectedActionIds.includes(action.id));
+    const copyAll = useCallback(() => {
+        let actionsToCopy = allActions.filter(action => selectedActionIds.includes(action.id));
         clipboardUtil.copyActions(actionsToCopy);
         contextMenuRef.current.setOpen(false);
-    }
+    }, [contextMenuRef, allActions, selectedActionIds]);
 
-    const paste = (index = -1) => {
+    const paste = useCallback((index = -1) => {
         let copiedActions = clipboardUtil.getCopiedActions();
         if (!copiedActions) {
             return;
         }
 
         props.addActionsCall(copiedActions, index);
-    }
+    }, [props]);
 
-    const cutAll = () => {
+    const cutAll = useCallback(() => {
         copyAll();
         deleteAllSelectedActions();
         contextMenuRef.current.setOpen(false);
-    }
+    }, [copyAll, deleteAllSelectedActions]);
 
     const onPaste = (index = -1) => {
         paste(index);
@@ -386,7 +396,7 @@ const ActionList = (props) => {
     ]
 
     const onClickedOutsideOfActions = () => {
-        setSelectedActionIds([]);
+        unselectAllActions();
     }
 
     useClickOutside(actionGroupRef, onClickedOutsideOfActions, () => { return contextMenuOpenCount === 0 });
@@ -399,6 +409,52 @@ const ActionList = (props) => {
         const dir = isOpen === true ? 1 : -1;
         setContextMenuOpenCount(contextMenuOpenCount + 1 * dir);
     }
+
+    const onKeyPress = useCallback((event) => {
+        const keyCode = event.keyCode;
+        const isCTRLPressed = event.ctrlKey;
+
+        const a = 65;
+        const c = 67;
+        const v = 86;
+        const x = 88;
+
+        if (!isCTRLPressed) {
+            return;
+        }
+
+        switch (keyCode) {
+            case c:
+                copyAll();
+                break;
+            case v:
+                let pasteIndex = -1;
+                if (lastSelectedItemId !== -1) {
+                    pasteIndex = allActions.findIndex(action => action.id === lastSelectedItemId);
+                    pasteIndex += Math.max(multiSelectedItemAmount - 1, 0);
+                    pasteIndex++;
+                }
+
+                paste(pasteIndex);
+                break;
+            case x:
+                cutAll();
+                break;
+            case a:
+                selectAllActions();
+                break;
+            default:
+                break;
+        }
+
+    }, [copyAll, paste, cutAll, selectAllActions, allActions, lastSelectedItemId]);
+
+    useEffect(() => {
+        document.addEventListener("keydown", onKeyPress);
+        return () => {
+            document.removeEventListener("keydown", onKeyPress);
+        };
+    }, [onKeyPress])
 
     return (
         <div className="action-table">
@@ -416,7 +472,7 @@ const ActionList = (props) => {
                 <div className="header center">Actions</div>
             </div>
             <div className="actions" onMouseUp={onRightClick}>
-                <Reorder.Group ref={actionGroupRef} values={props.allActions} onReorder={onReorder}>
+                <Reorder.Group ref={actionGroupRef} values={allActions} onReorder={onReorder}>
                     {activeActions.map((action, index) =>
                         <ActionItem onContextMenuOpenChange={handleAnyContextMenuOpenChange} index={(actionsPerPage * currentPage) + index} onOpenEditWindow={openEditWindow} onPaste={() => onPaste((actionsPerPage * currentPage) + index + 1)} ref={(el) => actionRefs.current[action.id] = el} isSelected={selectedActionIds.includes(action.id)} moveDown={() => moveActionDown(action.id)} moveUp={() => moveActionUp(action.id)} onSelectionClick={(e, isSelected) => onActionItemSelectionClick(e, action.id, isSelected)} performing={(actionsPerPage * currentPage + index) === currentActionIndex} data={action} key={`action-item-${action.id}`} />
                     )}
