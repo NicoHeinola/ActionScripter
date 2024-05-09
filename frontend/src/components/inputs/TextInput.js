@@ -50,6 +50,10 @@ const TextInput = (props) => {
     }
 
     const onIconClicked = (icon) => {
+        if (props.disabled) {
+            return;
+        }
+
         if (!props.onIconClicked) {
             return;
         }
@@ -61,7 +65,7 @@ const TextInput = (props) => {
         <div className={"text-input" + ((props.disabled) ? " disabled" : "") + ((props.className) ? ` ${props.className}` : "")}>
             <div className={"bg" + ((isInputActive) ? " active" : "")}></div>
             <div className="input-container">
-                <input value={value} onChange={valueChanged} disabled={props.disabled === true} min={props.min} max={props.max} onFocus={() => setIsInputActive(true)} onBlur={() => setIsInputActive(false)} type={props.type} className="input" />
+                <input step={props.step} value={value} onChange={valueChanged} disabled={props.disabled === true || props.allowTyping === false} min={props.min} max={props.max} onFocus={() => setIsInputActive(true)} onBlur={() => setIsInputActive(false)} type={props.type} className="input" />
                 <p className={"placeholder" + (((value !== "" && value !== null && value !== undefined) || isInputActive) ? " active-or-value" : "") + ((isInputActive) ? " active" : "")}>{props.placeholder}</p>
             </div>
             <div className="button-container">

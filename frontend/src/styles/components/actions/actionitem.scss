@@ -10,10 +10,6 @@
         flex-direction: row;
         transition: all 0.1s;
         overflow-x: auto;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
 
         /* When not hovering or pressing and just selected*/
         &.selected {

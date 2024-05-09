@@ -9,6 +9,7 @@ import store from "store/store";
 import SaveManager from 'components/save/SaveManager';
 import NavigationMenu from 'components/navigation/NavigationMenu';
 import SettingsPageView from 'views/SettingsPageView';
+import HotkeyManager from 'components/hotkey/HotkeyManager';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
       <BrowserRouter>
         <div className='app'>
           <SaveManager />
+          <HotkeyManager />
           <NavigationMenu />
           <Routes>
             <Route path='/' element={<NoFileSelectedView />} />

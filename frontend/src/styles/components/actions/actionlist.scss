@@ -11,22 +11,12 @@
     overflow: hidden;
     background: $action-list-color;
 
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-
     .centered-loading-icon {
         position: absolute;
         left: 50%;
         top: 50%;
         transform: translate(-50%, -50%);
         pointer-events: none;
-
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
 
         .hidden {
             display: none;
@@ -97,11 +87,6 @@
                 filter: brightness(70%);
 
                 transition: all 0.2s;
-
-                -webkit-user-select: none;
-                -moz-user-select: none;
-                -ms-user-select: none;
-                user-select: none;
 
                 &.active {
                     filter: brightness(100%);

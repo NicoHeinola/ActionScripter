@@ -17,6 +17,11 @@ body {
     height: 100vh;
     background: $site-color-1;
     overflow-x: hidden;
+
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 ::-webkit-scrollbar {

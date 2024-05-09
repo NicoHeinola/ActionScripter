@@ -7,8 +7,10 @@ from flask_cors import CORS, cross_origin
 from controllers.actions.action_controller import ActionController
 from controllers.actions.action_script_controller import ActionScriptController
 from controllers.settings.setting_controller import SettingController
+from controllers.utils.hotkey_manager import HotkeyManager
 from controllers.utils.util_controller import UtilController
 from database.database import db
+
 
 # Load .env file
 load_dotenv()
@@ -24,14 +26,16 @@ migrate = Migrate(app, db)
 
 db.init_app(app)
 
+hotkey_manager: HotkeyManager = HotkeyManager(app, socketio)
 
-action_controller: ActionController = ActionController(app, socketio)
-action_script_controller: ActionScriptController = ActionScriptController(app, socketio)
-util_controller: UtilController = UtilController(app, socketio)
-setting_controller: SettingController = SettingController(app, socketio)
+action_controller: ActionController = ActionController(app, socketio, hotkey_manager)
+action_script_controller: ActionScriptController = ActionScriptController(app, socketio, hotkey_manager)
+util_controller: UtilController = UtilController(app, socketio, hotkey_manager)
+setting_controller: SettingController = SettingController(app, socketio, hotkey_manager)
 
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
 
     socketio.run(app, host=os.getenv("HOST"), port=int(os.getenv("PORT")), debug=os.getenv("ENVIRONMENT") == "DEBUG")
+    hotkey_manager.stop_listening_to_keys()

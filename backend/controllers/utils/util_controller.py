@@ -6,8 +6,8 @@ from utils.sleep import socket_supported_sleep
 
 class UtilController(BaseController):
 
-    def __init__(self, app, socket) -> None:
-        super().__init__(app, socket)
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
 
         self._picking_mouse_position_id: int = 0
 

@@ -8,8 +8,20 @@ from database.database import db
 class SettingController(BaseController):
     settings_default_values: Dict[str, str] = {
         "actions-per-page": "50",
-        "mouse-location-picker-wait-delay-s": "3"
+        "mouse-location-picker-wait-delay-s": "3",
+        "start-script-key-combination": "29+6",  # Ctrl + 6
+        "start-script-key-combination-display": "ctrl + 5",
+        "stop-script-key-combination": "29+7",  # Ctrl + 5
+        "stop-script-key-combination-display": "ctrl + 6",
+        "hotkeys-enabled": "true",
     }
+
+    def handle_setting_change(self, setting_name, setting_value) -> None:
+        """
+        Some settings may have some custom logic that needs to be handled
+        """
+        if setting_name == "hotkeys-enabled":
+            self._hotkey_manager.hotkey_listening_check()
 
     def _register_routes(self) -> None:
         base_route: str = "/setting"
@@ -34,8 +46,9 @@ class SettingController(BaseController):
                 setting.value = value
 
                 db.session.add(setting)
+                db.session.commit()
 
-            db.session.commit()
+                self.handle_setting_change(name, value)
 
             return make_response("", 200)
 

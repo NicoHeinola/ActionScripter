@@ -24,6 +24,10 @@
                 cursor: not-allowed;
             }
         }
+
+        .button-container {
+            pointer-events: none;
+        }
     }
 
     &:hover {

@@ -114,6 +114,9 @@ const ScriptEditorView = (props) => {
     }
 
     const isStopped = props.currentScript["play-state"] === "stopped";
+    const hotkeysEnabled = props.allSettings["hotkeys-enabled"] === "true";
+    const startHotkeyText = (hotkeysEnabled) ? `(${props.allSettings["start-script-key-combination-display"]})` : "";
+    const stopHotkeyText = (hotkeysEnabled) ? `(${props.allSettings["stop-script-key-combination-display"]})` : "";
 
     return (
         <motion.div
@@ -131,11 +134,11 @@ const ScriptEditorView = (props) => {
             <ActionList />
             <div className="playstate-actions">
                 {(props.currentScript["play-state"] !== "playing") ?
-                    <BasicButton disabled={props.allActions.length === 0} onClick={startScript} className="play-button">{props.currentScript["play-state"] === "stopped" ? "Start" : "Continue"}</BasicButton>
+                    <BasicButton disabled={props.allActions.length === 0} onClick={startScript} className="play-button">{props.currentScript["play-state"] === "stopped" ? "Start" : "Continue"} {startHotkeyText}</BasicButton>
                     :
-                    <BasicButton onClick={pauseScript} className="play-button">Pause</BasicButton>
+                    <BasicButton onClick={pauseScript} className="play-button">Pause {startHotkeyText}</BasicButton>
                 }
-                <BasicButton disabled={props.currentScript["play-state"] === "stopped" || props.isLoadingActions} onClick={stopScript} className="play-button cancel">Stop</BasicButton>
+                <BasicButton disabled={props.currentScript["play-state"] === "stopped" || props.isLoadingActions} onClick={stopScript} className="play-button cancel">Stop {stopHotkeyText}</BasicButton>
                 <BasicButton disabled={!isStopped || props.isLoadingActions} onClick={switchScriptLoopType} className="repeat-button" icon={`images/icons/${props.currentScript["loop-type"] === 'infinite' ? "loop_infinite.png" : "loop_x_times.png"}`}></BasicButton>
                 <TextInput min="0" value={props.currentScript["loop-count"]} onChange={newValue => setScriptLoopCount(newValue)} className="input" type="number" placeholder="Loop Count" disabled={!isStopped || props.currentScript["loop-type"] === 'infinite' || props.isLoadingActions} />
             </div>
@@ -148,6 +151,7 @@ const mapStateToProps = (state) => {
         allActions: state.actions.allActions,
         currentScript: state.actionScript.currentScript,
         isLoadingActions: state.actionScript.isLoadingActions,
+        allSettings: state.settings.allSettings,
     };
 };
 

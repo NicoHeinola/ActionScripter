@@ -34,6 +34,10 @@ const actionScriptSlice = createSlice({
     },
 });
 
+const updateScriptPlayStateCall = (playState) => async (dispatch) => {
+    dispatch(actionScriptSlice.actions.setPlayState(playState));
+}
+
 const startScriptCall = () => async (dispatch) => {
     await actionScriptAPI.startActionScript();
     dispatch(actionScriptSlice.actions.setPlayState("playing"));
@@ -141,6 +145,7 @@ export {
     loadActionScriptCall,
     setScriptIsModifiedCall,
     undoHistoryCall,
-    redoHistoryCall
+    redoHistoryCall,
+    updateScriptPlayStateCall
 };
 export default actionScriptSlice.reducer;
