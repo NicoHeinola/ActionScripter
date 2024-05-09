@@ -13,6 +13,7 @@ import ActionEditForm from "./edit/ActionEditForm";
 import BasicButton from "components/inputs/BasicButton";
 import { ring } from 'ldrs'
 import { loadSettingsCall } from "store/reducers/settingsReducer";
+import useClickOutside from "hooks/useClickOutside";
 
 ring.register()
 
@@ -381,6 +382,8 @@ const ActionList = (props) => {
             "disabled": selectedActionIds.length === 0,
         },
     ]
+
+    useClickOutside(actionGroupRef, unselectAllActions);
 
     const loadingIconElementMedium = <l-ring class={(!props.isLoadingActions) ? "hidden" : ""} size="40" stroke="5" bg-opacity="0" speed="2" color="white" />;
     const loadingIconElementSmall = <l-ring class={(!props.isLoadingActions) ? "hidden" : ""} size="25" stroke="4" bg-opacity="0" speed="2" color="white" />;
