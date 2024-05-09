@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 
 const useClickOutside = (ref, handler, preCheck = null) => {
     useEffect(() => {
-        if (preCheck !== null && (!preCheck || !preCheck())) {
+        if (preCheck !== null && !preCheck()) {
             return;
         }
 

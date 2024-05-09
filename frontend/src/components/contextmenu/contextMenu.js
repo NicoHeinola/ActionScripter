@@ -11,6 +11,10 @@ const ContextMenu = forwardRef((props, ref) => {
 
     const setOpen = (isOpen) => {
         setIsOpen(isOpen);
+
+        if (props.onOpenChange) {
+            props.onOpenChange(isOpen);
+        }
     }
 
     const setPosition = (x, y) => {
@@ -29,7 +33,7 @@ const ContextMenu = forwardRef((props, ref) => {
     }
 
     const onClickOutside = () => {
-        setIsOpen(false);
+        setOpen(false);
 
         if (props.onClose) {
             props.onClose();

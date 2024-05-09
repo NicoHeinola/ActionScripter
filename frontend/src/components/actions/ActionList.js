@@ -37,6 +37,8 @@ const ActionList = (props) => {
 
     const [lastSelectedItemId, setLastSelectedItemId] = useState(-1);
 
+    const [contextMenuOpenCount, setContextMenuOpenCount] = useState(0);
+
     useEffect(() => {
         loadSettingsCall();
     }, [loadSettingsCall])
@@ -383,18 +385,27 @@ const ActionList = (props) => {
         },
     ]
 
-    useClickOutside(actionGroupRef, unselectAllActions);
+    const onClickedOutsideOfActions = () => {
+        setSelectedActionIds([]);
+    }
+
+    useClickOutside(actionGroupRef, onClickedOutsideOfActions, () => { return contextMenuOpenCount === 0 });
 
     const loadingIconElementMedium = <l-ring class={(!props.isLoadingActions) ? "hidden" : ""} size="40" stroke="5" bg-opacity="0" speed="2" color="white" />;
     const loadingIconElementSmall = <l-ring class={(!props.isLoadingActions) ? "hidden" : ""} size="25" stroke="4" bg-opacity="0" speed="2" color="white" />;
     const isStopped = props.currentScript["play-state"] === "stopped";
+
+    const handleAnyContextMenuOpenChange = (isOpen) => {
+        const dir = isOpen === true ? 1 : -1;
+        setContextMenuOpenCount(contextMenuOpenCount + 1 * dir);
+    }
 
     return (
         <div className="action-table">
             <PopupWindow ref={popupWindow} onManualClose={onPopupClose} >
                 <ActionEditForm ref={actionEditForm} onCancel={closeEditWindow} actionType={openedAction.type} actionData={openedAction}></ActionEditForm>
             </PopupWindow>
-            <ContextMenu ref={contextMenuRef} items={contextMenuItems} />
+            <ContextMenu onOpenCHange={handleAnyContextMenuOpenChange} ref={contextMenuRef} items={contextMenuItems} />
             <div className="headers row">
                 <div className="header"></div>
                 <div className="header">Name</div>
@@ -407,7 +418,7 @@ const ActionList = (props) => {
             <div className="actions" onMouseUp={onRightClick}>
                 <Reorder.Group ref={actionGroupRef} values={props.allActions} onReorder={onReorder}>
                     {activeActions.map((action, index) =>
-                        <ActionItem index={(actionsPerPage * currentPage) + index} onOpenEditWindow={openEditWindow} onPaste={() => onPaste((actionsPerPage * currentPage) + index + 1)} ref={(el) => actionRefs.current[action.id] = el} isSelected={selectedActionIds.includes(action.id)} moveDown={() => moveActionDown(action.id)} moveUp={() => moveActionUp(action.id)} onSelectionClick={(e, isSelected) => onActionItemSelectionClick(e, action.id, isSelected)} performing={(actionsPerPage * currentPage + index) === currentActionIndex} data={action} key={`action-item-${action.id}`} />
+                        <ActionItem onContextMenuOpenChange={handleAnyContextMenuOpenChange} index={(actionsPerPage * currentPage) + index} onOpenEditWindow={openEditWindow} onPaste={() => onPaste((actionsPerPage * currentPage) + index + 1)} ref={(el) => actionRefs.current[action.id] = el} isSelected={selectedActionIds.includes(action.id)} moveDown={() => moveActionDown(action.id)} moveUp={() => moveActionUp(action.id)} onSelectionClick={(e, isSelected) => onActionItemSelectionClick(e, action.id, isSelected)} performing={(actionsPerPage * currentPage + index) === currentActionIndex} data={action} key={`action-item-${action.id}`} />
                     )}
                 </Reorder.Group>
                 <div className="centered-loading-icon">

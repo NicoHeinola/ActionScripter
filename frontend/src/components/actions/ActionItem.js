@@ -174,9 +174,15 @@ const ActionItem = forwardRef((props, ref) => {
         startDragging
     }));
 
+    const onContextMenuOpenChange = (isOpen) => {
+        if (props.onContextMenuOpenChange) {
+            props.onContextMenuOpenChange(isOpen);
+        }
+    }
+
     return (
         <div className="action-item-wrapper">
-            <ContextMenu onClose={() => setContextMenuOpen(false)} ref={contextMenuRef} items={contextMenuItems} />
+            <ContextMenu onOpenChange={onContextMenuOpenChange} onClose={() => setContextMenuOpen(false)} ref={contextMenuRef} items={contextMenuItems} />
             <Reorder.Item onDragEnd={onDragEnd} onDrag={onDrag} value={action} dragListener={false} dragControls={dragControls} className="action-item-container">
                 <div className={"action-item" + ((isHovering) ? " hover" : "") + ((contextMenuOpen === true) ? " context-menu-open" : "") + ((isSelected) ? " selected" : "") + ((props.className) ? ` ${props.className}` : "") + ` ${performingActionClass}`} onMouseUp={onRightClick} >
                     <div className="drag-items">
