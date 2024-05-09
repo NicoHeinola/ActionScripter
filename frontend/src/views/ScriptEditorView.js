@@ -106,8 +106,8 @@ const ScriptEditorView = (props) => {
                         <p>No script found!</p>
                         <p>Please create or select one first.</p>
                     </div>
-                    <BasicButton className="button" onClick={() => window.history.back()}>Go back</BasicButton>
                     <BasicButton className="button" onClick={() => navigate("/")}>Home</BasicButton>
+                    <BasicButton className="button" onClick={() => window.history.back()}>Go back</BasicButton>
                 </div>
             </motion.div>
         )
