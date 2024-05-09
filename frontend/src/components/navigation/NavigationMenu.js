@@ -3,6 +3,9 @@ import { Link, useLocation } from 'react-router-dom';
 import { connect } from 'react-redux';
 
 const NavigationMenu = (props) => {
+    const currentScript = props.currentScript;
+    const scriptIsMissing = currentScript["missing-script"];
+
     const location = useLocation();
     const links = [
         {
@@ -14,13 +17,14 @@ const NavigationMenu = (props) => {
             "text": "Script Editor",
             "icon": "images/icons/script.png",
             "to": "/script-editor",
-            "class": (props.scriptIsModified === true) ? "alert" : ""
+            "class": (props.scriptIsModified === true) ? "alert" : "",
+            "disabled": scriptIsMissing,
         },
         {
             "text": "Settings",
             "icon": "images/icons/settings.png",
             "to": "/settings",
-            "class": ""
+            "class": "",
         },
     ];
 
@@ -29,7 +33,7 @@ const NavigationMenu = (props) => {
             <div className="content">
                 <div className="items">
                     {links.map(link =>
-                        <Link key={link.to} to={link.to} className={"item" + ((location.pathname === link.to) ? " active" : "")}>
+                        <Link key={link.to} to={link.to} className={"item" + ((link.disabled) ? " disabled" : "") + ((location.pathname === link.to) ? " active" : "")}>
                             <div className={"icon-wrapper" + ((link.class) ? ` ${link.class}` : "")}>
                                 <img alt={link.text} className="icon" src={link.icon} />
                             </div>
@@ -44,7 +48,7 @@ const NavigationMenu = (props) => {
 const mapStateToProps = (state) => {
     return {
         scriptIsModified: state.actionScript.scriptIsModified,
-
+        currentScript: state.actionScript.currentScript,
     };
 };
 
