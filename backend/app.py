@@ -4,7 +4,6 @@ from flask_socketio import SocketIO, emit
 from flask import Flask, jsonify
 from dotenv import load_dotenv
 from flask_cors import CORS, cross_origin
-from controllers.actions.action_controller import ActionController
 from controllers.actions.action_script_controller import ActionScriptController
 from controllers.settings.setting_controller import SettingController
 from controllers.utils.hotkey_manager import HotkeyManager
@@ -28,7 +27,6 @@ db.init_app(app)
 
 hotkey_manager: HotkeyManager = HotkeyManager(app, socketio)
 
-action_controller: ActionController = ActionController(app, socketio, hotkey_manager)
 action_script_controller: ActionScriptController = ActionScriptController(app, socketio, hotkey_manager)
 util_controller: UtilController = UtilController(app, socketio, hotkey_manager)
 setting_controller: SettingController = SettingController(app, socketio, hotkey_manager)

@@ -98,6 +98,46 @@ const loadActionScript = (path) => {
     })
 }
 
+const createAction = (groupId, actionType) => {
+    return axiosInstance.post(`${BASE_ROUTE}/create-new-action`, { "group-id": groupId, "action-type": actionType }).then(response => {
+        return response;
+    }).catch(e => {
+        throw e;
+    })
+}
+
+const addActions = (groupId, actionDatas, index) => {
+    return axiosInstance.post(`${BASE_ROUTE}/add-new-actions`, { "group-id": groupId, "actions": actionDatas, "index": index }).then(response => {
+        return response;
+    }).catch(e => {
+        throw e;
+    })
+}
+
+const removeActions = (groupId, actionIds) => {
+    return axiosInstance.post(`${BASE_ROUTE}/remove-actions`, { "group-id": groupId, "actions": actionIds }).then(response => {
+        return response;
+    }).catch(e => {
+        throw e;
+    })
+}
+
+const updateAction = (groupId, updatedAction) => {
+    return axiosInstance.put(`${BASE_ROUTE}/update-action`, { "group-id": groupId, "action": updatedAction }).then(response => {
+        return response;
+    }).catch(e => {
+        throw e;
+    })
+}
+
+const swapActionIndexes = (groupId, indexA, indexB) => {
+    return axiosInstance.post(`${BASE_ROUTE}/swap-two-actions`, { "group-id": groupId, "index-a": indexA, "index-b": indexB }).then(response => {
+        return response;
+    }).catch(e => {
+        throw e;
+    })
+}
+
 const undoHistory = () => {
     return axiosInstance.post(`${BASE_ROUTE}/undo`).then(response => {
         return response;
@@ -128,6 +168,11 @@ const functions = {
     saveAsActionScript,
     loadActionScript,
     undoHistory,
-    redoHistory
+    redoHistory,
+    createAction,
+    addActions,
+    removeActions,
+    updateAction,
+    swapActionIndexes,
 };
 export default functions; 

@@ -3,7 +3,7 @@ import "styles/components/actions/actionlist.scss";
 import { connect } from 'react-redux';
 import { Reorder } from "framer-motion";
 import ActionItem from "./ActionItem";
-import { addActionsCall, removeActionCall, removeActionsCall, swapActionIndexesCall } from "store/reducers/actionsReducer";
+import { addActionsCall, removeActionsCall, swapActionIndexesCall } from "store/reducers/actionScriptReducer";
 import socket from "socket/socketManager";
 import { useCallback, useEffect, useRef, useState } from "react";
 import ContextMenu from "components/contextmenu/contextMenu";
@@ -28,12 +28,14 @@ const ActionList = (props) => {
     const actionEditForm = useRef(null);
     const [openedAction, setOpenedAction] = useState({});
 
-    const allActions = props.allActions;
+    const groupId = props.groupId;
+    const actionsInGroup = props.currentScript["action-groups"][`${groupId}`]["actions"];
 
     const actionsPerPage = Number(props.allSettings["actions-per-page"]);
     const [currentPage, setCurrentPage] = useState(0);
-    const pages = Math.ceil(allActions.length / actionsPerPage);
-    const activeActions = allActions.slice(currentPage * actionsPerPage, (currentPage + 1) * actionsPerPage)
+    const pages = Math.ceil(actionsInGroup.length / actionsPerPage);
+
+    const activeActions = actionsInGroup.slice(currentPage * actionsPerPage, (currentPage + 1) * actionsPerPage)
 
     const loadSettingsCall = props.loadSettingsCall;
 
@@ -86,7 +88,7 @@ const ActionList = (props) => {
             return;
         }
 
-        props.swapActionIndexesCall(swappedItems[0], swappedItems[1]);
+        props.swapActionIndexesCall(groupId, swappedItems[0], swappedItems[1]);
     };
 
     const closeEditWindow = () => {
@@ -104,7 +106,7 @@ const ActionList = (props) => {
     }
 
     const moveActionUp = async (id) => {
-        let index = allActions.findIndex(action => action.id === id);
+        let index = actionsInGroup.findIndex(action => action.id === id);
 
         // Couldn't find action index
         if (index === null) {
@@ -116,13 +118,13 @@ const ActionList = (props) => {
             return null;
         }
 
-        await props.swapActionIndexesCall(index, index - 1);
+        await props.swapActionIndexesCall(groupId, index, index - 1);
 
         return index - 1;
     }
 
     const moveActionDown = async (id) => {
-        let index = allActions.findIndex((action) => action.id === id);
+        let index = actionsInGroup.findIndex((action) => action.id === id);
 
         // Couldn't find action index
         if (index === null) {
@@ -130,11 +132,11 @@ const ActionList = (props) => {
         }
 
         // If action would go out of bounds
-        if (index + 1 >= allActions.length) {
+        if (index + 1 >= actionsInGroup.length) {
             return null;
         }
 
-        await props.swapActionIndexesCall(index, index + 1);
+        await props.swapActionIndexesCall(groupId, index, index + 1);
 
         return index + 1;
     }
@@ -189,7 +191,7 @@ const ActionList = (props) => {
 
             let startedCounting = false;
             let multiselectedAmount = 0;
-            for (let action of allActions) {
+            for (let action of actionsInGroup) {
                 const isEither = action.id === lastSelectedItemId || action.id === id;
                 if (!isEither && !startedCounting) {
                     continue;
@@ -230,14 +232,14 @@ const ActionList = (props) => {
     }
 
     const deleteAllSelectedActions = useCallback(() => {
-        props.removeActionsCall(selectedActionIds);
+        props.removeActionsCall(groupId, selectedActionIds);
         contextMenuRef.current.setOpen(false);
-    }, [props, selectedActionIds]);
+    }, [props, groupId, selectedActionIds]);
 
     const moveAllSelectedActionsUp = async () => {
         let selectedIdsSorted = [];
 
-        for (let action of allActions) {
+        for (let action of actionsInGroup) {
             let id = action.id;
 
             if (selectedActionIds.includes(id)) {
@@ -247,7 +249,7 @@ const ActionList = (props) => {
 
         let topIndex = -1;
         for (let id of selectedIdsSorted) {
-            let index = allActions.findIndex((action) => action.id === id);
+            let index = actionsInGroup.findIndex((action) => action.id === id);
 
             // If the next index would overlap with the limit, let's skip this one
             if (index - 1 === topIndex) {
@@ -267,7 +269,7 @@ const ActionList = (props) => {
     const moveAllSelectedActionsDown = async () => {
         let selectedIdsSorted = [];
 
-        for (let action of allActions) {
+        for (let action of actionsInGroup) {
             let id = action.id;
 
             if (selectedActionIds.includes(id)) {
@@ -279,7 +281,7 @@ const ActionList = (props) => {
 
         let bottomIndex = -1;
         for (let id of selectedIdsSorted) {
-            let index = allActions.findIndex((action) => action.id === id);
+            let index = actionsInGroup.findIndex((action) => action.id === id);
 
             // If the next index would overlap with the limit, let's skip this one
             if (index + 1 === bottomIndex) {
@@ -296,23 +298,23 @@ const ActionList = (props) => {
         }
     }
 
-    const selectAllActions = useCallback(() => {
-        let newSelectedActionIds = allActions.map(action => action.id);
+    const selectactionsInGroup = useCallback(() => {
+        let newSelectedActionIds = actionsInGroup.map(action => action.id);
         setSelectedActionIds(newSelectedActionIds);
         contextMenuRef.current.setOpen(false);
-    }, [allActions]);
+    }, [actionsInGroup]);
 
-    const unselectAllActions = () => {
+    const unselectactionsInGroup = () => {
         setSelectedActionIds([]);
         contextMenuRef.current.setOpen(false);
         setLastSelectedItemId(-1);
     }
 
     const copyAll = useCallback(() => {
-        let actionsToCopy = allActions.filter(action => selectedActionIds.includes(action.id));
+        let actionsToCopy = actionsInGroup.filter(action => selectedActionIds.includes(action.id));
         clipboardUtil.copyActions(actionsToCopy);
         contextMenuRef.current.setOpen(false);
-    }, [contextMenuRef, allActions, selectedActionIds]);
+    }, [contextMenuRef, actionsInGroup, selectedActionIds]);
 
     const paste = useCallback((index = -1) => {
         let copiedActions = clipboardUtil.getCopiedActions();
@@ -320,8 +322,8 @@ const ActionList = (props) => {
             return;
         }
 
-        props.addActionsCall(copiedActions, index);
-    }, [props]);
+        props.addActionsCall(groupId, copiedActions, index);
+    }, [props, groupId]);
 
     const cutAll = useCallback(() => {
         copyAll();
@@ -348,12 +350,12 @@ const ActionList = (props) => {
         {
             "name": "select-all",
             "text": "Select all",
-            "onClick": selectAllActions
+            "onClick": selectactionsInGroup
         },
         {
             "name": "unselect-all",
             "text": "Unselect all",
-            "onClick": unselectAllActions,
+            "onClick": unselectactionsInGroup,
             "disabled": selectedActionIds.length === 0,
         },
         {
@@ -396,7 +398,7 @@ const ActionList = (props) => {
     ]
 
     const onClickedOutsideOfActions = () => {
-        unselectAllActions();
+        unselectactionsInGroup();
     }
 
     useClickOutside(actionGroupRef, onClickedOutsideOfActions, () => { return contextMenuOpenCount === 0 });
@@ -407,7 +409,8 @@ const ActionList = (props) => {
 
     const handleAnyContextMenuOpenChange = (isOpen) => {
         const dir = isOpen === true ? 1 : -1;
-        setContextMenuOpenCount(contextMenuOpenCount + 1 * dir);
+        const newOpenCount = Math.max(contextMenuOpenCount + 1 * dir, 0)
+        setContextMenuOpenCount(newOpenCount);
     }
 
     const onKeyPress = useCallback((event) => {
@@ -418,6 +421,15 @@ const ActionList = (props) => {
         const c = 67;
         const v = 86;
         const x = 88;
+        const del = 46
+
+        switch (keyCode) {
+            case del:
+                deleteAllSelectedActions();
+                break;
+            default:
+                break;
+        }
 
         if (!isCTRLPressed) {
             return;
@@ -430,7 +442,7 @@ const ActionList = (props) => {
             case v:
                 let pasteIndex = -1;
                 if (lastSelectedItemId !== -1) {
-                    pasteIndex = allActions.findIndex(action => action.id === lastSelectedItemId);
+                    pasteIndex = actionsInGroup.findIndex(action => action.id === lastSelectedItemId);
                     pasteIndex += Math.max(multiSelectedItemAmount - 1, 0);
                     pasteIndex++;
                 }
@@ -441,13 +453,13 @@ const ActionList = (props) => {
                 cutAll();
                 break;
             case a:
-                selectAllActions();
+                selectactionsInGroup();
                 break;
             default:
                 break;
         }
 
-    }, [copyAll, paste, cutAll, selectAllActions, allActions, lastSelectedItemId, multiSelectedItemAmount]);
+    }, [copyAll, paste, cutAll, selectactionsInGroup, deleteAllSelectedActions, actionsInGroup, lastSelectedItemId, multiSelectedItemAmount]);
 
     useEffect(() => {
         document.addEventListener("keydown", onKeyPress);
@@ -459,9 +471,9 @@ const ActionList = (props) => {
     return (
         <div className="action-table">
             <PopupWindow ref={popupWindow} onManualClose={onPopupClose} >
-                <ActionEditForm ref={actionEditForm} onCancel={closeEditWindow} actionType={openedAction.type} actionData={openedAction}></ActionEditForm>
+                <ActionEditForm groupId={groupId} ref={actionEditForm} onCancel={closeEditWindow} actionType={openedAction.type} actionData={openedAction}></ActionEditForm>
             </PopupWindow>
-            <ContextMenu onOpenCHange={handleAnyContextMenuOpenChange} ref={contextMenuRef} items={contextMenuItems} />
+            <ContextMenu onOpenChange={handleAnyContextMenuOpenChange} ref={contextMenuRef} items={contextMenuItems} />
             <div className="headers row">
                 <div className="header"></div>
                 <div className="header">Name</div>
@@ -472,9 +484,9 @@ const ActionList = (props) => {
                 <div className="header center">Actions</div>
             </div>
             <div className="actions" onMouseUp={onRightClick}>
-                <Reorder.Group ref={actionGroupRef} values={allActions} onReorder={onReorder}>
+                <Reorder.Group ref={actionGroupRef} values={actionsInGroup} onReorder={onReorder}>
                     {activeActions.map((action, index) =>
-                        <ActionItem onContextMenuOpenChange={handleAnyContextMenuOpenChange} index={(actionsPerPage * currentPage) + index} onOpenEditWindow={openEditWindow} onPaste={() => onPaste((actionsPerPage * currentPage) + index + 1)} ref={(el) => actionRefs.current[action.id] = el} isSelected={selectedActionIds.includes(action.id)} moveDown={() => moveActionDown(action.id)} moveUp={() => moveActionUp(action.id)} onSelectionClick={(e, isSelected) => onActionItemSelectionClick(e, action.id, isSelected)} performing={(actionsPerPage * currentPage + index) === currentActionIndex} data={action} key={`action-item-${action.id}`} />
+                        <ActionItem groupId={groupId} onContextMenuOpenChange={handleAnyContextMenuOpenChange} index={(actionsPerPage * currentPage) + index} onOpenEditWindow={openEditWindow} onPaste={() => onPaste((actionsPerPage * currentPage) + index + 1)} ref={(el) => actionRefs.current[action.id] = el} isSelected={selectedActionIds.includes(action.id)} moveDown={() => moveActionDown(action.id)} moveUp={() => moveActionUp(action.id)} onSelectionClick={(e, isSelected) => onActionItemSelectionClick(e, action.id, isSelected)} performing={(actionsPerPage * currentPage + index) === currentActionIndex} data={action} key={`action-item-${action.id}`} />
                     )}
                 </Reorder.Group>
                 <div className="centered-loading-icon">
@@ -500,7 +512,6 @@ const ActionList = (props) => {
 
 const mapStateToProps = (state) => {
     return {
-        allActions: state.actions.allActions,
         isLoadingActions: state.actionScript.isLoadingActions,
         currentScript: state.actionScript.currentScript,
         allSettings: state.settings.allSettings,
@@ -509,7 +520,6 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = {
     swapActionIndexesCall,
-    removeActionCall,
     removeActionsCall,
     addActionsCall,
     loadSettingsCall

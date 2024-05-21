@@ -9,11 +9,15 @@ const ContextMenu = forwardRef((props, ref) => {
     const [positionX, setPositionX] = useState(0)
     const [positionY, setPositionY] = useState(0)
 
-    const setOpen = (isOpen) => {
-        setIsOpen(isOpen);
+    const setOpen = (newIsOpen) => {
+        if (newIsOpen === isOpen) {
+            return;
+        }
+
+        setIsOpen(newIsOpen);
 
         if (props.onOpenChange) {
-            props.onOpenChange(isOpen);
+            props.onOpenChange(newIsOpen);
         }
     }
 

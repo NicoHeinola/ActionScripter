@@ -3,13 +3,15 @@ import MouseClickActionForm from "./forms/MouseClickActionForm";
 import TextInput from "components/inputs/TextInput";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from "react";
 import BasicButton from "components/inputs/BasicButton";
-import { updateActionCall } from "store/reducers/actionsReducer";
+import { updateActionCall } from "store/reducers/actionScriptReducer";
 import { connect } from 'react-redux';
 import GroupBox from "components/boxes/GroupBox";
 
 const ActionEditForm = forwardRef((props, ref) => {
 
     const [actionData, setActionData] = useState(props.actionData);
+
+    const { groupId } = props;
 
     useEffect(() => {
         setActionData({ ...props.actionData });
@@ -28,11 +30,10 @@ const ActionEditForm = forwardRef((props, ref) => {
 
     const onCancelProp = props.onCancel;
     const updateActionCall = props.updateActionCall;
-    const actionDataFromProps = props.actionData;
 
     const resetActionData = useCallback(() => {
-        setActionData(actionDataFromProps);
-    }, [setActionData, actionDataFromProps]);
+        setActionData(actionData);
+    }, [setActionData, actionData]);
 
     const onCancel = useCallback(() => {
         resetActionData();
@@ -45,9 +46,9 @@ const ActionEditForm = forwardRef((props, ref) => {
     }, [onCancelProp, resetActionData]);
 
     const save = useCallback(() => {
-        updateActionCall(actionData);
+        updateActionCall(groupId, actionData);
         onCancelProp();
-    }, [onCancelProp, updateActionCall, actionData]);
+    }, [onCancelProp, updateActionCall, actionData, groupId]);
 
     useImperativeHandle(ref, () => ({
         resetActionData
@@ -100,9 +101,7 @@ const ActionEditForm = forwardRef((props, ref) => {
 });
 
 const mapStateToProps = (state) => {
-    return {
-        allActions: state.actions.allActions,
-    };
+    return {};
 };
 
 const mapDispatchToProps = {

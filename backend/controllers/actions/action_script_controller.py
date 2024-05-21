@@ -5,9 +5,11 @@ from typing import List
 from flask import jsonify, make_response, request
 from controllers.base_controller import BaseController
 from models.recent_script_model import RecentScript
+from scripter.action_group import ActionGroup
 from scripter.action_script import ActionScript
 from scripter.actions.action import Action
 from database.database import db
+from scripter.actions.action_helper import ActionHelper
 from utils.sleep import socket_supported_sleep
 
 
@@ -20,14 +22,7 @@ class ActionScriptController(BaseController):
             if ActionScript.current_script is None:
                 create_new_action_script()
 
-            return make_response(ActionScript.current_script.serialize(False), 200)
-
-        @self._app.route(f"{base_route}/serialize", methods=["GET"])
-        def get_serialized_current_script():
-            if ActionScript.current_script is None:
-                return make_response({"error": "There is no script to serialize!"}, 500)
-
-            return make_response(ActionScript.current_script.serialize(True), 200)
+            return make_response(ActionScript.current_script.serialize(), 200)
 
         @self._app.route(f"{base_route}", methods=["POST"])
         def create_new_action_script():
@@ -35,12 +30,14 @@ class ActionScriptController(BaseController):
                 # We want to stop the script if it is playing
                 ActionScript.current_script.stop()
 
-            new_script: ActionScript = ActionScript()
-            new_script.on("performed-action", lambda current_action_index: self._socket.emit("performed-action", current_action_index))
-            new_script.on("finished-actions", lambda: self._socket.emit("finished-actions"))
-
             # Reset the current id for new script
             Action.reset_current_id()
+            ActionGroup.reset_global_id_count()
+
+            new_script: ActionScript = ActionScript()
+
+            new_script.on("performed-action", lambda current_action_index: self._socket.emit("performed-action", current_action_index))
+            new_script.on("finished-actions", lambda: self._socket.emit("finished-actions"))
 
             return make_response("", 200)
 
@@ -206,7 +203,7 @@ class ActionScriptController(BaseController):
                 file_data_json = json.load(file)
                 action_script.deserialize(file_data_json)
 
-            return make_response(action_script.serialize(True), 200)
+            return make_response(action_script.serialize(), 200)
 
         @self._app.route(f"{base_route}/undo", methods=["POST"])
         def undo():
@@ -225,3 +222,151 @@ class ActionScriptController(BaseController):
             changes: List[dict] = ActionScript.current_script.redo_history()
 
             return make_response(changes, 200)
+
+        @self._app.route(f"{base_route}/create-new-action", methods=["POST"])
+        def create_new_action():
+            data: dict = request.get_json()
+
+            if not "action-type" in data:
+                return make_response({"error": "action-type param missing!"}, 400)
+
+            if not "group-id" in data:
+                return make_response({"error": "'group-id' param missing!"}, 400)
+
+            group_id: int = int(data["group-id"])
+            action_type: str = data["action-type"]
+
+            if ActionScript.current_script is None:
+                return make_response({"error": "No current script found!"}, 500)
+
+            added_action: Action = ActionHelper.create_action_with_type(action_type)
+
+            if added_action is None:
+                return make_response({"error": f"Invalid action type: {action_type}"}, 400)
+
+            ActionScript.current_script.add_action(group_id, added_action)
+
+            return make_response(added_action.serialize(), 200)
+
+        @self._app.route(f"{base_route}/add-new-actions", methods=["POST"])
+        def add_new_actions():
+            if ActionScript.current_script is None:
+                return make_response({"error": "No current script found!"}, 500)
+
+            data: dict = request.get_json()
+
+            if not "actions" in data:
+                return make_response({"error": "'actions' param missing!"}, 400)
+
+            if not "group-id" in data:
+                return make_response({"error": "'group-id' param missing!"}, 400)
+
+            group_id: int = int(data["group-id"])
+
+            index: int = -1
+            if "index" in data:
+                index = int(data["index"])
+
+            action_datas: dict = data["actions"]
+
+            new_actions = []
+
+            # Add the actions
+            for action_data in action_datas:
+                action_data.pop("id")
+
+                new_action: Action = ActionHelper.create_action_with_type(action_data["type"])
+                new_action.deserialize(action_data)
+                new_actions.append(new_action.serialize())
+
+                if index != -1:
+                    ActionScript.current_script.add_action_at(group_id, new_action, index)
+                else:
+                    ActionScript.current_script.add_action(group_id, new_action)
+
+            return make_response(new_actions, 200)
+
+        @self._app.route(f"{base_route}/remove-actions", methods=["POST"])
+        def delete_actions():
+            if ActionScript.current_script is None:
+                return make_response({"error": "No current script found!"}, 500)
+
+            data: dict = request.get_json()
+
+            if "actions" not in data:
+                return make_response({"error": "Missing actions!"}, 404)
+
+            if "group-id" not in data:
+                return make_response({"error": "Missing group id!"}, 404)
+
+            group_id: int = int(data["group-id"])
+            actions: list = data["actions"]
+
+            for action_id in actions:
+                ActionScript.current_script.remove_action(group_id, int(action_id))
+
+            return make_response("", 200)
+
+        @self._app.route(f"{base_route}/overwrite-actions", methods=["POST"])
+        def set_actions():
+            if ActionScript.current_script is None:
+                return make_response({"error": "No current script found!"}, 500)
+
+            data: dict = request.get_json()
+
+            if "actions" not in data:
+                return make_response({"error": "No action list provided!"}, 400)
+
+            if "group-id" not in data:
+                return make_response({"error": "Missing group id!"}, 404)
+
+            group_id: int = int(data["group-id"])
+            actions: list = data["actions"]
+
+            ActionScript.current_script.set_actions_with_dict(group_id, actions)
+
+            return make_response("", 200)
+
+        @self._app.route(f"{base_route}/swap-two-actions", methods=["POST"])
+        def swap_actions():
+            if ActionScript.current_script is None:
+                return make_response({"error": "No current script found!"}, 500)
+
+            data: dict = request.get_json()
+
+            if "index-a" not in data:
+                return make_response({"error": "Index-a is missing!"}, 400)
+
+            if "index-b" not in data:
+                return make_response({"error": "Index-b is missing!"}, 400)
+
+            if "group-id" not in data:
+                return make_response({"error": "Missing group id!"}, 404)
+
+            group_id: int = int(data["group-id"])
+            index_a: int = data["index-a"]
+            index_b: int = data["index-b"]
+
+            ActionScript.current_script.swap_actions(group_id, index_a, index_b)
+
+            return make_response("", 200)
+
+        @self._app.route(f"{base_route}/update-action", methods=["PUT"])
+        def update_action():
+            if ActionScript.current_script is None:
+                return make_response({"error": "No current script found!"}, 500)
+
+            data = request.get_json()
+
+            if "action" not in data:
+                return make_response({"error": "No action list provided!"}, 400)
+
+            if "group-id" not in data:
+                return make_response({"error": "Missing group id!"}, 404)
+
+            group_id: int = int(data["group-id"])
+            action: dict = data["action"]
+
+            ActionScript.current_script.update_actions(group_id, [action])
+
+            return make_response("", 200)

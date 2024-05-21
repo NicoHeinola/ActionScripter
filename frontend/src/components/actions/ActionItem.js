@@ -1,6 +1,6 @@
 import "styles/components/actions/actionitem.scss";
 
-import { createActionCall, removeActionCall, swapActionIndexesCall } from "store/reducers/actionsReducer";
+import { createActionCall, removeActionsCall, swapActionIndexesCall } from "store/reducers/actionScriptReducer";
 import { connect } from 'react-redux';
 import { Reorder, useDragControls } from "framer-motion";
 import BasicButton from "components/inputs/BasicButton";
@@ -23,8 +23,11 @@ const ActionItem = forwardRef((props, ref) => {
     const isSelected = props.isSelected === true ? true : false;
     const index = props.index;
 
+    const groupId = props.groupId;
+    const actionsInGroup = props.currentScript["action-groups"][`${groupId}`]["actions"];
+
     const removeAction = () => {
-        props.removeActionCall(action.id);
+        props.removeActionsCall(groupId, [action.id]);
     }
 
     const openEditWindow = () => {
@@ -155,7 +158,7 @@ const ActionItem = forwardRef((props, ref) => {
             "name": "move-down",
             "text": "Move down",
             "onClick": moveDown,
-            "disabled": index === props.allActions.length - 1,
+            "disabled": index === actionsInGroup.length - 1,
         },
     ]
 
@@ -213,14 +216,13 @@ const ActionItem = forwardRef((props, ref) => {
 
 const mapStateToProps = (state) => {
     return {
-        allActions: state.actions.allActions,
         currentScript: state.actionScript.currentScript,
     };
 };
 
 const mapDispatchToProps = {
     createActionCall,
-    removeActionCall,
+    removeActionsCall,
     swapActionIndexesCall
 };
 

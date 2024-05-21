@@ -4,7 +4,6 @@ import actionScriptAPI from "apis/actionScriptAPI";
 import { useNavigate } from 'react-router-dom';
 
 import { connect } from 'react-redux';
-import { setActionsCall } from "store/reducers/actionsReducer";
 import { getRecentScriptsCall, getScriptCall, loadActionScriptCall, newRecentScriptCall, setScriptIsModifiedCall, updateScriptCall } from "store/reducers/actionScriptReducer";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
@@ -15,7 +14,6 @@ const NoFileSelectedView = (props) => {
 
     const newEmptyActionScript = () => {
         actionScriptAPI.newActionScript();
-        props.setActionsCall([]);
         props.getScriptCall();
         props.setScriptIsModifiedCall(true);
         navigate('/script-editor');
@@ -47,11 +45,6 @@ const NoFileSelectedView = (props) => {
 
                 // Create a new action script according to the opened file
                 actionScriptAPI.newActionScript();
-
-                let actions = contents["actions"];
-                props.setActionsCall(actions);
-                delete contents["actions"];
-
                 props.updateScriptCall(contents);
                 props.getScriptCall();
                 navigate('/script-editor');
@@ -107,7 +100,6 @@ const mapStateToProps = (state) => {
 };
 
 const mapDispatchToProps = {
-    setActionsCall,
     getScriptCall,
     updateScriptCall,
     getRecentScriptsCall,

@@ -1,6 +1,7 @@
 import json
 from typing import Callable, Dict, List
 
+from scripter.action_group import ActionGroup
 from scripter.actions.action import Action
 from scripter.actions.mouse_click_action import MouseClickAction
 from scripter.event_emitter import EventEmitter
@@ -10,9 +11,9 @@ from enum import Enum
 
 class HistoryRecordEntry:
     class ModificationType(Enum):
-        DELETE = "delete"
-        MODIFY = "modify"
-        ADD = "add"
+        DELETE_ACTION = "delete-action"
+        MODIFY_ACTION = "modify-action"
+        ADD_ACTION = "add-action"
 
     def __init__(self, type: ModificationType, index: int, action_before: Action, action_after: Action) -> None:
         self.type = type
@@ -56,11 +57,11 @@ class HistoryRecord:
 
         for entry in self._modifications:
             match entry.type:
-                case HistoryRecordEntry.ModificationType.ADD:
+                case HistoryRecordEntry.ModificationType.ADD_ACTION:
                     actions.pop(entry.index)
-                case HistoryRecordEntry.ModificationType.MODIFY:
+                case HistoryRecordEntry.ModificationType.MODIFY_ACTION:
                     actions[entry.index] = entry.action_before
-                case HistoryRecordEntry.ModificationType.DELETE:
+                case HistoryRecordEntry.ModificationType.DELETE_ACTION:
                     actions.insert(entry.index, entry.action_before)
 
             changes.append(entry.serialize())
@@ -84,11 +85,11 @@ class HistoryRecord:
         for i in range(len(self._modifications)):
             entry: HistoryRecordEntry = self._modifications[len(self._modifications) - 1 - i]
             match entry.type:
-                case HistoryRecordEntry.ModificationType.ADD:
+                case HistoryRecordEntry.ModificationType.ADD_ACTION:
                     actions.insert(entry.index, entry.action_after)
-                case HistoryRecordEntry.ModificationType.MODIFY:
+                case HistoryRecordEntry.ModificationType.MODIFY_ACTION:
                     actions[entry.index] = entry.action_after
-                case HistoryRecordEntry.ModificationType.DELETE:
+                case HistoryRecordEntry.ModificationType.DELETE_ACTION:
                     actions.pop(entry.index)
 
             changes.append(entry.serialize())
@@ -99,17 +100,16 @@ class HistoryRecord:
 class ActionScript(EventEmitter):
     current_script = None
 
-    all_actions: Dict[str, Action] = {
-        MouseClickAction.action_type: MouseClickAction
-    }
-
     def __init__(self) -> None:
         super().__init__()
 
+        # Let's reset the global group id since there can only be one action script active at a time anyways
         ActionScript.current_script = self
 
-        # Contains all the actions in order.
-        self._actions: List[Action] = []
+        # Contains all the action groups
+        # 0 = the main action group
+        self._action_groups: Dict[int, ActionGroup] = {}
+        self.add_action_group(ActionGroup())
 
         # How many times the script plays, x-times or infinite
         self._loop_type: str = "x-times"
@@ -123,9 +123,6 @@ class ActionScript(EventEmitter):
         # Is this script running, paused or stopped
         self._play_state: str = "stopped"
 
-        # What action is currently playing
-        self._action_index: int = 0
-
         # Where this script was last saved. Used for automatically saving without having to manually pick the location
         self._latest_save_path: str = ""
 
@@ -133,183 +130,216 @@ class ActionScript(EventEmitter):
         self._action_history: List[HistoryRecord] = []
         self._history_index: int = -1
 
+    def group_exists(self, group_id: int) -> bool:
+        return self._action_groups.get(group_id) is not None
+
+    def get_action_group(self, group_id: int) -> ActionGroup:
+        if not self.group_exists(group_id):
+            return None
+
+        return self._action_groups[group_id]
+
+    def get_main_action_group(self) -> ActionGroup:
+        """
+        :return: Returns the action group that contains the main script.
+        """
+        return self.get_action_group(0)
+
     def is_playing(self) -> bool:
+        """
+        Checks if the playback of this script is running.
+
+        :return: If the script is running.
+        """
         return self._play_state == "playing"
 
     def is_stopped(self) -> bool:
+        """
+        Checks if the playback of this script is stopped.
+
+        :return: Is the script stopped.
+        """
         return self._play_state == "stopped"
 
     def is_paused(self) -> bool:
+        """
+        Checks if playback of this script is paused.
+
+        :return: Is the script running.
+        """
         return self._play_state == "paused"
 
-    def get_actions(self) -> List[Action]:
-        return self._actions
-
-    def play_handler(self, sleep_handler: Callable[float, Callable]) -> None:
+    def get_action_groups(self) -> List[ActionGroup]:
         """
-        Performs all actions.
+        :return: The list of all action group this script has.
         """
-
-        while self._current_loop_count <= self._loop_count or self._loop_type == "infinite":
-
-            self.emit("performed-action", self._action_index)
-
-            # Loop through each action that user has created (or start at where we left before pausing)
-            for action in self._actions[self._action_index:]:
-
-                # Perform the action as many times as wanted
-                for i in range(action._loop_count):
-                    if action._start_delay_ms > 0:
-                        # Wait for the action to start
-                        sleep_handler(action._start_delay_ms, lambda: not self.is_playing())
-
-                    if not self.is_playing():
-                        return
-
-                    # Perform the actual action
-                    action.do_action()
-
-                    if action._end_delay_ms > 0:
-                        # Wait for the action to end
-                        sleep_handler(action._end_delay_ms, lambda: not self.is_playing())
-
-                if not self.is_playing():
-                    return
-
-                # Inform that the next action will be played soon
-                self._action_index += 1
-
-                if (self._action_index < len(self._actions)):
-                    self.emit("performed-action", self._action_index)
-
-            self._action_index = 0
-            self._current_loop_count += 1
-
-            if not self.is_playing():
-                return
-
-        self.stop()
-        self.emit("finished-actions")
+        return self._action_groups
 
     def start(self, sleep_handler: Callable[float, Callable]) -> None:
+        """
+        Starts playing actions.
+
+        :param sleep_handler: a function that performs a sleep operation.
+        """
         if self.is_playing():
             return
 
         self._play_state = "playing"
-        self.play_handler(sleep_handler)
+
+        # Loop the actions until stopped or loop limit reached
+        while self._current_loop_count <= self._loop_count or self._loop_type == "infinite":
+            # Start running the main script
+            main_group: ActionGroup = self.get_main_action_group()
+            main_group.play_handler(sleep_handler, self.is_playing)
+
+            if not self.is_playing():
+                return
+
+            self._current_loop_count += 1
+
+        self.stop()
+        self.emit("finished-actions")
 
     def pause(self) -> None:
+        """
+        Temporarely stop running any actions. Can be resumed.
+        """
+
         if not self.is_playing():
             return
 
         self._play_state = "paused"
 
     def stop(self) -> None:
+        """
+        Completely stop running any actions.
+        """
+
         if self.is_stopped():
             return
 
         self._play_state = "stopped"
-        self._action_index = 0
         self._current_loop_count = 0
 
-    def add_action(self, action: Action) -> None:
+        for group in self._action_groups.values():
+            group.reset_action_index()
+
+    def add_action_group(self, group: ActionGroup) -> None:
+        group.on("performed-action", lambda action_index: self.emit("performed-action", action_index))
+        self._action_groups[group.get_id()] = group
+
+    def add_action(self, group_id: int, action: Action) -> None:
         """
-        Adds an action to this class' actions.
+        Adds an action to a group.
 
         :param action: Action to add.
         """
 
-        action.on("deserialized", lambda _1, _2: self.create_new_history_entry())
-        action.on("deserialized", lambda before, after: self.save_history_change(HistoryRecordEntry.ModificationType.MODIFY, self._actions.index(after), before, after))
+        group: ActionGroup = self.get_action_group(group_id)
 
-        self._actions.append(action)
-        self.create_new_history_entry()
-        self.save_history_change(HistoryRecordEntry.ModificationType.ADD, len(self._actions) - 1, None, action)
+        if group is None:
+            return
 
-    def add_action_at(self, action: Action, index: int) -> None:
+        group.add_action(action)
+
+        # DOESNT WORK BECAUSE OF DESERIALIZE
+        # action.on("deserialized", lambda _1, _2: self.create_new_history_entry())
+        # action.on("deserialized", lambda before, after: self.save_history_change(HistoryRecordEntry.ModificationType.MODIFY_ACTION, self._actions.index(after), before, after))
+
+        # self.create_new_history_entry()
+        # self.save_history_change(HistoryRecordEntry.ModificationType.ADD_ACTION, len(self._actions) - 1, None, action)
+
+    def add_action_at(self, group_id: int, action: Action, index: int) -> None:
         """
-        Adds an action to this class' action list at an index
+        Inserts an action into a certain index of an action group.
 
-        :param action: Action to add
-        :param index: Index to add the action to
-        """
-
-        action.on("deserialized", lambda _1, _2: self.create_new_history_entry())
-        action.on("deserialized", lambda before, after: self.save_history_change(HistoryRecordEntry.ModificationType.MODIFY, self._actions.index(action), before, after))
-
-        self._actions.insert(index, action)
-        self.create_new_history_entry()
-        self.save_history_change(HistoryRecordEntry.ModificationType.ADD, index, None, action)
-
-    def create_action_with_type(self, action_type: str) -> Action:
-        """
-        Creates a new action.
-
-        :param action_type: What type of action to add.
-        :return: Created action.
+        :param group_id: Id of the group to add the action to.
+        :param action: Action to add.
+        :param index: Index to add the action to.
         """
 
-        if action_type not in ActionScript.all_actions:
-            return None
+        group: ActionGroup = self.get_action_group(group_id)
 
-        action_class: Action = ActionScript.all_actions[action_type]
-        new_action: Action = action_class()
+        if group is None:
+            return
 
-        return new_action
+        group.add_action_at(action, index)
 
-    def remove_action(self, action_id: int) -> int:
+        # DOEST WORK
+        # action.on("deserialized", lambda _1, _2: self.create_new_history_entry())
+        # action.on("deserialized", lambda before, after: self.save_history_change(HistoryRecordEntry.ModificationType.MODIFY_ACTION, self._actions.index(action), before, after))
+
+        # self.create_new_history_entry()
+        # self.save_history_change(HistoryRecordEntry.ModificationType.ADD_ACTION, index, None, action)
+
+    def remove_action(self, group_id: int, action_id: int) -> int:
         """
-        Removes an action from this class' action list.
+        Removes an action from the given group.
 
+        :param group_id: Id of the group to remove the action from.
         :param action_id: Id of the action to remove.
         :return: Index of removed action
         """
 
-        action_index: int = None
-        for index, action in enumerate(self._actions):
-            if action._id != action_id:
-                continue
+        group: ActionGroup = self.get_action_group(group_id)
 
-            action_index = index
-
-        if action_index is None:
+        if group is None:
             return
 
-        removed_action: Action = self._actions.pop(action_index)
+        action_index, removed_action = group.remove_action(action_id)
+
+        if action_index is None or removed_action is None:
+            return
+
         self.create_new_history_entry()
-        self.save_history_change(HistoryRecordEntry.ModificationType.DELETE, action_index, removed_action, None)
+        self.save_history_change(HistoryRecordEntry.ModificationType.DELETE_ACTION, action_index, removed_action, None)
         return action_index
 
-    def set_actions_with_dict(self, actions: List[dict]) -> None:
+    def update_actions(self, group_id: int, actions: List[dict]) -> None:
         """
-        Sets this class' actions to match the list provided. Deserializes the actions using the list's data.
+        Updates actions in a group.
 
+        :param group_id: Group to update.
+        :param actions: Actions to update.
+        """
+
+        group: ActionGroup = self.get_action_group(group_id)
+
+        if group is None:
+            return
+
+        group.update_actions(actions)
+
+    def set_actions_with_dict(self, group_id: int, actions: List[dict]) -> None:
+        """
+        Sets the actions of given group.
+
+        :param group_id: Group to set the actions to.
         :param actions: List of actions in a serializes format.
         """
 
-        self._actions = []
+        group: ActionGroup = self.get_action_group(group_id)
 
-        for action in actions:
-            action_type: str = action["type"]
+        if group is None:
+            return
 
-            if action_type not in ActionScript.all_actions:
-                continue
-
-            action_class: Action = ActionScript.all_actions[action_type]
-            new_action: Action = action_class()
-            new_action.deserialize(action)
-
-            self.add_action(new_action)
+        group.set_actions_with_dict(actions)
 
         self.clear_history()
 
-    def swap_actions(self, index_a: int, index_b: int) -> None:
+    def swap_actions(self, group_id: int, index_a: int, index_b: int) -> None:
         """
-        Swaps 2 actions positions inside this class' action list
+        Swaps 2 actions in a group.
 
+        :param group_id: Group to swap the actions in.
         :param index_a: Some index.
         :param index_b: Some index.
         """
+
+        group: ActionGroup = self.get_action_group(group_id)
+
+        if group is None:
+            return
 
         # We can't swap 2 things that are the same
         if index_a == index_b:
@@ -317,13 +347,12 @@ class ActionScript(EventEmitter):
 
         self.create_new_history_entry()
 
-        action_at_index_a: Action = self._actions[index_a]
-        action_at_index_b: Action = self._actions[index_b]
-        self.save_history_change(HistoryRecordEntry.ModificationType.MODIFY, index_a, action_at_index_a, action_at_index_b)
-        self.save_history_change(HistoryRecordEntry.ModificationType.MODIFY, index_b, action_at_index_b, action_at_index_a)
+        action_at_index_a: Action = group.get_action_at(index_a)
+        action_at_index_b: Action = group.get_action_at(index_b)
+        self.save_history_change(HistoryRecordEntry.ModificationType.MODIFY_ACTION, index_a, action_at_index_a, action_at_index_b)
+        self.save_history_change(HistoryRecordEntry.ModificationType.MODIFY_ACTION, index_b, action_at_index_b, action_at_index_a)
 
-        # Swap the actions
-        self._actions[index_a], self._actions[index_b] = self._actions[index_b], self._actions[index_a]
+        group.swap_actions(index_a, index_b)
 
     def set_loop_type(self, loop_type: str) -> None:
         self._loop_type = loop_type
@@ -331,7 +360,7 @@ class ActionScript(EventEmitter):
     def set_loop_count(self, loop_count: int) -> None:
         self._loop_count = loop_count
 
-    def serialize(self, include_actions: bool = False) -> dict:
+    def serialize(self) -> dict:
         data: dict = {}
 
         data["loop-type"] = self._loop_type
@@ -339,14 +368,12 @@ class ActionScript(EventEmitter):
         data["current-loop-count"] = self._current_loop_count
 
         data["play-state"] = self._play_state
-        data["action-index"] = self._action_index
 
-        serialized_actions: List[Action] = []
-        if include_actions:
-            for action in self._actions:
-                action_data: dict = action.serialize()
-                serialized_actions.append(action_data)
-        data["actions"] = serialized_actions
+        serialized_action_groups: Dict[int, dict] = {}
+        for action_group in self._action_groups.values():
+            action_group_data: dict = action_group.serialize()
+            serialized_action_groups[action_group.get_id()] = action_group_data
+        data["action-groups"] = serialized_action_groups
 
         return data
 
@@ -357,12 +384,12 @@ class ActionScript(EventEmitter):
         if "loop-count" in data:
             self._loop_count = int(data["loop-count"])
 
-        if "actions" in data:
-            self._actions.clear()
-            for action_data in data["actions"]:
-                action: Action = self.create_action_with_type(action_data["type"])
-                action.deserialize(action_data)
-                self.add_action(action)
+        if "action-groups" in data:
+            self._action_groups.clear()
+            for action_group_data in data["action-groups"].values():
+                action_group: ActionGroup = ActionGroup()
+                action_group.deserialize(action_group_data)
+                self.add_action_group(action_group)
 
     def save_as(self) -> None:
         file_path: str = filedialog.asksaveasfilename(defaultextension=".acsc", filetypes=[("ActionScript Files", "*.acsc"), ("All Files", "*.*")])
@@ -378,13 +405,15 @@ class ActionScript(EventEmitter):
 
     def save(self) -> None:
         with open(self._latest_save_path, 'w') as file:
-            file.write(json.dumps(self.serialize(True)))
+            file.write(json.dumps(self.serialize()))
 
     def clear_history(self) -> None:
         self._history_index = -1
         self._action_history = []
 
     def create_new_history_entry(self) -> None:
+        return
+
         # If we are not at the latest history entry, overwrite future history changes by this one
         if self._history_index != len(self._action_history) - 1:
             self._action_history = self._action_history[:self._history_index + 1]
@@ -394,6 +423,8 @@ class ActionScript(EventEmitter):
         self._history_index += 1
 
     def save_history_change(self, modification_type: HistoryRecordEntry.ModificationType, modified_action_index: int, action_before_modification: Action, action_after_modification: Action) -> None:
+        return
+
         # Create copies of the modified actions
         action_after: Action = None
         action_before: Action = None
@@ -409,6 +440,8 @@ class ActionScript(EventEmitter):
         history_record.add_entry(modification_type, modified_action_index, action_before, action_after)
 
     def undo_history(self) -> List[dict]:
+        return []
+
         # Check if there is history left to undo
         if self._history_index < 0:
             return []
@@ -420,6 +453,8 @@ class ActionScript(EventEmitter):
         return changes
 
     def redo_history(self) -> List[dict]:
+        return []
+
         # Check if there is history left to redo
         if self._history_index >= len(self._action_history) - 1:
             return []

@@ -4,7 +4,7 @@ import TextInput from "components/inputs/TextInput";
 import { useEffect, useMemo, useState } from "react";
 
 import { connect } from 'react-redux';
-import { createActionCall, removeActionCall, swapActionIndexesCall } from "store/reducers/actionsReducer";
+import { createActionCall } from "store/reducers/actionScriptReducer";
 import ActionList from "components/actions/ActionList";
 
 import "styles/views/scripteditorview.scss";
@@ -24,6 +24,9 @@ const ScriptEditorView = (props) => {
     const [actionFilterKeyword, setActionFilterKeyword] = useState("");
     const [filteredActions, setFilteredActions] = useState([]);
     const [selectedActionType, setSelectedActionType] = useState("");
+
+    // eslint-disable-next-line
+    const [currentGroupId, setCurrentGroupId] = useState(0);
 
     useEffect(() => {
         const filterActions = () => {
@@ -52,7 +55,7 @@ const ScriptEditorView = (props) => {
             return;
         }
 
-        props.createActionCall(selectedActionType);
+        props.createActionCall(currentGroupId, selectedActionType);
     }
 
     const startScript = () => {
@@ -113,6 +116,8 @@ const ScriptEditorView = (props) => {
         )
     }
 
+    const actionsInGroup = props.currentScript["action-groups"][`${currentGroupId}`]["actions"];
+
     const isStopped = props.currentScript["play-state"] === "stopped";
     const hotkeysEnabled = props.allSettings["hotkeys-enabled"] === "true";
     const startHotkeyText = (hotkeysEnabled) ? `(${props.allSettings["start-script-key-combination-display"]})` : "";
@@ -131,10 +136,10 @@ const ScriptEditorView = (props) => {
                     <BasicButton disabled={!isStopped || props.isLoadingActions} onClick={addNewAction} className="add-button">Add</BasicButton>
                 </div>
             </div>
-            <ActionList />
+            <ActionList groupId={currentGroupId} />
             <div className="playstate-actions">
                 {(props.currentScript["play-state"] !== "playing") ?
-                    <BasicButton disabled={props.allActions.length === 0} onClick={startScript} className="play-button">{props.currentScript["play-state"] === "stopped" ? "Start" : "Continue"} {startHotkeyText}</BasicButton>
+                    <BasicButton disabled={actionsInGroup.length === 0} onClick={startScript} className="play-button">{props.currentScript["play-state"] === "stopped" ? "Start" : "Continue"} {startHotkeyText}</BasicButton>
                     :
                     <BasicButton onClick={pauseScript} className="play-button">Pause {startHotkeyText}</BasicButton>
                 }
@@ -148,7 +153,6 @@ const ScriptEditorView = (props) => {
 
 const mapStateToProps = (state) => {
     return {
-        allActions: state.actions.allActions,
         currentScript: state.actionScript.currentScript,
         isLoadingActions: state.actionScript.isLoadingActions,
         allSettings: state.settings.allSettings,
@@ -157,8 +161,6 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = {
     createActionCall,
-    removeActionCall,
-    swapActionIndexesCall,
     startScriptCall,
     pauseScriptCall,
     stopScriptCall,
