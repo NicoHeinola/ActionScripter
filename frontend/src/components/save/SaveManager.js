@@ -2,7 +2,7 @@ import { useCallback, useEffect } from "react";
 import { useLocation } from 'react-router-dom';
 
 import { connect } from 'react-redux';
-import { redoHistoryCall, saveActionScriptCall, saveAsActionScriptCall, undoHistoryCall } from "store/reducers/actionScriptReducer";
+import { saveActionScriptCall, saveAsActionScriptCall } from "store/reducers/actionScriptReducer";
 
 const SaveManager = (props) => {
     const location = useLocation();
@@ -10,8 +10,6 @@ const SaveManager = (props) => {
 
     const saveActionScriptCall = props.saveActionScriptCall;
     const saveAsActionScriptCall = props.saveAsActionScriptCall;
-    const undoHistoryCall = props.undoHistoryCall;
-    const redoHistoryCall = props.redoHistoryCall;
 
     const handleSaveFile = useCallback(() => {
         saveActionScriptCall();
@@ -37,27 +35,6 @@ const SaveManager = (props) => {
         }
     }, [handleSaveAsFile, handleSaveFile]);
 
-    const historyCheck = useCallback((event) => {
-        if (!event.ctrlKey) {
-            return;
-        }
-
-        let key = event.key.toLowerCase();
-
-        if (key !== "z" && key !== "y") {
-            return;
-        }
-
-        event.preventDefault();
-
-        if (key === "z") {
-            undoHistoryCall();
-        } else {
-            redoHistoryCall();
-        }
-
-    }, [undoHistoryCall, redoHistoryCall]);
-
 
     useEffect(() => {
         const handleKeyDown = (event) => {
@@ -72,7 +49,6 @@ const SaveManager = (props) => {
             }
 
             saveCheck(event);
-            historyCheck(event);
         };
 
         document.addEventListener('keydown', handleKeyDown);
@@ -80,7 +56,7 @@ const SaveManager = (props) => {
         return () => {
             document.removeEventListener('keydown', handleKeyDown);
         };
-    }, [currentScript, currentPath, saveCheck, historyCheck])
+    }, [currentScript, currentPath, saveCheck])
 
     return (
         <></>
@@ -97,8 +73,6 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = {
     saveActionScriptCall,
     saveAsActionScriptCall,
-    undoHistoryCall,
-    redoHistoryCall
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(SaveManager);

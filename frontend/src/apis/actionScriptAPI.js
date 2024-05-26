@@ -138,16 +138,16 @@ const swapActionIndexes = (groupId, indexA, indexB) => {
     })
 }
 
-const undoHistory = () => {
-    return axiosInstance.post(`${BASE_ROUTE}/undo`).then(response => {
+const undoHistory = (groupId) => {
+    return axiosInstance.post(`${BASE_ROUTE}/undo`, { "group-id": groupId }).then(response => {
         return response;
     }).catch(e => {
         throw e;
     })
 }
 
-const redoHistory = () => {
-    return axiosInstance.post(`${BASE_ROUTE}/redo`).then(response => {
+const redoHistory = (groupId) => {
+    return axiosInstance.post(`${BASE_ROUTE}/redo`, { "group-id": groupId }).then(response => {
         return response;
     }).catch(e => {
         throw e;

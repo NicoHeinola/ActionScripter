@@ -1,8 +1,97 @@
-from typing import Callable, List, Union
+from typing import Callable, List
 
 from scripter.actions.action import Action
 from scripter.actions.action_helper import ActionHelper
 from scripter.event_emitter import EventEmitter
+from enum import Enum
+
+
+class HistoryRecordEntry:
+    class ModificationType(Enum):
+        DELETE_ACTION = "delete-action"
+        MODIFY_ACTION = "modify-action"
+        ADD_ACTION = "add-action"
+
+    def __init__(self, type: ModificationType, index: int, action_before: Action, action_after: Action) -> None:
+        self.type = type
+        self.index: int = index
+        self.action_before: Action = action_before
+        self.action_after: Action = action_after
+
+    def serialize(self) -> dict:
+        data: dict = {}
+        data["type"] = self.type.value
+        data["index"] = self.index
+        data["action-before"] = None
+        data["action-after"] = None
+
+        if self.action_before is not None:
+            data["action-before"] = self.action_before.serialize()
+
+        if self.action_after is not None:
+            data["action-after"] = self.action_after.serialize()
+
+        return data
+
+
+class HistoryRecord:
+    def __init__(self) -> None:
+        self._modifications: List[HistoryRecordEntry] = []
+
+    def add_entry(self, type: HistoryRecordEntry.ModificationType, index: int, action_before: Action, action_after: Action) -> None:
+        new_entry: HistoryRecordEntry = HistoryRecordEntry(type, index, action_before, action_after)
+        self._modifications.append(new_entry)
+
+    def apply(self, actions: List[Action]) -> List[dict]:
+        """
+        Should be called when you want to go back to this position in history
+
+        :param actions: List of actions to modify
+        :returns: A list of all changes
+        """
+
+        changes: List[dict] = []
+
+        for entry in self._modifications:
+            match entry.type:
+                case HistoryRecordEntry.ModificationType.ADD_ACTION:
+                    actions.pop(entry.index)
+                case HistoryRecordEntry.ModificationType.MODIFY_ACTION:
+                    actions[entry.index] = entry.action_before
+                case HistoryRecordEntry.ModificationType.DELETE_ACTION:
+                    actions.insert(entry.index, entry.action_before)
+
+            changes.append(entry.serialize())
+
+        return changes
+
+    def revert(self, actions: List[Action]) -> List[dict]:
+        """
+        Should be called when you have returned to this point in history and want to go back instead
+
+        :param actions: List of actions to modify
+        :returns: A list of all changes
+        """
+
+        changes: List[dict] = []
+
+        # We need to loop the modifications in a reversed order to undo them
+        reversed_modifications: List[HistoryRecordEntry] = self._modifications[:]
+        reversed_modifications.reverse()
+
+        for i in range(len(self._modifications)):
+            entry: HistoryRecordEntry = self._modifications[len(self._modifications) - 1 - i]
+            match entry.type:
+                case HistoryRecordEntry.ModificationType.ADD_ACTION:
+                    actions.insert(entry.index, entry.action_after)
+                case HistoryRecordEntry.ModificationType.MODIFY_ACTION:
+                    actions[entry.index] = entry.action_after
+                case HistoryRecordEntry.ModificationType.DELETE_ACTION:
+                    actions.pop(entry.index)
+
+            changes.append(entry.serialize())
+
+        return changes
 
 
 class ActionGroup(EventEmitter):
@@ -16,6 +105,10 @@ class ActionGroup(EventEmitter):
 
         # Actions that this group contains and will perform
         self._actions: List[Action] = []
+
+        # History
+        self._action_history: List[HistoryRecord] = []
+        self._history_index: int = -1
 
         # What action is currently playing
         self._action_index: int = 0
@@ -106,6 +199,13 @@ class ActionGroup(EventEmitter):
 
         self._actions.append(action)
 
+        # Save history changes
+        action.on("deserialized", lambda _1, _2: self.create_new_history_entry())
+        action.on("deserialized", lambda before, after: self.save_history_change(HistoryRecordEntry.ModificationType.MODIFY_ACTION, self._actions.index(after), before, after))
+
+        self.create_new_history_entry()
+        self.save_history_change(HistoryRecordEntry.ModificationType.ADD_ACTION, len(self._actions) - 1, None, action)
+
     def add_action_at(self, action: Action, index: int) -> None:
         """
         Adds an action to this class' action list at an index
@@ -115,6 +215,13 @@ class ActionGroup(EventEmitter):
         """
 
         self._actions.insert(index, action)
+
+        # Save history changes
+        action.on("deserialized", lambda _1, _2: self.create_new_history_entry())
+        action.on("deserialized", lambda before, after: self.save_history_change(HistoryRecordEntry.ModificationType.MODIFY_ACTION, self._actions.index(action), before, after))
+
+        self.create_new_history_entry()
+        self.save_history_change(HistoryRecordEntry.ModificationType.ADD_ACTION, index, None, action)
 
     def remove_action(self, action_id: int):
         """
@@ -131,10 +238,15 @@ class ActionGroup(EventEmitter):
 
             action_index = index
 
+        # If no action can be removed
         if action_index is None:
             return None, None
 
         removed_action: Action = self._actions.pop(action_index)
+
+        self.create_new_history_entry()
+        self.save_history_change(HistoryRecordEntry.ModificationType.DELETE_ACTION, action_index, removed_action, None)
+
         return action_index, removed_action
 
     def update_actions(self, actions: List[dict]) -> None:
@@ -172,6 +284,8 @@ class ActionGroup(EventEmitter):
 
             self.add_action(new_action)
 
+        self.clear_history()
+
     def swap_actions(self, index_a: int, index_b: int) -> None:
         """
         Swaps 2 actions.
@@ -184,5 +298,62 @@ class ActionGroup(EventEmitter):
         if index_a == index_b:
             return
 
+        self.create_new_history_entry()
+
+        action_at_index_a: Action = self.get_action_at(index_a)
+        action_at_index_b: Action = self.get_action_at(index_b)
+        self.save_history_change(HistoryRecordEntry.ModificationType.MODIFY_ACTION, index_a, action_at_index_a, action_at_index_b)
+        self.save_history_change(HistoryRecordEntry.ModificationType.MODIFY_ACTION, index_b, action_at_index_b, action_at_index_a)
+
         # Swap the actions
         self._actions[index_a], self._actions[index_b] = self._actions[index_b], self._actions[index_a]
+
+    def create_new_history_entry(self) -> None:
+        # If we are not at the latest history entry, overwrite future history changes by this one
+        if self._history_index != len(self._action_history) - 1:
+            self._action_history = self._action_history[:self._history_index + 1]
+
+        history_record: HistoryRecord = HistoryRecord()
+        self._action_history.append(history_record)
+        self._history_index += 1
+
+    def save_history_change(self, modification_type: HistoryRecordEntry.ModificationType, modified_action_index: int, action_before_modification: Action, action_after_modification: Action) -> None:
+        # Create copies of the modified actions
+        action_after: Action = None
+        action_before: Action = None
+
+        if action_before_modification is not None:
+            action_before = action_before_modification.copy()
+
+        if action_after_modification is not None:
+            action_after = action_after_modification.copy()
+
+        # Create new history record
+        history_record: HistoryRecord = self._action_history[len(self._action_history) - 1]
+        history_record.add_entry(modification_type, modified_action_index, action_before, action_after)
+
+    def undo_history(self) -> List[dict]:
+        # Check if there is history left to undo
+        if self._history_index < 0:
+            return []
+
+        changes: List[dict] = self._action_history[self._history_index].apply(self._actions)
+
+        self._history_index -= 1
+
+        return changes
+
+    def redo_history(self) -> List[dict]:
+        # Check if there is history left to redo
+        if self._history_index >= len(self._action_history) - 1:
+            return []
+
+        self._history_index += 1
+
+        changes: List[dict] = self._action_history[self._history_index].revert(self._actions)
+
+        return changes
+
+    def clear_history(self) -> None:
+        self._history_index = -1
+        self._action_history = []

@@ -13,6 +13,7 @@ import { getScriptCall, pauseScriptCall, startScriptCall, stopScriptCall, update
 import socket from "socket/socketManager";
 import { useNavigate } from 'react-router-dom';
 import { motion } from "framer-motion";
+import HistoryManager from "components/save/HistoryManager";
 
 const ScriptEditorView = (props) => {
     const navigate = useNavigate();
@@ -129,6 +130,7 @@ const ScriptEditorView = (props) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="script-editor-view page">
+            <HistoryManager groupId={currentGroupId} />
             <div className="add-action-container">
                 <div className="actions">
                     <TextInput onChange={newValue => setActionFilterKeyword(newValue)} type={"text"} placeholder={"Filter Actions"}></TextInput>

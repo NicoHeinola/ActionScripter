@@ -210,7 +210,14 @@ class ActionScriptController(BaseController):
             if ActionScript.current_script is None:
                 return make_response({"error": "No current script found!"}, 500)
 
-            changes: List[dict] = ActionScript.current_script.undo_history()
+            data: dict = request.get_json()
+
+            if not "group-id" in data:
+                return make_response({"error": "'group-id' param missing!"}, 400)
+
+            group_id: int = int(data["group-id"])
+
+            changes: List[dict] = ActionScript.current_script.undo_history(group_id)
 
             return make_response(changes, 200)
 
@@ -219,7 +226,14 @@ class ActionScriptController(BaseController):
             if ActionScript.current_script is None:
                 return make_response({"error": "No current script found!"}, 500)
 
-            changes: List[dict] = ActionScript.current_script.redo_history()
+            data: dict = request.get_json()
+
+            if not "group-id" in data:
+                return make_response({"error": "'group-id' param missing!"}, 400)
+
+            group_id: int = int(data["group-id"])
+
+            changes: List[dict] = ActionScript.current_script.redo_history(group_id)
 
             return make_response(changes, 200)
 

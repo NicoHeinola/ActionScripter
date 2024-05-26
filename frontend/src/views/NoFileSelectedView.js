@@ -43,6 +43,10 @@ const NoFileSelectedView = (props) => {
                     return;
                 }
 
+                if (!("action-groups" in contents)) {
+                    return;
+                }
+
                 // Create a new action script according to the opened file
                 actionScriptAPI.newActionScript();
                 props.updateScriptCall(contents);

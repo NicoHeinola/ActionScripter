@@ -134,7 +134,14 @@ const actionScriptSlice = createSlice({
             [actions[actionAIndex], actions[actionBIndex]] = [actions[actionBIndex], actions[actionAIndex]];
 
             state.currentScript = { ...state.currentScript };
-        }
+        },
+        setActions: (state, data) => {
+            const groupId = data.payload["group-id"];
+            const actions = data.payload["actions"];
+            state.currentScript["action-groups"][`${groupId}`]["actions"] = actions;
+
+            state.currentScript = { ...state.currentScript };
+        },
     },
 });
 
@@ -251,22 +258,82 @@ const swapActionIndexesCall = (groupId, indexA, indexB) => async (dispatch) => {
     dispatch(setScriptIsModifiedCall(true));
 };
 
-const undoHistoryCall = () => async (dispatch) => {
-    /*dispatch(actionScriptSlice.actions.setIsLoadingActions(true));
-    const response = await actionScriptAPI.undoHistory();
+const applyActionChangesUndoCall = (groupId, changes) => async (dispatch, getState) => {
+    if (changes.length === 0) {
+        return;
+    }
+
+    let state = getState();
+    let newActions = [...state.actionScript.currentScript["action-groups"][`${groupId}`]["actions"]];
+    for (let change of changes) {
+        const type = change["type"];
+        const index = change["index"];
+        const actionBefore = change["action-before"];
+
+        switch (type) {
+            case "add-action":
+                newActions.splice(index, 1)
+                break;
+            case "modify-action":
+                newActions[index] = actionBefore
+                break;
+            case "delete-action":
+                newActions.splice(index, 0, actionBefore)
+                break;
+            default:
+                console.log(`Unhandled history modification type: ${type}`)
+        }
+    }
+
+    dispatch(actionScriptSlice.actions.setActions({ "group-id": groupId, "actions": newActions }));
+}
+
+const applyActionChangesRedoCall = (groupId, changes) => async (dispatch, getState) => {
+    if (changes.length === 0) {
+        return;
+    }
+
+    let state = getState();
+    let newActions = [...state.actionScript.currentScript["action-groups"][`${groupId}`]["actions"]];
+    for (let change of changes) {
+        const type = change["type"];
+        const index = change["index"];
+        const actionAfter = change["action-after"];
+
+        switch (type) {
+            case "add-action":
+                newActions.splice(index, 0, actionAfter)
+                break;
+            case "modify-action":
+                newActions[index] = actionAfter
+                break;
+            case "delete-action":
+                newActions.splice(index, 1)
+                break;
+            default:
+                console.log(`Unhandled history modification type: ${type}`)
+        }
+    }
+
+    dispatch(actionScriptSlice.actions.setActions({ "group-id": groupId, "actions": newActions }));
+}
+
+const undoHistoryCall = (groupId) => async (dispatch) => {
+    dispatch(actionScriptSlice.actions.setIsLoadingActions(true));
+    const response = await actionScriptAPI.undoHistory(groupId);
     const changes = response.data;
-    await dispatch(applyActionChangesUndoCall(changes));
+    await dispatch(applyActionChangesUndoCall(groupId, changes));
     dispatch(actionScriptSlice.actions.setIsLoadingActions(false));
-    dispatch(actionScriptSlice.actions.setScriptIsModified(true));*/
+    dispatch(actionScriptSlice.actions.setScriptIsModified(true));
 };
 
-const redoHistoryCall = () => async (dispatch) => {
-    /*dispatch(actionScriptSlice.actions.setIsLoadingActions(true));
-    const response = await actionScriptAPI.redoHistory();
+const redoHistoryCall = (groupId) => async (dispatch) => {
+    dispatch(actionScriptSlice.actions.setIsLoadingActions(true));
+    const response = await actionScriptAPI.redoHistory(groupId);
     const changes = response.data;
-    await dispatch(applyActionChangesRedoCall(changes));
+    await dispatch(applyActionChangesRedoCall(groupId, changes));
     dispatch(actionScriptSlice.actions.setIsLoadingActions(false));
-    dispatch(actionScriptSlice.actions.setScriptIsModified(true));*/
+    dispatch(actionScriptSlice.actions.setScriptIsModified(true));
 };
 
 export {
