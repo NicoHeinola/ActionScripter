@@ -488,8 +488,8 @@ const ActionList = (props) => {
                 <div className="header">Loop count</div>
                 <div className="header center">Actions</div>
             </div>
-            <div className="actions" onMouseUp={onRightClick}>
-                <Reorder.Group ref={actionGroupRef} values={actionsInGroup} onReorder={onReorder}>
+            <div ref={actionGroupRef} className="actions" onMouseUp={onRightClick}>
+                <Reorder.Group values={actionsInGroup} onReorder={onReorder}>
                     {activeActions.map((action, index) =>
                         <ActionItem groupId={groupId} onContextMenuOpenChange={handleAnyContextMenuOpenChange} index={(actionsPerPage * currentPage) + index} onOpenEditWindow={openEditWindow} onPaste={() => onPaste((actionsPerPage * currentPage) + index + 1)} ref={(el) => actionRefs.current[action.id] = el} isSelected={selectedActionIds.includes(action.id)} moveDown={() => moveActionDown(action.id)} moveUp={() => moveActionUp(action.id)} onSelectionClick={(e, isSelected) => onActionItemSelectionClick(e, action.id, isSelected)} performing={(actionsPerPage * currentPage + index) === currentActionIndex} data={action} key={`action-item-${action.id}`} />
                     )}
