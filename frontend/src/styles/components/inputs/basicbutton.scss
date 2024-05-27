@@ -4,11 +4,10 @@
     position: relative;
     display: flex;
     flex-direction: row;
-    justify-content: center;
     align-items: center;
-    gap: 10px;
     width: 100%;
     height: 100%;
+    gap: 6px;
     min-height: 35px;
 
     border: none;
@@ -16,11 +15,17 @@
     border-radius: $global-border-radius;
 
     background: $button-color-1;
-    color: $button-text-color-1;
 
     transition: all 0.2s;
 
     cursor: pointer;
+
+    .text {
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+        color: $button-text-color-1;
+    }
 
     &.cancel {
         background: $button-color-1-cancel;
@@ -35,8 +40,9 @@
         background: black;
         opacity: 0.2;
 
+        border-radius: $global-border-radius;
+
         transition: all 0.2s;
-        /*border-radius: $global-border-radius;*/
     }
 
     &:hover:not(.disabled) {
@@ -61,7 +67,6 @@
     }
 
     .image {
-        height: 100%;
         aspect-ratio: 1;
         object-fit: contain;
     }

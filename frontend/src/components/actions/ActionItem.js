@@ -194,11 +194,12 @@ const ActionItem = forwardRef((props, ref) => {
                         </div>
                     </div>
                     <div className="other-items" onClick={onItemClicked} onMouseLeave={() => setIsHovering(false)} onMouseEnter={() => setIsHovering(true)}>
-                        <div className="data">{action["name"]}</div>
-                        <div className="data">{action["type-display-name"]}</div>
-                        <div className="data">{action["start-delay-ms"]}</div>
-                        <div className="data">{action["end-delay-ms"]}</div>
-                        <div className="data">{action["loop-count"]}</div>
+                        <div className="data"><p className="text">{action["name"]}</p></div>
+                        <div className="data"><p className="text">{action["type-display-name"]}</p></div>
+                        <div className="data"><p className="text">{action["start-delay-ms"]}</p></div>
+                        <div className="data"><p className="text">{action["end-delay-ms"]}</p></div>
+                        <div className="data"><p className="text">{action["loop-count"]}</p></div>
+
                     </div>
                     <div className="action-buttons">
                         <div className="data buttons">

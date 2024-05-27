@@ -57,7 +57,14 @@ class ActionScriptController(BaseController):
             if ActionScript.current_script is None:
                 return make_response({"error": "No current script found!"}, 500)
 
-            self._socket.start_background_task(target=lambda: ActionScript.current_script.start(lambda a, b=None: socket_supported_sleep(self._socket, a, b)))
+            data = request.get_json()
+
+            if not "group-id" in data:
+                return make_response({"error": "'group-id' param missing!"}, 400)
+
+            group_id: int = int(data["group-id"])
+
+            self._socket.start_background_task(target=lambda: ActionScript.current_script.start(group_id, lambda a, b=None: socket_supported_sleep(self._socket, a, b)))
 
             return make_response("", 200)
 
@@ -384,3 +391,44 @@ class ActionScriptController(BaseController):
             ActionScript.current_script.update_actions(group_id, [action])
 
             return make_response("", 200)
+
+        @self._app.route(f"{base_route}/action-group", methods=["POST"])
+        def add_action_group():
+            if ActionScript.current_script is None:
+                return make_response({"error": "No current script found!"}, 500)
+
+            new_action_group = ActionGroup()
+            ActionScript.current_script.add_action_group(new_action_group)
+            return make_response(new_action_group.serialize(), 200)
+
+        @self._app.route(f"{base_route}/action-group", methods=["PUT"])
+        def update_action_group():
+            if ActionScript.current_script is None:
+                return make_response({"error": "No current script found!"}, 500)
+
+            data: dict = request.get_json()
+
+            if "group-data" not in data:
+                return make_response({"error": "'group-data' param missing!"}, 500)
+
+            if "group-id" not in data:
+                return make_response({"error": "'group-id' param missing!"}, 500)
+
+            group_id: int = int(data["group-id"])
+            group_data: dict = data["group-data"]
+
+            ActionScript.current_script.update_action_group(group_id, group_data)
+
+            return make_response("", 200)
+
+        @self._app.route(f"{base_route}/action-group/<group_id>", methods=["DELETE"])
+        def remove_action_group(group_id):
+            if ActionScript.current_script is None:
+                return make_response({"error": "No current script found!"}, 500)
+
+            removed_group = ActionScript.current_script.remove_action_group(int(group_id))
+
+            if removed_group is None:
+                return make_response({"error": f"Couldn't find group with id '{group_id}'!"}, 500)
+
+            return make_response(removed_group.serialize(), 200)

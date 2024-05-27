@@ -50,8 +50,8 @@ const updateActionScript = (scriptData) => {
     })
 }
 
-const startActionScript = () => {
-    return axiosInstance.post(`${BASE_ROUTE}/start`).then(response => {
+const startActionScript = (groupId) => {
+    return axiosInstance.post(`${BASE_ROUTE}/start`, { "group-id": groupId }).then(response => {
         return response;
     }).catch(e => {
         throw e;
@@ -154,6 +154,30 @@ const redoHistory = (groupId) => {
     })
 }
 
+const addActionGroup = () => {
+    return axiosInstance.post(`${BASE_ROUTE}/action-group`).then(response => {
+        return response;
+    }).catch(e => {
+        throw e;
+    })
+}
+
+const updateActionGroup = (groupId, groupData) => {
+    return axiosInstance.put(`${BASE_ROUTE}/action-group`, { "group-id": groupId, "group-data": groupData }).then(response => {
+        return response;
+    }).catch(e => {
+        throw e;
+    })
+}
+
+const removeActionGroup = (groupId) => {
+    return axiosInstance.delete(`${BASE_ROUTE}/action-group/${groupId}`).then(response => {
+        return response;
+    }).catch(e => {
+        throw e;
+    })
+}
+
 const functions = {
     getActionScript,
     getSerializedActionScript,
@@ -174,5 +198,8 @@ const functions = {
     removeActions,
     updateAction,
     swapActionIndexes,
+    addActionGroup,
+    updateActionGroup,
+    removeActionGroup
 };
 export default functions; 

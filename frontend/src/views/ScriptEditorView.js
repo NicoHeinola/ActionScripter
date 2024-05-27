@@ -4,7 +4,7 @@ import TextInput from "components/inputs/TextInput";
 import { useEffect, useMemo, useState } from "react";
 
 import { connect } from 'react-redux';
-import { createActionCall } from "store/reducers/actionScriptReducer";
+import { createActionCall, setScriptPlayStateCall } from "store/reducers/actionScriptReducer";
 import ActionList from "components/actions/ActionList";
 
 import "styles/views/scripteditorview.scss";
@@ -14,6 +14,7 @@ import socket from "socket/socketManager";
 import { useNavigate } from 'react-router-dom';
 import { motion } from "framer-motion";
 import HistoryManager from "components/save/HistoryManager";
+import ActionGroupList from "components/actions/groups/ActionGroupList";
 
 const ScriptEditorView = (props) => {
     const navigate = useNavigate();
@@ -26,9 +27,11 @@ const ScriptEditorView = (props) => {
     const [filteredActions, setFilteredActions] = useState([]);
     const [selectedActionType, setSelectedActionType] = useState("");
 
-    // eslint-disable-next-line
+    const currentScript = props.currentScript;
+
     const [currentGroupId, setCurrentGroupId] = useState(0);
 
+    // Filter pickable actions
     useEffect(() => {
         const filterActions = () => {
             let newFilteredActions = [];
@@ -41,15 +44,17 @@ const ScriptEditorView = (props) => {
 
     const getScriptCall = props.getScriptCall;
 
+    const setScriptPlayStateCall = props.setScriptPlayStateCall;
+
     useEffect(() => {
         socket.on("finished-actions", () => {
-            getScriptCall();
+            setScriptPlayStateCall("stopped")
         });
 
         return (() => {
             socket.off("finished-actions");
         })
-    }, [getScriptCall]);
+    }, [getScriptCall, setScriptPlayStateCall]);
 
     const addNewAction = () => {
         if (selectedActionType === "") {
@@ -60,7 +65,7 @@ const ScriptEditorView = (props) => {
     }
 
     const startScript = () => {
-        props.startScriptCall();
+        props.startScriptCall(currentGroupId);
     }
 
     const pauseScript = () => {
@@ -72,7 +77,7 @@ const ScriptEditorView = (props) => {
     }
 
     const switchScriptLoopType = () => {
-        let updatedCurrentScript = { ...props.currentScript };
+        let updatedCurrentScript = { ...currentScript };
 
         if (updatedCurrentScript["loop-type"] === "infinite") {
             updatedCurrentScript["loop-type"] = "loop-x-times";
@@ -84,7 +89,7 @@ const ScriptEditorView = (props) => {
     }
 
     const setScriptLoopCount = (newValue) => {
-        let updatedCurrentScript = { ...props.currentScript };
+        let updatedCurrentScript = { ...currentScript };
         updatedCurrentScript["loop-count"] = newValue;
         updateScript(updatedCurrentScript);
     }
@@ -98,7 +103,7 @@ const ScriptEditorView = (props) => {
         props.updateScriptCall(updatedScript);
     }
 
-    if (props.currentScript["missing-script"] && !props.isLoadingActions) {
+    if (currentScript["missing-script"] && !props.isLoadingActions) {
         return (
             <motion.div
                 initial={{ opacity: 0 }}
@@ -117,12 +122,28 @@ const ScriptEditorView = (props) => {
         )
     }
 
-    const actionsInGroup = props.currentScript["action-groups"][`${currentGroupId}`]["actions"];
+    const actionsInGroup = currentScript["action-groups"][`${currentGroupId}`]["actions"];
 
-    const isStopped = props.currentScript["play-state"] === "stopped";
+    const isStopped = currentScript["play-state"] === "stopped";
     const hotkeysEnabled = props.allSettings["hotkeys-enabled"] === "true";
-    const startHotkeyText = (hotkeysEnabled) ? `(${props.allSettings["start-script-key-combination-display"]})` : "";
-    const stopHotkeyText = (hotkeysEnabled) ? `(${props.allSettings["stop-script-key-combination-display"]})` : "";
+    const startHotkeyText = (hotkeysEnabled) ? `${props.allSettings["start-script-key-combination-display"]}` : "";
+    const stopHotkeyText = (hotkeysEnabled) ? `${props.allSettings["stop-script-key-combination-display"]}` : "";
+
+    let playButton = <></>;
+    const buttonTextAlignment = hotkeysEnabled ? "flex-start" : "center";
+    switch (currentScript["play-state"]) {
+        case "playing":
+            playButton = <BasicButton centering={buttonTextAlignment} onClick={pauseScript} className="play-button" icon="images/icons/pause_play.png">{startHotkeyText}</BasicButton>
+            break;
+        case "stopped":
+            playButton = <BasicButton centering={buttonTextAlignment} disabled={actionsInGroup.length === 0} onClick={startScript} className="play-button" icon="images/icons/start_play.png">{startHotkeyText}</BasicButton>
+            break;
+        case "paused":
+            playButton = <BasicButton centering={buttonTextAlignment} onClick={startScript} className="play-button" icon="images/icons/continue_play.png">{startHotkeyText}</BasicButton>
+            break;
+        default:
+            break;
+    }
 
     return (
         <motion.div
@@ -135,19 +156,18 @@ const ScriptEditorView = (props) => {
                 <div className="actions">
                     <TextInput onChange={newValue => setActionFilterKeyword(newValue)} type={"text"} placeholder={"Filter Actions"}></TextInput>
                     <SelectBox onSelect={setSelectedActionType} className="action-list" placeholder="Actions" options={filteredActions} />
-                    <BasicButton disabled={!isStopped || props.isLoadingActions} onClick={addNewAction} className="add-button">Add</BasicButton>
+                    <BasicButton disabled={!isStopped || props.isLoadingActions} onClick={addNewAction} className="add-button" icon={"images/icons/new_action.png"}></BasicButton>
                 </div>
             </div>
-            <ActionList groupId={currentGroupId} />
+            <div className="action-manager">
+                <ActionGroupList onChangeGroup={groupId => setCurrentGroupId(groupId)} currentGroupId={currentGroupId} />
+                <ActionList groupId={currentGroupId} />
+            </div>
             <div className="playstate-actions">
-                {(props.currentScript["play-state"] !== "playing") ?
-                    <BasicButton disabled={actionsInGroup.length === 0} onClick={startScript} className="play-button">{props.currentScript["play-state"] === "stopped" ? "Start" : "Continue"} {startHotkeyText}</BasicButton>
-                    :
-                    <BasicButton onClick={pauseScript} className="play-button">Pause {startHotkeyText}</BasicButton>
-                }
-                <BasicButton disabled={props.currentScript["play-state"] === "stopped" || props.isLoadingActions} onClick={stopScript} className="play-button cancel">Stop {stopHotkeyText}</BasicButton>
-                <BasicButton disabled={!isStopped || props.isLoadingActions} onClick={switchScriptLoopType} className="repeat-button" icon={`images/icons/${props.currentScript["loop-type"] === 'infinite' ? "loop_infinite.png" : "loop_x_times.png"}`}></BasicButton>
-                <TextInput min="0" value={props.currentScript["loop-count"]} onChange={newValue => setScriptLoopCount(newValue)} className="input" type="number" placeholder="Loop Count" disabled={!isStopped || props.currentScript["loop-type"] === 'infinite' || props.isLoadingActions} />
+                {playButton}
+                <BasicButton centering={buttonTextAlignment} disabled={currentScript["play-state"] === "stopped" || props.isLoadingActions} onClick={stopScript} icon="images/icons/stop_play.png" className="play-button cancel">{stopHotkeyText}</BasicButton>
+                <BasicButton disabled={!isStopped || props.isLoadingActions} onClick={switchScriptLoopType} className="repeat-button" icon={`images/icons/${currentScript["loop-type"] === 'infinite' ? "loop_infinite.png" : "loop_x_times.png"}`}></BasicButton>
+                <TextInput min="0" value={currentScript["loop-count"]} onChange={newValue => setScriptLoopCount(newValue)} className="input" type="number" placeholder="Loop Count" disabled={!isStopped || currentScript["loop-type"] === 'infinite' || props.isLoadingActions} />
             </div>
         </motion.div>
     );
@@ -167,7 +187,8 @@ const mapDispatchToProps = {
     pauseScriptCall,
     stopScriptCall,
     getScriptCall,
-    updateScriptCall
+    updateScriptCall,
+    setScriptPlayStateCall
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ScriptEditorView);

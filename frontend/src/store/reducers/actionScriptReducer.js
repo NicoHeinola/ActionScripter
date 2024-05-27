@@ -22,6 +22,7 @@ const actionScriptSlice = createSlice({
     reducers: {
         setPlayState: (state, playState) => {
             state.currentScript["play-state"] = playState.payload;
+            state.currentScript = { ...state.currentScript }
         },
         setCurrentScript: (state, script) => {
             state.currentScript = script.payload;
@@ -142,6 +143,26 @@ const actionScriptSlice = createSlice({
 
             state.currentScript = { ...state.currentScript };
         },
+        addActionGroup: (state, data) => {
+            const group = data.payload;
+            const groupId = group.id;
+            state.currentScript["action-groups"][`${groupId}`] = group;
+
+            state.currentScript = { ...state.currentScript }
+        },
+        updateActionGroup: (state, data) => {
+            const groupId = data.payload["group-id"];
+            const groupData = data.payload["group-data"];
+
+            state.currentScript["action-groups"][`${groupId}`] = groupData;
+
+            state.currentScript = { ...state.currentScript }
+        },
+        removeActionGroup: (state, data) => {
+            const groupId = data.payload["group-id"];
+            delete state.currentScript["action-groups"][`${groupId}`];
+            state.currentScript = { ...state.currentScript }
+        },
     },
 });
 
@@ -149,8 +170,12 @@ const updateScriptPlayStateCall = (playState) => async (dispatch) => {
     dispatch(actionScriptSlice.actions.setPlayState(playState));
 }
 
-const startScriptCall = () => async (dispatch) => {
-    await actionScriptAPI.startActionScript();
+const setScriptPlayStateCall = (state) => async (dispatch) => {
+    dispatch(actionScriptSlice.actions.setPlayState(state));
+};
+
+const startScriptCall = (groupId) => async (dispatch) => {
+    await actionScriptAPI.startActionScript(groupId);
     dispatch(actionScriptSlice.actions.setPlayState("playing"));
 };
 
@@ -336,6 +361,21 @@ const redoHistoryCall = (groupId) => async (dispatch) => {
     dispatch(actionScriptSlice.actions.setScriptIsModified(true));
 };
 
+const addActionGroupCall = () => async (dispatch) => {
+    const response = await actionScriptAPI.addActionGroup();
+    dispatch(actionScriptSlice.actions.addActionGroup(response.data))
+}
+
+const updateActionGroupCall = (groupId, groupData) => async (dispatch) => {
+    actionScriptAPI.updateActionGroup(groupId, groupData);
+    dispatch(actionScriptSlice.actions.updateActionGroup({ "group-id": groupId, "group-data": groupData }));
+}
+
+const removeActionGroupCall = (groupId) => async (dispatch) => {
+    actionScriptAPI.removeActionGroup(groupId);
+    dispatch(actionScriptSlice.actions.removeActionGroup({ "group-id": groupId }));
+}
+
 export {
     startScriptCall,
     pauseScriptCall,
@@ -355,6 +395,10 @@ export {
     addActionsCall,
     updateActionCall,
     removeActionsCall,
-    swapActionIndexesCall
+    swapActionIndexesCall,
+    addActionGroupCall,
+    updateActionGroupCall,
+    removeActionGroupCall,
+    setScriptPlayStateCall
 };
 export default actionScriptSlice.reducer;

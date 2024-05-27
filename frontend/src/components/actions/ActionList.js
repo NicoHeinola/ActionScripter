@@ -474,6 +474,7 @@ const ActionList = (props) => {
                 <ActionEditForm groupId={groupId} ref={actionEditForm} onCancel={closeEditWindow} actionType={openedAction.type} actionData={openedAction}></ActionEditForm>
             </PopupWindow>
             <ContextMenu onOpenChange={handleAnyContextMenuOpenChange} ref={contextMenuRef} items={contextMenuItems} />
+
             <div className="headers row">
                 <div className="header"></div>
                 <div className="header">Name</div>

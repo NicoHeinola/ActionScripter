@@ -35,7 +35,7 @@ const ActionEditForm = forwardRef((props, ref) => {
         setActionData(actionData);
     }, [setActionData, actionData]);
 
-    const onCancel = useCallback(() => {
+    const cancel = useCallback(() => {
         resetActionData();
 
         if (!onCancelProp) {
@@ -61,9 +61,9 @@ const ActionEditForm = forwardRef((props, ref) => {
         if (event.keyCode === enterKeyCode) {
             save();
         } else if (event.keyCode === escKeyCode) {
-            onCancel();
+            cancel();
         }
-    }, [save, onCancel]);
+    }, [save, cancel]);
 
     useEffect(() => {
         document.addEventListener('keydown', handleKeyDown);
@@ -94,7 +94,7 @@ const ActionEditForm = forwardRef((props, ref) => {
             {component}
             <div className="row">
                 <BasicButton onClick={save}>Save</BasicButton>
-                <BasicButton className="cancel" onClick={onCancel}>Cancel</BasicButton>
+                <BasicButton className="cancel" onClick={cancel}>Cancel</BasicButton>
             </div>
         </div>
     )

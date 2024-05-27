@@ -113,6 +113,9 @@ class ActionGroup(EventEmitter):
         # What action is currently playing
         self._action_index: int = 0
 
+        # Information
+        self._name = f"Group {self._id + 1}"
+
     @staticmethod
     def reset_global_id_count() -> None:
         ActionGroup.global_group_id = 0
@@ -124,6 +127,7 @@ class ActionGroup(EventEmitter):
         data: dict = {}
         data["id"] = self.get_id()
         data["action-index"] = self._action_index
+        data["name"] = self._name
 
         serialized_actions: List[Action] = []
         for action in self._actions:
@@ -137,6 +141,12 @@ class ActionGroup(EventEmitter):
         if "id" in data:
             self._id = int(data["id"])
             ActionGroup.global_group_id = max(ActionGroup.global_group_id, self.get_id())
+
+            if "name" not in data:
+                self._name = f"Group {self._id + 1}"
+
+        if "name" in data:
+            self._name = data["name"]
 
         if "actions" in data:
             for action_data in data["actions"]:

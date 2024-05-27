@@ -1,7 +1,6 @@
 @import "styles/variables.scss";
 
 .action-table {
-    position: relative;
     display: flex;
     flex-direction: column;
 
@@ -10,6 +9,8 @@
 
     overflow: hidden;
     background: $action-list-color;
+
+    border-radius: $global-border-radius;
 
     .centered-loading-icon {
         position: absolute;

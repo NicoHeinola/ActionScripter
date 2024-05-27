@@ -46,12 +46,6 @@ class ActionScript(EventEmitter):
 
         return self._action_groups[group_id]
 
-    def get_main_action_group(self) -> ActionGroup:
-        """
-        :return: Returns the action group that contains the main script.
-        """
-        return self.get_action_group(0)
-
     def is_playing(self) -> bool:
         """
         Checks if the playback of this script is running.
@@ -82,7 +76,7 @@ class ActionScript(EventEmitter):
         """
         return self._action_groups
 
-    def start(self, sleep_handler: Callable[float, Callable]) -> None:
+    def start(self, group_id: int, sleep_handler: Callable[float, Callable]) -> None:
         """
         Starts playing actions.
 
@@ -93,11 +87,13 @@ class ActionScript(EventEmitter):
 
         self._play_state = "playing"
 
+        group: ActionGroup = self.get_action_group(group_id)
+
         # Loop the actions until stopped or loop limit reached
         while self._current_loop_count <= self._loop_count or self._loop_type == "infinite":
+
             # Start running the main script
-            main_group: ActionGroup = self.get_main_action_group()
-            main_group.play_handler(sleep_handler, self.is_playing)
+            group.play_handler(sleep_handler, self.is_playing)
 
             if not self.is_playing():
                 return
@@ -134,6 +130,34 @@ class ActionScript(EventEmitter):
     def add_action_group(self, group: ActionGroup) -> None:
         group.on("performed-action", lambda action_index: self.emit("performed-action", action_index))
         self._action_groups[group.get_id()] = group
+
+    def remove_action_group(self, group_id: int) -> ActionGroup:
+        """
+        Removes an action group with given id.
+
+        :param group_id: Action group to remove.
+        :return: Returns the removed action group.
+        """
+
+        if not self.group_exists(group_id):
+            return None
+
+        return self._action_groups.pop(group_id)
+
+    def update_action_group(self, group_id: int, data: dict):
+        """
+        Deserializes an action group with given data.
+
+        :param group_id: What group to modify.
+        :param data: Data to modify it with.
+        """
+
+        action_group: ActionGroup = self.get_action_group(group_id)
+
+        if action_group is None:
+            return
+
+        action_group.deserialize(data)
 
     def add_action(self, group_id: int, action: Action) -> None:
         """
