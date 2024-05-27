@@ -93,16 +93,20 @@ const ActionList = (props) => {
 
     const closeEditWindow = () => {
         popupWindow.current.setVisible(false);
+        actionEditForm.current.setIsActive(false);
     }
 
     const onPopupClose = () => {
         actionEditForm.current.resetActionData();
+        actionEditForm.current.setIsActive(false);
     }
 
     const openEditWindow = (action) => {
+        document.activeElement.blur();
         contextMenuRef.current.setOpen(false);
         popupWindow.current.setVisible(true);
         setOpenedAction({ ...action });
+        actionEditForm.current.setIsActive(true);
     }
 
     const moveActionUp = async (id) => {

@@ -10,8 +10,23 @@ import SaveManager from 'components/save/SaveManager';
 import NavigationMenu from 'components/navigation/NavigationMenu';
 import SettingsPageView from 'views/SettingsPageView';
 import HotkeyManager from 'components/hotkey/HotkeyManager';
+import { useEffect } from 'react';
 
 function App() {
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Tab') {
+        event.preventDefault();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    // Cleanup the event listener on component unmount
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
   return (
     <Provider store={store}>
       <BrowserRouter>
