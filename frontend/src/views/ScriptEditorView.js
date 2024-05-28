@@ -13,7 +13,6 @@ import { getScriptCall, pauseScriptCall, startScriptCall, stopScriptCall, update
 import socket from "socket/socketManager";
 import { useNavigate } from 'react-router-dom';
 import { motion } from "framer-motion";
-import HistoryManager from "components/save/HistoryManager";
 import ActionGroupList from "components/actions/groups/ActionGroupList";
 
 const ScriptEditorView = (props) => {
@@ -151,12 +150,11 @@ const ScriptEditorView = (props) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="script-editor-view page">
-            <HistoryManager groupId={currentGroupId} />
             <div className="add-action-container">
                 <div className="actions">
                     <TextInput onChange={newValue => setActionFilterKeyword(newValue)} type={"text"} placeholder={"Filter Actions"}></TextInput>
                     <SelectBox onSelect={setSelectedActionType} className="action-list" placeholder="Actions" options={filteredActions} />
-                    <BasicButton disabled={!isStopped || props.isLoadingActions} onClick={addNewAction} className="add-button" icon={"images/icons/new_action.png"}></BasicButton>
+                    <BasicButton theme="add" disabled={!isStopped || props.isLoadingActions} onClick={addNewAction} className="add-button" icon={"images/icons/new_action.png"}></BasicButton>
                 </div>
             </div>
             <div className="action-manager">

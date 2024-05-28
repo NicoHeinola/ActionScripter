@@ -8,11 +8,7 @@ const HistoryManager = (props) => {
     const location = useLocation();
     const currentPath = location.pathname;
 
-    const currentScript = props.currentScript;
-
-    const groupId = props.groupId;
-    const undoHistoryCall = props.undoHistoryCall;
-    const redoHistoryCall = props.redoHistoryCall;
+    const { currentScript, groupId, undoHistoryCall, redoHistoryCall, isActive } = props;
 
     const historyCheck = useCallback((event) => {
         if (!event.ctrlKey || event.shiftKey) {
@@ -37,6 +33,10 @@ const HistoryManager = (props) => {
 
 
     useEffect(() => {
+        if (!isActive) {
+            return;
+        }
+
         const handleKeyDown = (event) => {
             // Can't undo changes to a non-existing script
             if (currentScript["missing-script"] === true) {
@@ -56,7 +56,7 @@ const HistoryManager = (props) => {
         return () => {
             document.removeEventListener('keydown', handleKeyDown);
         };
-    }, [currentScript, currentPath, historyCheck])
+    }, [currentScript, currentPath, historyCheck, isActive])
 
     return (
         <></>

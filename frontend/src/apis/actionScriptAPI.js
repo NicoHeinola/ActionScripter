@@ -178,6 +178,14 @@ const removeActionGroup = (groupId) => {
     })
 }
 
+const updateSelectedActionGroup = (groupId) => {
+    return axiosInstance.post(`${BASE_ROUTE}/action-group/select/${groupId}`).then(response => {
+        return response;
+    }).catch(e => {
+        throw e;
+    })
+}
+
 const functions = {
     getActionScript,
     getSerializedActionScript,
@@ -200,6 +208,7 @@ const functions = {
     swapActionIndexes,
     addActionGroup,
     updateActionGroup,
-    removeActionGroup
+    removeActionGroup,
+    updateSelectedActionGroup
 };
 export default functions; 

@@ -34,9 +34,10 @@
         position: relative;
         display: flex;
         flex-direction: row;
-        overflow: hidden;
+        /*overflow: hidden;*/
 
-        height: 100%;
+        height: calc(100% - 40px * 2 - 15px * 2);
+        min-height: 170px;
         width: 100%;
         gap: 15px;
 

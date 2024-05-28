@@ -77,7 +77,7 @@ const NoFileSelectedView = (props) => {
             exit={{ opacity: 0 }}
             className="no-file-selected-view page">
             <div className="selection-buttons">
-                <BasicButton className="button" onClick={newEmptyActionScript}>Create a new script</BasicButton>
+                <BasicButton theme="add" className="button" onClick={newEmptyActionScript}>Create a new script</BasicButton>
                 <BasicButton className="button" onClick={selectFileFromDisk}>Open a script from disk</BasicButton>
             </div>
             <div className="recent-scripts">

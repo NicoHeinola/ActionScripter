@@ -11,38 +11,37 @@ import clipboardUtil from "utils/clipboardUtil";
 import PopupWindow from "components/popup/PopupWindow";
 import ActionEditForm from "./edit/ActionEditForm";
 import BasicButton from "components/inputs/BasicButton";
-import { ring } from 'ldrs'
 import { loadSettingsCall } from "store/reducers/settingsReducer";
 import useClickOutside from "hooks/useClickOutside";
+import HistoryManager from "components/save/HistoryManager";
 
-ring.register()
 
 const ActionList = (props) => {
+    // Props and basic variables
+    const { allSettings, groupId, currentScript, loadSettingsCall, swapActionIndexesCall, removeActionsCall, addActionsCall, isLoadingActions } = props;
+    const actionsInGroup = currentScript["action-groups"][`${groupId}`]["actions"];
+
+    // States
     const [currentActionIndex, setCurrentActionIndex] = useState(0);
     const [selectedActionIds, setSelectedActionIds] = useState([]);
-    const contextMenuRef = useRef(null);
-    const actionGroupRef = useRef(null);
-    const actionRefs = useRef({});
-
-    const popupWindow = useRef(null);
-    const actionEditForm = useRef(null);
     const [openedAction, setOpenedAction] = useState({});
-
-    const groupId = props.groupId;
-    const actionsInGroup = props.currentScript["action-groups"][`${groupId}`]["actions"];
-
-    const actionsPerPage = Number(props.allSettings["actions-per-page"]);
     const [currentPage, setCurrentPage] = useState(0);
-    const pages = Math.ceil(actionsInGroup.length / actionsPerPage);
-
-    const activeActions = actionsInGroup.slice(currentPage * actionsPerPage, (currentPage + 1) * actionsPerPage)
-
-    const loadSettingsCall = props.loadSettingsCall;
-
     const [lastSelectedItemId, setLastSelectedItemId] = useState(-1);
     const [multiSelectedItemAmount, setMultiSelectedItemAmount] = useState(0);
-
     const [contextMenuOpenCount, setContextMenuOpenCount] = useState(0);
+    const [actionEditFormVisisble, setActionEditFormVisisble] = useState(false);
+    const [isTopElementSelected, setIsTopElementSelected] = useState(false);
+
+    // Use refs
+    const contextMenuRef = useRef(null);
+    const actionGroupRef1 = useRef(null);
+    const actionGroupRef2 = useRef(null);
+    const topElement = useRef(null);
+
+    // Pages
+    const actionsPerPage = Number(allSettings["actions-per-page"]);
+    const pages = Math.ceil(actionsInGroup.length / actionsPerPage);
+    const activeActions = actionsInGroup.slice(currentPage * actionsPerPage, (currentPage + 1) * actionsPerPage)
 
     useEffect(() => {
         loadSettingsCall();
@@ -88,25 +87,18 @@ const ActionList = (props) => {
             return;
         }
 
-        props.swapActionIndexesCall(groupId, swappedItems[0], swappedItems[1]);
+        swapActionIndexesCall(groupId, swappedItems[0], swappedItems[1]);
     };
 
     const closeEditWindow = () => {
-        popupWindow.current.setVisible(false);
-        actionEditForm.current.setIsActive(false);
-    }
-
-    const onPopupClose = () => {
-        actionEditForm.current.resetActionData();
-        actionEditForm.current.setIsActive(false);
+        setActionEditFormVisisble(false);
     }
 
     const openEditWindow = (action) => {
         document.activeElement.blur();
         contextMenuRef.current.setOpen(false);
-        popupWindow.current.setVisible(true);
+        setActionEditFormVisisble(true);
         setOpenedAction({ ...action });
-        actionEditForm.current.setIsActive(true);
     }
 
     const moveActionUp = async (id) => {
@@ -122,7 +114,7 @@ const ActionList = (props) => {
             return null;
         }
 
-        await props.swapActionIndexesCall(groupId, index, index - 1);
+        await swapActionIndexesCall(groupId, index, index - 1);
 
         return index - 1;
     }
@@ -140,7 +132,7 @@ const ActionList = (props) => {
             return null;
         }
 
-        await props.swapActionIndexesCall(groupId, index, index + 1);
+        await swapActionIndexesCall(groupId, index, index + 1);
 
         return index + 1;
     }
@@ -236,9 +228,9 @@ const ActionList = (props) => {
     }
 
     const deleteAllSelectedActions = useCallback(() => {
-        props.removeActionsCall(groupId, selectedActionIds);
+        removeActionsCall(groupId, selectedActionIds);
         contextMenuRef.current.setOpen(false);
-    }, [props, groupId, selectedActionIds]);
+    }, [groupId, selectedActionIds, removeActionsCall]);
 
     const moveAllSelectedActionsUp = async () => {
         let selectedIdsSorted = [];
@@ -326,8 +318,8 @@ const ActionList = (props) => {
             return;
         }
 
-        props.addActionsCall(groupId, copiedActions, index);
-    }, [props, groupId]);
+        addActionsCall(groupId, copiedActions, index);
+    }, [groupId, addActionsCall]);
 
     const cutAll = useCallback(() => {
         copyAll();
@@ -401,19 +393,13 @@ const ActionList = (props) => {
         },
     ]
 
-    const onClickedOutsideOfActions = () => {
-        unselectactionsInGroup();
-    }
-
-    useClickOutside(actionGroupRef, onClickedOutsideOfActions, () => { return contextMenuOpenCount === 0 });
-
-    const loadingIconElementMedium = <l-ring class={(!props.isLoadingActions) ? "hidden" : ""} size="40" stroke="5" bg-opacity="0" speed="2" color="white" />;
-    const loadingIconElementSmall = <l-ring class={(!props.isLoadingActions) ? "hidden" : ""} size="25" stroke="4" bg-opacity="0" speed="2" color="white" />;
-    const isStopped = props.currentScript["play-state"] === "stopped";
+    const loadingIconElementMedium = <l-ring class={(!isLoadingActions) ? "hidden" : ""} size="40" stroke="5" bg-opacity="0" speed="2" color="white" />;
+    const loadingIconElementSmall = <l-ring class={(!isLoadingActions) ? "hidden" : ""} size="25" stroke="4" bg-opacity="0" speed="2" color="white" />;
+    const isStopped = currentScript["play-state"] === "stopped";
 
     const handleAnyContextMenuOpenChange = (isOpen) => {
         const dir = isOpen === true ? 1 : -1;
-        const newOpenCount = Math.max(contextMenuOpenCount + 1 * dir, 0)
+        const newOpenCount = Math.max(contextMenuOpenCount + 1 * dir, 0);
         setContextMenuOpenCount(newOpenCount);
     }
 
@@ -465,19 +451,34 @@ const ActionList = (props) => {
 
     }, [copyAll, paste, cutAll, selectactionsInGroup, deleteAllSelectedActions, actionsInGroup, lastSelectedItemId, multiSelectedItemAmount]);
 
+    // Such as undo, redo, copy, paste, etc. (Doesn't include starting, stopping and pausing script)
+    const areHotkeysEnabled = currentScript["play-state"] === "stopped" && !actionEditFormVisisble && isTopElementSelected;
+
     useEffect(() => {
+        if (!areHotkeysEnabled) {
+            return
+        }
+
         document.addEventListener("keydown", onKeyPress);
+
         return () => {
             document.removeEventListener("keydown", onKeyPress);
         };
-    }, [onKeyPress])
+    }, [onKeyPress, actionEditFormVisisble, currentScript, areHotkeysEnabled])
+
+    // Outside click handlers
+    useClickOutside([
+        { "refs": [actionGroupRef1, actionGroupRef2], "handler": unselectactionsInGroup, "preCheck": () => { return contextMenuOpenCount === 0 } },
+        { "refs": [topElement], "handler": () => setIsTopElementSelected(false) },
+    ]);
 
     return (
-        <div className="action-table">
-            <PopupWindow ref={popupWindow} onManualClose={onPopupClose} >
-                <ActionEditForm groupId={groupId} ref={actionEditForm} onCancel={closeEditWindow} actionType={openedAction.type} actionData={openedAction}></ActionEditForm>
+        <div ref={topElement} className={"action-table" + ((isTopElementSelected && areHotkeysEnabled) ? " selected" : "")} onMouseDown={() => setIsTopElementSelected(true)}>
+            <PopupWindow visible={actionEditFormVisisble} onVisibilityChange={setActionEditFormVisisble} >
+                <ActionEditForm groupId={groupId} isActive={actionEditFormVisisble} onCancel={closeEditWindow} actionType={openedAction.type} actionData={openedAction}></ActionEditForm>
             </PopupWindow>
             <ContextMenu onOpenChange={handleAnyContextMenuOpenChange} ref={contextMenuRef} items={contextMenuItems} />
+            <HistoryManager isActive={areHotkeysEnabled} groupId={groupId} />
 
             <div className="headers row">
                 <div className="header"></div>
@@ -488,10 +489,10 @@ const ActionList = (props) => {
                 <div className="header">Loop count</div>
                 <div className="header center">Actions</div>
             </div>
-            <div ref={actionGroupRef} className="actions" onMouseUp={onRightClick}>
-                <Reorder.Group values={actionsInGroup} onReorder={onReorder}>
+            <div ref={actionGroupRef2} className="actions" onMouseUp={onRightClick}>
+                <Reorder.Group ref={actionGroupRef1} values={actionsInGroup} onReorder={onReorder}>
                     {activeActions.map((action, index) =>
-                        <ActionItem groupId={groupId} onContextMenuOpenChange={handleAnyContextMenuOpenChange} index={(actionsPerPage * currentPage) + index} onOpenEditWindow={openEditWindow} onPaste={() => onPaste((actionsPerPage * currentPage) + index + 1)} ref={(el) => actionRefs.current[action.id] = el} isSelected={selectedActionIds.includes(action.id)} moveDown={() => moveActionDown(action.id)} moveUp={() => moveActionUp(action.id)} onSelectionClick={(e, isSelected) => onActionItemSelectionClick(e, action.id, isSelected)} performing={(actionsPerPage * currentPage + index) === currentActionIndex} data={action} key={`action-item-${action.id}`} />
+                        <ActionItem groupId={groupId} onContextMenuOpenChange={handleAnyContextMenuOpenChange} index={(actionsPerPage * currentPage) + index} onOpenEditWindow={openEditWindow} onPaste={() => onPaste((actionsPerPage * currentPage) + index + 1)} isSelected={selectedActionIds.includes(action.id)} moveDown={() => moveActionDown(action.id)} moveUp={() => moveActionUp(action.id)} onSelectionClick={(e, isSelected) => onActionItemSelectionClick(e, action.id, isSelected)} performing={(actionsPerPage * currentPage + index) === currentActionIndex} data={action} key={`action-item-${action.id}`} />
                     )}
                 </Reorder.Group>
                 <div className="centered-loading-icon">

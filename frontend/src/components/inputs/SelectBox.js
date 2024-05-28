@@ -41,7 +41,8 @@ const SelectBox = (props) => {
                 <div className={"underline colorful" + ((isOpen) ? " open" : "")} ></div>
             </div>
             <div className={"options" + ((!isOpen) ? ' hidden' : '')}>
-                <div ref={optionsSubContainerRef} style={{ top: `-${optionsYOffset}px` }} className={"options-sub-container"}>
+                <div ref={optionsSubContainerRef} style={{ top: `-${optionsYOffset}px` }} className="options-sub-container">
+                    <div className="bg"></div>
                     {props.options.map(option =>
                         <div onMouseDown={() => selectOption(option)} key={"opt-" + option.value} className="option">
                             <p className="text">{option.text}</p>

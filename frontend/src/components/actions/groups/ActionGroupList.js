@@ -1,29 +1,21 @@
 import BasicButton from "components/inputs/BasicButton";
 import PopupWindow from "components/popup/PopupWindow";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { connect } from "react-redux";
-import { addActionGroupCall, removeActionGroupCall, updateActionGroupCall } from "store/reducers/actionScriptReducer";
+import { addActionGroupCall, removeActionGroupCall } from "store/reducers/actionScriptReducer";
 import "styles/components/actions/groups/actiongrouplist.scss";
 import ActionGroupEditForm from "./ActionGroupEditForm";
+import actionScriptAPI from "apis/actionScriptAPI";
 
 const ActionGroupList = (props) => {
-
-    const popupWindow = useRef(null);
-
     const currentScript = props.currentScript;
     const groups = currentScript["action-groups"];
 
-    const currentGroupId = props.currentGroupId;
-
-    const addActionGroupCall = props.addActionGroupCall;
-    const updateActionGroupCall = props.updateActionGroupCall;
-    const removeActionGroupCall = props.removeActionGroupCall;
+    const { currentGroupId, addActionGroupCall, removeActionGroupCall, onChangeGroup } = props;
 
     const [hoveringActionsGroupId, setHoveringActionsGroupId] = useState(-1);
-
-    const onChangeGroup = props.onChangeGroup;
-
     const [selectedActionGroupId, setSelectedActionGroupId] = useState(-1);
+    const [groupEditFormVisible, setGroupEditFormVisible] = useState(false);
 
     const onClickGroup = (groupId) => {
         if (hoveringActionsGroupId !== -1) {
@@ -34,21 +26,22 @@ const ActionGroupList = (props) => {
             return
         }
 
+        actionScriptAPI.updateSelectedActionGroup(groupId);
         onChangeGroup(groupId);
     }
 
     const showEditForm = () => {
         setSelectedActionGroupId(hoveringActionsGroupId);
-        popupWindow.current.setVisible(true);
+        setGroupEditFormVisible(true);
     }
 
     const hideEditForm = () => {
-        popupWindow.current.setVisible(false);
+        setGroupEditFormVisible(false);
     }
 
     return (
         <div className="action-group-list">
-            <PopupWindow ref={popupWindow}>
+            <PopupWindow visible={groupEditFormVisible} onVisibilityChanged={setGroupEditFormVisible}>
                 <ActionGroupEditForm closeWindow={hideEditForm} groupId={selectedActionGroupId} />
             </PopupWindow>
             <div className="header">
@@ -67,7 +60,7 @@ const ActionGroupList = (props) => {
                 )}
             </div>
             <div className="footer">
-                <BasicButton onClick={addActionGroupCall} icon={"images/icons/new_group.png"}></BasicButton>
+                <BasicButton theme="add" onClick={addActionGroupCall} icon={"images/icons/new_group.png"}></BasicButton>
             </div>
         </div>
     )
@@ -82,8 +75,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = {
     addActionGroupCall,
-    removeActionGroupCall,
-    updateActionGroupCall
+    removeActionGroupCall
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ActionGroupList);

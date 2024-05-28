@@ -2,18 +2,21 @@ import "styles/components/inputs/basicbutton.scss";
 
 const BasicButton = (props) => {
 
-    const imageSize = (props.imageSize) ? props.imageSize : "100%";
+    const { imageSize, children, centering, icon, disabled, onClick, className, theme } = props;
 
-    const children = (props.children) ? <p className="text">{props.children}</p> : <></>;
-    const centering = (props.centering) ? props.centering : "center";
+    // Validation checks
+    const checkedImageSize = (imageSize) ? imageSize : "100%";
+    const checkedChildren = (children) ? <p className="text">{children}</p> : <></>;
+    const checkedCentering = (centering) ? centering : "center";
+    const checkedTheme = (theme) ? `${theme}-theme` : "default-theme";
 
     return (
-        <button style={{ justifyContent: centering }} disabled={props.disabled} onClick={props.onClick} className={"basic-button" + ((props.disabled) ? " disabled" : "") + ((props.className) ? ` ${props.className}` : "")}>
+        <button style={{ justifyContent: checkedCentering }} disabled={disabled} onClick={onClick} className={"basic-button " + checkedTheme + ((disabled) ? " disabled" : "") + ((className) ? ` ${className}` : "")}>
             <div className="bg"></div>
             {(!props.icon) ? "" :
-                <img alt="Some Icon" className="image" style={{ height: imageSize }} src={props.icon}></img>
+                <img alt="Some Icon" className="image" style={{ height: checkedImageSize }} src={icon}></img>
             }
-            {children}
+            {checkedChildren}
 
         </button>
     );

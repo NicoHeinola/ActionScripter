@@ -31,11 +31,23 @@ class ActionScript(EventEmitter):
         # How many times the script has looped so far
         self._current_loop_count: int = 0
 
+        # Contains a list of action groups that we are playing. Last one is the currently playing one
+        self._action_group_play_order: List[int] = []
+
         # Is this script running, paused or stopped
         self._play_state: str = "stopped"
 
         # Where this script was last saved. Used for automatically saving without having to manually pick the location
         self._latest_save_path: str = ""
+
+        # Makes it possible to keep track of what group we select at the frontend
+        self._latest_selected_group_id: int = 0
+
+    def set_latest_selected_group_id(self, group_id: int) -> None:
+        self._latest_selected_group_id = group_id
+
+    def get_latest_selected_group_id(self) -> None:
+        return self._latest_selected_group_id
 
     def group_exists(self, group_id: int) -> bool:
         return self._action_groups.get(group_id) is not None
@@ -76,6 +88,22 @@ class ActionScript(EventEmitter):
         """
         return self._action_groups
 
+    def _add_playing_action_group(self, group_id: int) -> None:
+        self._action_group_play_order.append(group_id)
+
+    def _remove_latest_playing_action_group(self) -> None:
+        self._action_group_play_order.pop()
+
+    def _clear_playing_action_group_list(self) -> None:
+        self._action_group_play_order.clear()
+
+    def _get_latest_playing_action_group(self) -> ActionGroup:
+        if len(self._action_group_play_order) == 0:
+            return None
+
+        latest_id: int = self._action_group_play_order[len(self._action_group_play_order) - 1]
+        return self.get_action_group(latest_id)
+
     def start(self, group_id: int, sleep_handler: Callable[float, Callable]) -> None:
         """
         Starts playing actions.
@@ -87,7 +115,19 @@ class ActionScript(EventEmitter):
 
         self._play_state = "playing"
 
-        group: ActionGroup = self.get_action_group(group_id)
+        group: ActionGroup = None
+
+        if group_id is not None:
+            # If we want to play a certain action group
+            group = self.get_action_group(group_id)
+        else:
+            # If we want to play the last played action group
+            group = self._get_latest_playing_action_group()
+
+        if group is None:
+            return
+
+        self._add_playing_action_group(group_id)
 
         # Loop the actions until stopped or loop limit reached
         while self._current_loop_count <= self._loop_count or self._loop_type == "infinite":
@@ -96,9 +136,12 @@ class ActionScript(EventEmitter):
             group.play_handler(sleep_handler, self.is_playing)
 
             if not self.is_playing():
+                self._remove_latest_playing_action_group()
                 return
 
             self._current_loop_count += 1
+
+        self._remove_latest_playing_action_group()
 
         self.stop()
         self.emit("finished-actions")
@@ -292,6 +335,8 @@ class ActionScript(EventEmitter):
                 action_group: ActionGroup = ActionGroup()
                 action_group.deserialize(action_group_data)
                 self.add_action_group(action_group)
+
+            self.set_latest_selected_group_id(list(self._action_groups.keys())[0])
 
     def save_as(self) -> None:
         file_path: str = filedialog.asksaveasfilename(defaultextension=".acsc", filetypes=[("ActionScript Files", "*.acsc"), ("All Files", "*.*")])

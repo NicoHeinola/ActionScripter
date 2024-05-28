@@ -73,11 +73,21 @@ class HotkeyManager:
             if ActionScript.current_script is None:
                 return
 
-            if ActionScript.current_script.is_playing():
-                ActionScript.current_script.pause()
+            script: ActionScript = ActionScript.current_script
+            def sleep_func(a, b=None): return socket_supported_sleep(self._socket, a, b)
+
+            if script.is_playing():
+                # Playing -> Paused
+                script.pause()
                 self._socket.emit("changed-play-state", "paused")
-            else:
-                self._socket.start_background_task(target=lambda: ActionScript.current_script.start(lambda a, b=None: socket_supported_sleep(self._socket, a, b)))
+            elif script.is_paused():
+                # Paused -> Playing
+                self._socket.start_background_task(target=lambda: script.start(None, sleep_func))
+                self._socket.emit("changed-play-state", "playing")
+            elif script.is_stopped():
+                # Stopped -> Playing
+                latest_group_id: int = script.get_latest_selected_group_id()
+                self._socket.start_background_task(target=lambda: script.start(latest_group_id, sleep_func))
                 self._socket.emit("changed-play-state", "playing")
 
         def on_stop_key() -> None:

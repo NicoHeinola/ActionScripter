@@ -1,24 +1,19 @@
 import "styles/components/actions/edit/actioneditform.scss";
 import MouseClickActionForm from "./forms/MouseClickActionForm";
 import TextInput from "components/inputs/TextInput";
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import BasicButton from "components/inputs/BasicButton";
 import { updateActionCall } from "store/reducers/actionScriptReducer";
 import { connect } from 'react-redux';
 import GroupBox from "components/boxes/GroupBox";
 
-const ActionEditForm = forwardRef((props, ref) => {
+const ActionEditForm = (props) => {
 
-    const { groupId, actionData, onCancel, updateActionCall, actionType, currentScript } = props;
+    const { groupId, actionData, onCancel, updateActionCall, actionType, currentScript, isActive } = props;
 
     const playState = currentScript["play-state"];
 
     const [actionDataCopy, setActionDataCopy] = useState({ ...actionData });
-    const [isActive, setIsActive] = useState(false);
-
-    useEffect(() => {
-        setActionDataCopy({ ...actionData });
-    }, [actionData]);
 
     const onDataChanged = (newDatas) => {
         let newActionData = { ...actionDataCopy };
@@ -69,12 +64,18 @@ const ActionEditForm = forwardRef((props, ref) => {
         return () => {
             document.removeEventListener('keydown', handleKeyDown);
         };
-    }, [handleKeyDown, actionDataCopy, playState]);
+    }, [handleKeyDown, actionDataCopy, playState, isActive]);
 
-    useImperativeHandle(ref, () => ({
-        resetActionData,
-        setIsActive
-    }));
+    useEffect(() => {
+        setActionDataCopy({ ...actionData });
+    }, [actionData]);
+
+    useEffect(() => {
+        if (!isActive) {
+            resetActionData();
+        }
+    }, [isActive, resetActionData])
+
 
     let component = null;
     switch (actionType) {
@@ -102,7 +103,7 @@ const ActionEditForm = forwardRef((props, ref) => {
             </div>
         </div>
     )
-});
+};
 
 const mapStateToProps = (state) => {
     return {
@@ -114,4 +115,4 @@ const mapDispatchToProps = {
     updateActionCall
 };
 
-export default connect(mapStateToProps, mapDispatchToProps, null, { forwardRef: true })(ActionEditForm);
+export default connect(mapStateToProps, mapDispatchToProps)(ActionEditForm);

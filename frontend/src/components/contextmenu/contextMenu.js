@@ -44,7 +44,10 @@ const ContextMenu = forwardRef((props, ref) => {
         }
     }
 
-    useClickOutside(clickRef, onClickOutside, () => isOpen === true);
+    useClickOutside([
+        { "refs": [clickRef], "handler": onClickOutside, "preCheck": () => isOpen === true },
+    ]);
+
 
     useImperativeHandle(ref, () => ({
         setOpen,

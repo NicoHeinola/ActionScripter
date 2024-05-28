@@ -432,3 +432,15 @@ class ActionScriptController(BaseController):
                 return make_response({"error": f"Couldn't find group with id '{group_id}'!"}, 500)
 
             return make_response(removed_group.serialize(), 200)
+
+        @self._app.route(f"{base_route}/action-group/select/<group_id>", methods=["POST"])
+        def update_latest_selected_group_id(group_id):
+            if ActionScript.current_script is None:
+                return make_response({"error": "No current script found!"}, 500)
+
+            if group_id is None:
+                return make_response({"error": "Missing 'group_id'"}, 500)
+
+            ActionScript.current_script.set_latest_selected_group_id(int(group_id))
+
+            return make_response("", 200)

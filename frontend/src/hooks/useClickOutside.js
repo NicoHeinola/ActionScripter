@@ -1,17 +1,40 @@
 import { useEffect } from 'react';
 
-const useClickOutside = (ref, handler, preCheck = null) => {
+const useClickOutside = (refHandlers) => {
     useEffect(() => {
-        if (preCheck !== null && !preCheck()) {
-            return;
-        }
-
         const handleClickOutside = (event) => {
             let mouseClientX = event.clientX;
             let mouseClientY = event.clientY;
-            let rect = ref.current.getBoundingClientRect();
 
-            if (mouseClientX < rect.x || mouseClientX > rect.x + rect.width || mouseClientY < rect.y || mouseClientY > rect.y + rect.height) {
+            const handlersToRun = [];
+
+            // Loop through each handler
+            for (const { refs, handler, preCheck } of refHandlers) {
+                if (preCheck !== null && preCheck !== undefined && !preCheck()) {
+                    return;
+                }
+
+                // Check that if we are outside any element
+                for (const ref of refs) {
+                    let rect = ref.current.getBoundingClientRect();
+
+                    // If mouse is outside of the element
+                    const isOutside = (
+                        mouseClientX < rect.x ||
+                        mouseClientX > rect.x + rect.width ||
+                        mouseClientY < rect.y ||
+                        mouseClientY > rect.y + rect.height
+                    );
+
+                    if (isOutside) {
+                        handlersToRun.push(handler);
+                        break;
+                    }
+                }
+            }
+
+            // Run the handler functions
+            for (let handler of handlersToRun) {
                 handler();
             }
         };
@@ -20,7 +43,7 @@ const useClickOutside = (ref, handler, preCheck = null) => {
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [ref, handler, preCheck]);
+    }, [refHandlers]);
 };
 
 export default useClickOutside;

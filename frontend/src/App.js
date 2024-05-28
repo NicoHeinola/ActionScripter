@@ -11,6 +11,9 @@ import NavigationMenu from 'components/navigation/NavigationMenu';
 import SettingsPageView from 'views/SettingsPageView';
 import HotkeyManager from 'components/hotkey/HotkeyManager';
 import { useEffect } from 'react';
+import { ring } from 'ldrs';
+
+ring.register()
 
 function App() {
   useEffect(() => {

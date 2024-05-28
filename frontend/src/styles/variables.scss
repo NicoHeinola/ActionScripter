@@ -1,27 +1,18 @@
-// Site
-$site-color-1: rgb(54, 64, 73);
-$site-text-color-1: white;
+// Colors
+$warning-color: rgb(236, 75, 75);
+$ok-color: rgb(95, 228, 101);
+$primary-color: rgb(99, 223, 216);
+
+$primary-text-color: white;
+$secondary-text-color: black;
+$unactive-text-color: rgba(255, 255, 255, 0.445);
 
 // Globals
 $global-border-radius: 3px;
-$global-darkened-bg: rgba(0, 0, 0, 0.1);
 
-// Buttons
-$button-color-1: rgb(95, 228, 101);
-$button-color-1-cancel: rgb(236, 75, 75);
-$button-text-color-1: rgb(34, 34, 34);
-
-// Text input
-$input-color-1: rgb(0, 0, 0);
-$input-active-color-1: rgb(95, 228, 101);
-$input-text-color-1: white;
-$input-placeholder-color-1: rgba(255, 255, 255, 0.445);
-
-// Select input
-$select-color-1: rgb(31, 110, 55);
-
-// Group box
-$group-box-border-color: rgba(0, 0, 0, 0.4);
+// Site
+$site-color-1: rgb(54, 64, 73);
+$site-text-color-1: $primary-text-color;
 
 // Fonts
 $main-font-family: Overpass,
@@ -29,11 +20,27 @@ Sans-Serif;
 
 // Navigation
 $nav-color: rgb(33, 39, 44);
-$warning-color: rgba(236, 75, 75, 0.486);
-$warning-active-color: rgb(196, 62, 62);
 
 // Context menu
 $context-menu-color: rgb(23, 24, 37);
 
 // Action list
 $action-list-color: rgb(35, 46, 58);
+
+// Buttons
+$button-color-1: $primary-color;
+$button-color-2: $ok-color;
+$button-color-1-cancel: $warning-color;
+$button-text-color-1: $secondary-text-color;
+
+// Text input
+$input-color-1: rgb(0, 0, 0);
+$input-active-color-1: $primary-color;
+$input-text-color-1: $primary-text-color;
+$input-placeholder-color-1: $unactive-text-color;
+
+// Select input
+$select-color-1: $input-active-color-1;
+
+// Group box
+$group-box-border-color: rgba(0, 0, 0, 0.4);

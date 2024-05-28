@@ -1,22 +1,22 @@
-import { useState, forwardRef, useImperativeHandle } from "react";
+import { useState, useEffect } from "react";
 import "styles/components/popup/popupwindow.scss";
 
-const PopupWindow = forwardRef((props, ref) => {
-    const [visible, setVisible] = useState(false);
+const PopupWindow = (props) => {
+    const [visible, setVisible] = useState(props.visible);
 
-    // Expose customFunction via ref
-    useImperativeHandle(ref, () => ({
-        setVisible
-    }));
+    useEffect(() => {
+        setVisible(props.visible);
+    }, [props.visible])
+
+    const { onVisibilityChange } = props;
+
 
     const closePopup = () => {
-        setVisible(false);
-
-        if (!props.onManualClose) {
+        if (!onVisibilityChange) {
             return;
         }
 
-        props.onManualClose();
+        onVisibilityChange(!visible);
     }
 
 
@@ -28,6 +28,6 @@ const PopupWindow = forwardRef((props, ref) => {
             </div>
         </div>
     )
-});
+};
 
 export default PopupWindow;

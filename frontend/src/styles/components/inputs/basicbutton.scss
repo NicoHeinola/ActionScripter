@@ -14,11 +14,18 @@
     padding: 6px;
     border-radius: $global-border-radius;
 
+    transition: all 0.2s;
     background: $button-color-1;
 
-    transition: all 0.2s;
-
     cursor: pointer;
+
+    &.default-theme {
+        background: $button-color-1;
+    }
+
+    &.add-theme {
+        background: $button-color-2;
+    }
 
     .text {
         text-overflow: ellipsis;
