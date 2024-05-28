@@ -93,13 +93,13 @@ const ActionEditForm = (props) => {
                 <div className="row">
                     <TextInput min="0" type="number" onChange={newValue => onDataChanged({ "start-delay-ms": newValue })} value={actionDataCopy["start-delay-ms"]} placeholder="Start delay (ms)" />
                     <TextInput min="0" type="number" onChange={newValue => onDataChanged({ "end-delay-ms": newValue })} value={actionDataCopy["end-delay-ms"]} placeholder="End delay (ms)" />
-                    <TextInput min="0" type="number" onChange={newValue => onDataChanged({ "loop-count": newValue })} value={actionDataCopy["loop-count"]} placeholder="Loop count" />
+                    <TextInput min="0" type="number" onChange={newValue => onDataChanged({ "loop-count": newValue })} value={actionDataCopy["loop-count"]} placeholder="Loops" />
                 </div>
             </GroupBox>
             {component}
             <div className="row">
-                <BasicButton onClick={save}>Save</BasicButton>
-                <BasicButton className="cancel" onClick={cancel}>Cancel</BasicButton>
+                <BasicButton theme="add" onClick={save}>Save</BasicButton>
+                <BasicButton theme="warning" onClick={cancel}>Cancel</BasicButton>
             </div>
         </div>
     )

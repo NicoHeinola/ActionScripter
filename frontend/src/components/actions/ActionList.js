@@ -468,7 +468,7 @@ const ActionList = (props) => {
 
     // Outside click handlers
     useClickOutside([
-        { "refs": [actionGroupRef1, actionGroupRef2], "handler": unselectactionsInGroup, "preCheck": () => { return contextMenuOpenCount === 0 } },
+        { "refs": [actionGroupRef1, actionGroupRef2], "handler": unselectactionsInGroup, "preCheck": () => { return contextMenuOpenCount === 0 && !actionEditFormVisisble } },
         { "refs": [topElement], "handler": () => setIsTopElementSelected(false) },
     ]);
 
@@ -486,8 +486,7 @@ const ActionList = (props) => {
                 <div className="header">Type</div>
                 <div className="header">Start delay (ms)</div>
                 <div className="header">End delay (ms)</div>
-                <div className="header">Loop count</div>
-                <div className="header center">Actions</div>
+                <div className="header">Loops</div>
             </div>
             <div ref={actionGroupRef2} className="actions" onMouseUp={onRightClick}>
                 <Reorder.Group ref={actionGroupRef1} values={actionsInGroup} onReorder={onReorder}>

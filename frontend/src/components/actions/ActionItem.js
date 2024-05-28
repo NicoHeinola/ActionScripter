@@ -16,6 +16,8 @@ const ActionItem = forwardRef((props, ref) => {
     const contextMenuRef = useRef(null);
     const [contextMenuOpen, setContextMenuOpen] = useState(false);
     const [isHovering, setIsHovering] = useState(false);
+    const [isHoveringActionsWrapper, setIsHoveringActionsWrapper] = useState(false);
+    const [isHoveringActions, setIsHoveringActions] = useState(false);
 
     const canModify = props.currentScript["play-state"] === "stopped";
     const performingActionClass = (canModify) ? "" : (props.performing) ? "performing" : "disabled";
@@ -187,7 +189,7 @@ const ActionItem = forwardRef((props, ref) => {
         <div className="action-item-wrapper">
             <ContextMenu onOpenChange={onContextMenuOpenChange} onClose={() => setContextMenuOpen(false)} ref={contextMenuRef} items={contextMenuItems} />
             <Reorder.Item onDragEnd={onDragEnd} onDrag={onDrag} value={action} dragListener={false} dragControls={dragControls} className="action-item-container">
-                <div className={"action-item" + ((isHovering) ? " hover" : "") + ((contextMenuOpen === true) ? " context-menu-open" : "") + ((isSelected) ? " selected" : "") + ((props.className) ? ` ${props.className}` : "") + ` ${performingActionClass}`} onMouseUp={onRightClick} >
+                <div className={"action-item" + ((isHoveringActionsWrapper) ? " hovering-actions-wrapper" : "") + ((isHoveringActions) ? " hovering-actions" : "") + ((isHovering) ? " hover" : "") + ((contextMenuOpen === true) ? " context-menu-open" : "") + ((isSelected) ? " selected" : "") + ((props.className) ? ` ${props.className}` : "") + ` ${performingActionClass}`} onMouseUp={onRightClick} >
                     <div className="drag-items">
                         <div onPointerDown={onDragContainerPointerDown} className="data drag">
                             <img alt="Drag Icon" draggable="false" className="icon" src="images/icons/drag.png"></img>
@@ -199,12 +201,12 @@ const ActionItem = forwardRef((props, ref) => {
                         <div className="data"><p className="text">{action["start-delay-ms"]}</p></div>
                         <div className="data"><p className="text">{action["end-delay-ms"]}</p></div>
                         <div className="data"><p className="text">{action["loop-count"]}</p></div>
-
                     </div>
-                    <div className="action-buttons">
-                        <div className="data buttons">
-                            <BasicButton disabled={!canModify} onClick={openEditWindow} className="button" icon="images/icons/edit.png"></BasicButton>
-                            <BasicButton disabled={!canModify} onClick={removeAction} className="button cancel" icon="images/icons/delete.png"></BasicButton>
+                    <div className="actions-wrapper" onMouseLeave={() => setIsHoveringActionsWrapper(false)} onMouseEnter={() => setIsHoveringActionsWrapper(true)}>
+                        <div className="actions" onMouseLeave={() => setIsHoveringActions(false)} onMouseEnter={() => setIsHoveringActions(true)}>
+                            <div className="bg"></div>
+                            <BasicButton className="action" disabled={!canModify} onClick={openEditWindow} icon="images/icons/edit.png"></BasicButton>
+                            <BasicButton className="action" theme="warning" disabled={!canModify} onClick={removeAction} icon="images/icons/delete.png"></BasicButton>
                         </div>
                     </div>
                 </div>

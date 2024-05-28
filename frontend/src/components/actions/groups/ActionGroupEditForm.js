@@ -71,8 +71,8 @@ const ActionGroupEditForm = forwardRef((props, ref) => {
                 <TextInput placeholder="Name" onChange={newValue => dataChanged("name", newValue)} value={actionGroupData["name"]} />
             </GroupBox>
             <div className="row">
-                <BasicButton onClick={save}>Save</BasicButton>
-                <BasicButton className="cancel" onClick={cancel}>Cancel</BasicButton>
+                <BasicButton theme="add" onClick={save}>Save</BasicButton>
+                <BasicButton theme="warning" onClick={cancel}>Cancel</BasicButton>
             </div>
         </div>
     )

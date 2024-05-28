@@ -13,6 +13,7 @@
     outline: 1px solid rgba($primary-color, 0);
 
     transition: outline-color 0.1s;
+    overflow-x: auto;
 
     &.selected {
         outline: 1px solid rgba($primary-color, 0.5);
@@ -35,12 +36,13 @@
     .actions {
         position: relative;
         overflow-y: scroll;
+        overflow-x: hidden;
         height: 100%;
     }
 
     .headers {
         display: grid;
-        grid-template-columns: 50px repeat(4, minmax(80px, 1fr)) 50px 110px;
+        grid-template-columns: 50px repeat(4, minmax(80px, 1fr)) 50px;
         width: 100%;
         min-height: 60px;
         padding: 10px;
@@ -67,7 +69,7 @@
         align-items: center;
         width: 100%;
         border-top: 3px solid rgba(0, 0, 0, 0.4);
-        margin-top: auto;
+        min-height: 60px;
 
         .pages {
             position: relative;

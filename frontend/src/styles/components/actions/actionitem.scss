@@ -6,6 +6,7 @@
     background: $action-list-color;
 
     .action-item {
+        position: relative;
         display: flex;
         flex-direction: row;
         transition: all 0.1s;
@@ -16,18 +17,34 @@
             background: rgba(255, 255, 255, 0.06);
         }
 
-        /* When hovering */
-        &.hover:not(.performing):not(.disabled) {
+        /* When hovering anything but the actions */
+        &:is(:hover, .hovering-actions-wrapper):not(.performing):not(.disabled):not(.hovering-actions) {
             background: rgba(255, 255, 255, 0.02);
             cursor: pointer;
 
             &.selected {
                 background: rgba(255, 255, 255, 0.08);
             }
+
+            .actions-wrapper {
+                .actions {
+                    transform: translateX(0);
+                    transition-delay: 0.1s;
+                }
+            }
+        }
+
+        &.hovering-actions {
+            .actions-wrapper {
+                .actions {
+                    transform: translateX(0);
+                    transition-delay: 0.1s;
+                }
+            }
         }
 
         /* When pressing down */
-        &:active:not(.performing):not(.disabled) {
+        &:active:not(.performing):not(.disabled):not(.hovering-actions) {
             background: rgba(255, 255, 255, 0.01);
 
             &.selected {
@@ -60,6 +77,52 @@
             }
         }
 
+        .actions-wrapper {
+            position: absolute;
+            right: 0;
+            height: 100%;
+            overflow: hidden;
+            z-index: 50;
+
+            .actions {
+                position: relative;
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                overflow-y: hidden;
+
+                right: 0;
+                gap: 10px;
+                padding: 0 10px;
+
+                transform: translateX(100%);
+
+                transition: transform 0.2s;
+                transition-delay: 0s;
+
+                .action {
+                    aspect-ratio: 1;
+                    height: 35px;
+                    width: initial;
+                }
+
+                .bg {
+                    position: absolute;
+                    left: 0;
+                    top: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: $action-list-color;
+
+                    border-bottom-left-radius: $global-border-radius;
+                    border-top-left-radius: $global-border-radius;
+
+                    filter: brightness(80%);
+                }
+            }
+        }
+
+
         .drag-items {
             display: flex;
             justify-content: center;
@@ -85,15 +148,6 @@
             padding: 10px;
             gap: 10px;
             transition: all 0.2s;
-        }
-
-        .action-buttons {
-            position: relative;
-            display: flex;
-            flex-direction: row;
-            justify-content: center;
-            align-items: center;
-            min-width: 120px;
         }
 
         .data {

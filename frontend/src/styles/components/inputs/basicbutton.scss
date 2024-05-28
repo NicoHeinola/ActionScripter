@@ -15,7 +15,6 @@
     border-radius: $global-border-radius;
 
     transition: all 0.2s;
-    background: $button-color-1;
 
     cursor: pointer;
 
@@ -27,15 +26,17 @@
         background: $button-color-2;
     }
 
+    &.warning-theme {
+        background: $button-color-1-cancel;
+    }
+
+    background: $button-color-1;
+
     .text {
         text-overflow: ellipsis;
         white-space: nowrap;
         overflow: hidden;
         color: $button-text-color-1;
-    }
-
-    &.cancel {
-        background: $button-color-1-cancel;
     }
 
     .bg {

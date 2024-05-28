@@ -56,10 +56,9 @@
 
             /* When hovering */
             &:hover:not(.disabled) {
-                cursor: pointer;
-
                 &:not(.hovering-actions) {
                     background: rgba(255, 255, 255, 0.02);
+                    cursor: pointer;
 
                     &.selected {
                         background: rgba(255, 255, 255, 0.08);
@@ -99,8 +98,8 @@
                 flex-direction: row;
                 align-items: center;
 
-                gap: 15px;
-                padding: 0 15px;
+                gap: 10px;
+                padding: 0 10px;
 
                 height: 100%;
                 right: 0%;
@@ -129,7 +128,7 @@
                     border-bottom-left-radius: $global-border-radius;
                     border-top-left-radius: $global-border-radius;
 
-                    filter: brightness(90%);
+                    filter: brightness(80%);
                 }
 
                 .action {

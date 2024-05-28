@@ -163,9 +163,9 @@ const ScriptEditorView = (props) => {
             </div>
             <div className="playstate-actions">
                 {playButton}
-                <BasicButton centering={buttonTextAlignment} disabled={currentScript["play-state"] === "stopped" || props.isLoadingActions} onClick={stopScript} icon="images/icons/stop_play.png" className="play-button cancel">{stopHotkeyText}</BasicButton>
+                <BasicButton theme="warning" centering={buttonTextAlignment} disabled={currentScript["play-state"] === "stopped" || props.isLoadingActions} onClick={stopScript} icon="images/icons/stop_play.png" className="play-button cancel">{stopHotkeyText}</BasicButton>
                 <BasicButton disabled={!isStopped || props.isLoadingActions} onClick={switchScriptLoopType} className="repeat-button" icon={`images/icons/${currentScript["loop-type"] === 'infinite' ? "loop_infinite.png" : "loop_x_times.png"}`}></BasicButton>
-                <TextInput min="0" value={currentScript["loop-count"]} onChange={newValue => setScriptLoopCount(newValue)} className="input" type="number" placeholder="Loop Count" disabled={!isStopped || currentScript["loop-type"] === 'infinite' || props.isLoadingActions} />
+                <TextInput min="0" value={currentScript["loop-count"]} onChange={newValue => setScriptLoopCount(newValue)} className="input" type="number" placeholder="Loops" disabled={!isStopped || currentScript["loop-type"] === 'infinite' || props.isLoadingActions} />
             </div>
         </motion.div>
     );

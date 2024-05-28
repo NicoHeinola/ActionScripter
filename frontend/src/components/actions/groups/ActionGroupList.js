@@ -61,7 +61,7 @@ const ActionGroupList = (props) => {
                         <div className="actions" onMouseLeave={() => setHoveringActionsGroupId(-1)} onMouseEnter={() => setHoveringActionsGroupId(group.id)}>
                             <div className="bg"></div>
                             <BasicButton disabled={!enabled} onClick={showEditForm} className="action" icon="images/icons/edit.png"></BasicButton>
-                            <BasicButton disabled={!enabled} onClick={() => removeActionGroupCall(group.id)} className={"action cancel" + ((currentGroupId === group.id) ? " hidden" : "")} icon="images/icons/delete.png"></BasicButton>
+                            <BasicButton theme="warning" disabled={!enabled} onClick={() => removeActionGroupCall(group.id)} className={"action " + ((currentGroupId === group.id) ? " hidden" : "")} icon="images/icons/delete.png"></BasicButton>
                         </div>
                     </div>
                 )}
