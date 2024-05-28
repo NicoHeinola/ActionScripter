@@ -51,12 +51,12 @@
             cursor: pointer;
 
             /* When not hovering or pressing and just selected*/
-            &.selected {
+            &.selected:not(.disabled) {
                 background: rgba(255, 255, 255, 0.06);
             }
 
             /* When hovering */
-            &:hover {
+            &:hover:not(.disabled) {
                 &:not(.hovering-actions) {
                     background: rgba(255, 255, 255, 0.02);
 
@@ -78,6 +78,11 @@
                 &.selected {
                     background: rgba(255, 255, 255, 0.07);
                 }
+            }
+
+            &.disabled {
+                background: rgba(255, 255, 255, 0.05);
+                filter: opacity(0.5);
             }
 
             .name {

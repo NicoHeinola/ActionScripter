@@ -17,8 +17,15 @@ const ActionGroupList = (props) => {
     const [selectedActionGroupId, setSelectedActionGroupId] = useState(-1);
     const [groupEditFormVisible, setGroupEditFormVisible] = useState(false);
 
+    const scriptPlayState = currentScript["play-state"];
+    const enabled = scriptPlayState === "stopped";
+
     const onClickGroup = (groupId) => {
         if (hoveringActionsGroupId !== -1) {
+            return;
+        }
+
+        if (!enabled) {
             return;
         }
 
@@ -49,18 +56,18 @@ const ActionGroupList = (props) => {
             </div>
             <div className="group-list">
                 {Object.values(groups).map(group =>
-                    <div onClick={() => onClickGroup(group.id)} className={"group" + ((hoveringActionsGroupId === group.id) ? " hovering-actions" : "") + ((group.id === currentGroupId) ? " selected" : "")} key={`group-${group.id}`}>
+                    <div onClick={() => onClickGroup(group.id)} className={"group" + ((!enabled) ? " disabled" : "") + ((hoveringActionsGroupId === group.id) ? " hovering-actions" : "") + ((group.id === currentGroupId) ? " selected" : "")} key={`group-${group.id}`}>
                         <p className="name">{group.name}</p>
                         <div className="actions" onMouseLeave={() => setHoveringActionsGroupId(-1)} onMouseEnter={() => setHoveringActionsGroupId(group.id)}>
                             <div className="bg"></div>
-                            <BasicButton onClick={showEditForm} className="action" icon="images/icons/edit.png"></BasicButton>
-                            <BasicButton onClick={() => removeActionGroupCall(group.id)} className={"action cancel" + ((currentGroupId === group.id) ? " hidden" : "")} icon="images/icons/delete.png"></BasicButton>
+                            <BasicButton disabled={!enabled} onClick={showEditForm} className="action" icon="images/icons/edit.png"></BasicButton>
+                            <BasicButton disabled={!enabled} onClick={() => removeActionGroupCall(group.id)} className={"action cancel" + ((currentGroupId === group.id) ? " hidden" : "")} icon="images/icons/delete.png"></BasicButton>
                         </div>
                     </div>
                 )}
             </div>
             <div className="footer">
-                <BasicButton theme="add" onClick={addActionGroupCall} icon={"images/icons/new_group.png"}></BasicButton>
+                <BasicButton disabled={!enabled} theme="add" onClick={addActionGroupCall} icon={"images/icons/new_group.png"}></BasicButton>
             </div>
         </div>
     )

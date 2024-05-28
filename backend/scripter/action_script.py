@@ -144,7 +144,6 @@ class ActionScript(EventEmitter):
         self._remove_latest_playing_action_group()
 
         self.stop()
-        self.emit("finished-actions")
 
     def pause(self) -> None:
         """
@@ -169,6 +168,8 @@ class ActionScript(EventEmitter):
 
         for group in self._action_groups.values():
             group.reset_action_index()
+
+        self.emit("finished-actions")
 
     def add_action_group(self, group: ActionGroup) -> None:
         group.on("performed-action", lambda action_index: self.emit("performed-action", action_index))
