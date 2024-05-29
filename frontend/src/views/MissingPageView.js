@@ -12,7 +12,7 @@ const MissingPageView = (props) => {
             exit={{ opacity: 0 }}
             className="missing-page-view page">
             <h1>No page found!</h1>
-            <Link to="#" onClick={() => window.history.back()}><BasicButton>Go back</BasicButton></Link>
+            <Link to="#" onClick={() => window.history.back()}><BasicButton theme="warning">Go back</BasicButton></Link>
         </motion.div>
     )
 }

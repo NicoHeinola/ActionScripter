@@ -4,84 +4,58 @@ import { connect } from "react-redux";
 import { updateActionGroupCall } from "store/reducers/actionScriptReducer";
 import GroupBox from "components/boxes/GroupBox";
 import TextInput from "components/inputs/TextInput";
-import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
-import BasicButton from "components/inputs/BasicButton";
+import { useCallback, useEffect, useState } from "react";
+import PopupForm from "components/forms/PopupForm";
 
-const ActionGroupEditForm = forwardRef((props, ref) => {
+const ActionGroupEditForm = (props) => {
 
-    const groupId = props.groupId;
-    const currentScript = props.currentScript;
-
-    const originalActionGroupData = currentScript["action-groups"][`${groupId}`];
-
-    const [actionGroupData, setActionGroupData] = useState({ ...originalActionGroupData });
+    const { data, visible, onVisibilityChange, updateActionGroupCall } = props;
+    const [localData, setLocalData] = useState({ ...data });
 
     useEffect(() => {
-        setActionGroupData({ ...originalActionGroupData });
-    }, [originalActionGroupData])
+        setLocalData({ ...data });
+    }, [data])
 
-    useImperativeHandle(ref, () => ({
-        resetActionGroupData
-    }));
-
-    const updateActionGroupCall = props.updateActionGroupCall;
-    const closeWindow = props.closeWindow;
-
-    const save = () => {
-        updateActionGroupCall(actionGroupData.id, actionGroupData);
-
-        if (!closeWindow) {
+    const close = useCallback(() => {
+        if (!onVisibilityChange) {
             return;
         }
 
-        closeWindow();
-    }
+        onVisibilityChange(false);
+    }, [onVisibilityChange]);
 
-    const resetActionGroupData = () => {
-        setActionGroupData({ ...originalActionGroupData });
-    }
+    const save = useCallback(() => {
+        updateActionGroupCall(localData.id, localData);
+    }, [localData, updateActionGroupCall]);
 
-    const cancel = () => {
+    const resetActionGroupData = useCallback(() => {
+        setLocalData({ ...data });
+    }, [data]);
+
+    const cancel = useCallback(() => {
         resetActionGroupData();
+    }, [resetActionGroupData]);
 
-        if (!closeWindow) {
-            return;
-        }
-
-        closeWindow();
-    }
-
-    const dataChanged = (key, value) => {
-        let newActionGroupData = { ...actionGroupData };
-        newActionGroupData[key] = value;
-        setActionGroupData(newActionGroupData);
-    }
-
-    if (!(groupId in currentScript["action-groups"])) {
-        return (
-            <div className="action-group-edit-form">
-                <p>No action group selected.</p>
-            </div>
-        )
-    }
+    const dataChanged = useCallback((key, value) => {
+        let newData = { ...localData };
+        newData[key] = value;
+        setLocalData(newData);
+    }, [localData, setLocalData]);
 
     return (
-        <div className="action-group-edit-form">
-            <GroupBox title="General">
-                <TextInput placeholder="Name" onChange={newValue => dataChanged("name", newValue)} value={actionGroupData["name"]} />
-            </GroupBox>
-            <div className="row">
-                <BasicButton theme="add" onClick={save}>Save</BasicButton>
-                <BasicButton theme="warning" onClick={cancel}>Cancel</BasicButton>
+        <PopupForm allowSaving={true} onSave={save} onCancel={cancel} onVisibilityChange={close} visible={visible}>
+            <div className="action-group-edit-form">
+                <GroupBox title="General">
+                    <TextInput placeholder="Name" onChange={newValue => dataChanged("name", newValue)} value={localData["name"]} />
+                </GroupBox>
             </div>
-        </div>
+        </PopupForm>
     )
-});
+};
 
 
 const mapStateToProps = (state) => {
     return {
-        currentScript: state.actionScript.currentScript,
     };
 };
 
@@ -89,4 +63,4 @@ const mapDispatchToProps = {
     updateActionGroupCall
 };
 
-export default connect(mapStateToProps, mapDispatchToProps, null, { forwardRef: true })(ActionGroupEditForm);
+export default connect(mapStateToProps, mapDispatchToProps)(ActionGroupEditForm);

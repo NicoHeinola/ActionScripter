@@ -14,23 +14,10 @@
 
     transition: outline-color 0.1s;
     overflow-x: auto;
+    overflow-y: hidden;
 
     &.selected {
         outline: 1px solid rgba($primary-color, 0.5);
-        ;
-    }
-
-    .centered-loading-icon {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        pointer-events: none;
-
-        .hidden {
-            display: none;
-            opacity: 0;
-        }
     }
 
     .actions {

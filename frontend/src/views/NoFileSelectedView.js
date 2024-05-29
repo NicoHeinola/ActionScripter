@@ -4,19 +4,19 @@ import actionScriptAPI from "apis/actionScriptAPI";
 import { useNavigate } from 'react-router-dom';
 
 import { connect } from 'react-redux';
-import { getRecentScriptsCall, getScriptCall, loadActionScriptCall, newRecentScriptCall, setScriptIsModifiedCall, updateScriptCall } from "store/reducers/actionScriptReducer";
+import { getRecentScriptsCall, getScriptCall, loadActionScriptCall, newRecentScriptCall, setIsLoadingActionsCall, setScriptIsModifiedCall, updateScriptCall } from "store/reducers/actionScriptReducer";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 
 const NoFileSelectedView = (props) => {
     const navigate = useNavigate();
-    const getRecentScriptsCall = props.getRecentScriptsCall;
+    const { getRecentScriptsCall, recentScripts, getScriptCall, loadActionScriptCall, newRecentScriptCall, setIsLoadingActionsCall, setScriptIsModifiedCall, updateScriptCall } = props;
 
-    const newEmptyActionScript = () => {
-        actionScriptAPI.newActionScript();
-        props.getScriptCall();
-        props.setScriptIsModifiedCall(true);
+    const newEmptyActionScript = async () => {
+        await actionScriptAPI.newActionScript();
+        await getScriptCall();
         navigate('/script-editor');
+        setScriptIsModifiedCall(true);
     }
 
     const selectFileFromDisk = () => {
@@ -35,7 +35,7 @@ const NoFileSelectedView = (props) => {
 
             // Read the contents of that file
             let reader = new FileReader();
-            reader.onload = function (e) {
+            reader.onload = async function (e) {
                 let contents = null;
                 try {
                     contents = JSON.parse(e.target.result);
@@ -48,12 +48,15 @@ const NoFileSelectedView = (props) => {
                 }
 
                 // Create a new action script according to the opened file
-                actionScriptAPI.newActionScript();
-                props.updateScriptCall(contents);
-                props.getScriptCall();
+                setIsLoadingActionsCall(true);
+                await actionScriptAPI.newActionScript();
+                await getScriptCall();
                 navigate('/script-editor');
-                props.newRecentScriptCall(file.path);
-                props.setScriptIsModifiedCall(false);
+                await updateScriptCall(contents);
+                getScriptCall();
+                newRecentScriptCall(file.path);
+                setIsLoadingActionsCall(false);
+                setScriptIsModifiedCall(false);
             };
             reader.readAsText(file);
         }
@@ -62,8 +65,10 @@ const NoFileSelectedView = (props) => {
     }
 
     const openRecentFile = async (path) => {
-        props.loadActionScriptCall(path);
+        await actionScriptAPI.newActionScript();
+        await getScriptCall();
         navigate('/script-editor');
+        loadActionScriptCall(path);
     }
 
     useEffect(() => {
@@ -85,8 +90,8 @@ const NoFileSelectedView = (props) => {
                 <div className="recent-list">
                     <div className="items">
                         {
-                            (props.recentScripts.length > 0) ?
-                                props.recentScripts.map(recentScript =>
+                            (recentScripts.length > 0) ?
+                                recentScripts.map(recentScript =>
                                     <div onClick={() => openRecentFile(recentScript.path)} className="recent" key={`recent-script-${recentScript.id}`}><div className="bg"></div><p>{recentScript.path}</p></div>
                                 ) : <p>No recent scripts</p>
                         }
@@ -109,7 +114,8 @@ const mapDispatchToProps = {
     getRecentScriptsCall,
     newRecentScriptCall,
     loadActionScriptCall,
-    setScriptIsModifiedCall
+    setScriptIsModifiedCall,
+    setIsLoadingActionsCall,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(NoFileSelectedView);

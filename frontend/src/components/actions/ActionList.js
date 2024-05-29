@@ -2,16 +2,15 @@ import "styles/components/actions/actionlist.scss";
 
 import { connect } from 'react-redux';
 import { Reorder } from "framer-motion";
-import ActionItem from "./ActionItem";
 import { addActionsCall, removeActionsCall, swapActionIndexesCall } from "store/reducers/actionScriptReducer";
-import socket from "socket/socketManager";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { loadSettingsCall } from "store/reducers/settingsReducer";
+import ActionItem from "./ActionItem";
+import socket from "socket/socketManager";
 import ContextMenu from "components/contextmenu/contextMenu";
 import clipboardUtil from "utils/clipboardUtil";
-import PopupWindow from "components/popup/PopupWindow";
 import ActionEditForm from "./edit/ActionEditForm";
 import BasicButton from "components/inputs/BasicButton";
-import { loadSettingsCall } from "store/reducers/settingsReducer";
 import useClickOutside from "hooks/useClickOutside";
 import HistoryManager from "components/save/HistoryManager";
 
@@ -61,7 +60,7 @@ const ActionList = (props) => {
 
     const onFinishedActions = useCallback(() => {
         setCurrentActionIndex(0);
-    }, []);
+    }, [setCurrentActionIndex]);
 
     useEffect(() => {
         socket.on("performed-action", onPerformedAction);
@@ -74,7 +73,7 @@ const ActionList = (props) => {
         })
     }, [onPerformedAction, onFinishedActions]);
 
-    const onReorder = (reorderedActions) => {
+    const onReorder = useCallback((reorderedActions) => {
         // Find what items were swapped
         const swappedItems = [];
         for (let i = 0; i < reorderedActions.length; i++) {
@@ -88,20 +87,20 @@ const ActionList = (props) => {
         }
 
         swapActionIndexesCall(groupId, swappedItems[0], swappedItems[1]);
-    };
+    }, [swapActionIndexesCall, actionsPerPage, activeActions, currentPage, groupId]);;
 
-    const closeEditWindow = () => {
+    const closeEditWindow = useCallback(() => {
         setActionEditFormVisisble(false);
-    }
+    }, [setActionEditFormVisisble]);
 
-    const openEditWindow = (action) => {
+    const openEditWindow = useCallback((action) => {
         document.activeElement.blur();
         contextMenuRef.current.setOpen(false);
         setActionEditFormVisisble(true);
         setOpenedAction({ ...action });
-    }
+    }, [contextMenuRef, setOpenedAction, setActionEditFormVisisble]);
 
-    const moveActionUp = async (id) => {
+    const moveActionUp = useCallback(async (id) => {
         let index = actionsInGroup.findIndex(action => action.id === id);
 
         // Couldn't find action index
@@ -117,9 +116,9 @@ const ActionList = (props) => {
         await swapActionIndexesCall(groupId, index, index - 1);
 
         return index - 1;
-    }
+    }, [actionsInGroup, swapActionIndexesCall, groupId]);
 
-    const moveActionDown = async (id) => {
+    const moveActionDown = useCallback(async (id) => {
         let index = actionsInGroup.findIndex((action) => action.id === id);
 
         // Couldn't find action index
@@ -135,7 +134,7 @@ const ActionList = (props) => {
         await swapActionIndexesCall(groupId, index, index + 1);
 
         return index + 1;
-    }
+    }, [actionsInGroup, swapActionIndexesCall, groupId]);
 
     const selectActionItem = (id) => {
         const newSelectedActionIds = [...selectedActionIds];
@@ -262,7 +261,7 @@ const ActionList = (props) => {
         }
     }
 
-    const moveAllSelectedActionsDown = async () => {
+    const moveAllSelectedActionsDown = useCallback(async () => {
         let selectedIdsSorted = [];
 
         for (let action of actionsInGroup) {
@@ -292,7 +291,7 @@ const ActionList = (props) => {
                 bottomIndex = index;
             }
         }
-    }
+    }, [actionsInGroup, moveActionDown, selectedActionIds]);
 
     const selectactionsInGroup = useCallback(() => {
         let newSelectedActionIds = actionsInGroup.map(action => action.id);
@@ -300,11 +299,11 @@ const ActionList = (props) => {
         contextMenuRef.current.setOpen(false);
     }, [actionsInGroup]);
 
-    const unselectactionsInGroup = () => {
+    const unselectactionsInGroup = useCallback(() => {
         setSelectedActionIds([]);
         contextMenuRef.current.setOpen(false);
         setLastSelectedItemId(-1);
-    }
+    }, [setSelectedActionIds, setLastSelectedItemId, contextMenuRef]);
 
     const copyAll = useCallback(() => {
         let actionsToCopy = actionsInGroup.filter(action => selectedActionIds.includes(action.id));
@@ -327,10 +326,10 @@ const ActionList = (props) => {
         contextMenuRef.current.setOpen(false);
     }, [copyAll, deleteAllSelectedActions]);
 
-    const onPaste = (index = -1) => {
+    const onPaste = useCallback((index = -1) => {
         paste(index);
         contextMenuRef.current.setOpen(false);
-    }
+    }, [paste, contextMenuRef]);
 
     const contextMenuItems = [
         {
@@ -474,9 +473,7 @@ const ActionList = (props) => {
 
     return (
         <div ref={topElement} className={"action-table" + ((isTopElementSelected && areHotkeysEnabled) ? " selected" : "")} onMouseDown={() => setIsTopElementSelected(true)}>
-            <PopupWindow visible={actionEditFormVisisble} onVisibilityChange={setActionEditFormVisisble} >
-                <ActionEditForm groupId={groupId} isActive={actionEditFormVisisble} onCancel={closeEditWindow} actionType={openedAction.type} actionData={openedAction}></ActionEditForm>
-            </PopupWindow>
+            <ActionEditForm onVisibilityChange={closeEditWindow} visible={actionEditFormVisisble} groupId={groupId} actionData={openedAction}></ActionEditForm>
             <ContextMenu onOpenChange={handleAnyContextMenuOpenChange} ref={contextMenuRef} items={contextMenuItems} />
             <HistoryManager isActive={areHotkeysEnabled} groupId={groupId} />
 

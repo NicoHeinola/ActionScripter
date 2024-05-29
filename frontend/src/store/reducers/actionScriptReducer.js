@@ -376,6 +376,10 @@ const removeActionGroupCall = (groupId) => async (dispatch) => {
     dispatch(actionScriptSlice.actions.removeActionGroup({ "group-id": groupId }));
 }
 
+const setIsLoadingActionsCall = (isLoadingActions) => async (dispatch) => {
+    dispatch(actionScriptSlice.actions.setIsLoadingActions(isLoadingActions));
+}
+
 export {
     startScriptCall,
     pauseScriptCall,
@@ -399,6 +403,7 @@ export {
     addActionGroupCall,
     updateActionGroupCall,
     removeActionGroupCall,
-    setScriptPlayStateCall
+    setScriptPlayStateCall,
+    setIsLoadingActionsCall,
 };
 export default actionScriptSlice.reducer;

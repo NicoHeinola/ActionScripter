@@ -1,15 +1,8 @@
-import { useState, useEffect } from "react";
 import "styles/components/popup/popupwindow.scss";
 
 const PopupWindow = (props) => {
-    const [visible, setVisible] = useState(props.visible);
 
-    useEffect(() => {
-        setVisible(props.visible);
-    }, [props.visible])
-
-    const { onVisibilityChange } = props;
-
+    const { visible, onVisibilityChange, className, children } = props;
 
     const closePopup = () => {
         if (!onVisibilityChange) {
@@ -21,10 +14,10 @@ const PopupWindow = (props) => {
 
 
     return (
-        <div className={"popup-window" + ((visible) ? " visible" : " hidden") + ((props.className) ? ` ${props.className}` : "")}>
+        <div className={"popup-window" + ((visible) ? " visible" : " hidden") + ((className) ? ` ${className}` : "")}>
             <div onClick={closePopup} className="bg"></div>
             <div className="items">
-                {props.children}
+                {children}
             </div>
         </div>
     )
