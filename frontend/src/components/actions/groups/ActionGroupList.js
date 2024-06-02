@@ -19,7 +19,7 @@ const ActionGroupList = (props) => {
     const [groupEditFormVisible, setGroupEditFormVisible] = useState(false);
 
     const scriptPlayState = currentScript["play-state"];
-    const enabled = scriptPlayState === "stopped";
+    const enabled = scriptPlayState === "stopped" && !isLoadingActions;
 
     const onClickGroup = useCallback((groupId) => {
         if (hoveringActionsGroupId !== -1) {

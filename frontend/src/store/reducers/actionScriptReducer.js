@@ -22,7 +22,7 @@ const actionScriptSlice = createSlice({
     reducers: {
         setPlayState: (state, playState) => {
             state.currentScript["play-state"] = playState.payload;
-            state.currentScript = { ...state.currentScript }
+
         },
         setCurrentScript: (state, script) => {
             state.currentScript = script.payload;
@@ -49,9 +49,6 @@ const actionScriptSlice = createSlice({
             const group = allGroups[groupId];
             const actionsInGroup = group["actions"];
             actionsInGroup.push(...actions);
-
-            // To update all the components
-            state.currentScript = { ...state.currentScript }
         },
         addActionsAt: (state, data) => {
             const groupId = data.payload["group-id"];
@@ -67,9 +64,6 @@ const actionScriptSlice = createSlice({
             const group = allGroups[groupId];
             const actionsInGroup = group["actions"];
             actionsInGroup.splice(index, 0, ...actions)
-
-            // To update all the components
-            state.currentScript = { ...state.currentScript }
         },
         updateAction: (state, data) => {
             const groupId = data.payload["group-id"];
@@ -101,7 +95,6 @@ const actionScriptSlice = createSlice({
             }
 
             actionsInGroup[indexOfUpdatedAction] = updatedAction;
-            state.currentScript = { ...state.currentScript };
         },
         removeActions: (state, data) => {
             const groupId = data.payload["group-id"];
@@ -133,35 +126,26 @@ const actionScriptSlice = createSlice({
             const group = allGroups[groupId];
             const actions = group["actions"];
             [actions[actionAIndex], actions[actionBIndex]] = [actions[actionBIndex], actions[actionAIndex]];
-
-            state.currentScript = { ...state.currentScript };
         },
         setActions: (state, data) => {
             const groupId = data.payload["group-id"];
             const actions = data.payload["actions"];
             state.currentScript["action-groups"][`${groupId}`]["actions"] = actions;
-
-            state.currentScript = { ...state.currentScript };
         },
         addActionGroup: (state, data) => {
             const group = data.payload;
             const groupId = group.id;
             state.currentScript["action-groups"][`${groupId}`] = group;
-
-            state.currentScript = { ...state.currentScript }
         },
         updateActionGroup: (state, data) => {
             const groupId = data.payload["group-id"];
             const groupData = data.payload["group-data"];
 
             state.currentScript["action-groups"][`${groupId}`] = groupData;
-
-            state.currentScript = { ...state.currentScript }
         },
         removeActionGroup: (state, data) => {
             const groupId = data.payload["group-id"];
             delete state.currentScript["action-groups"][`${groupId}`];
-            state.currentScript = { ...state.currentScript }
         },
     },
 });
@@ -278,8 +262,8 @@ const removeActionsCall = (groupId, actionIds) => async (dispatch) => {
 };
 
 const swapActionIndexesCall = (groupId, indexA, indexB) => async (dispatch) => {
-    await actionScriptAPI.swapActionIndexes(groupId, indexA, indexB);
-    dispatch(actionScriptSlice.actions.swapActionIndexes({ "group-id": groupId, "indexes": [indexA, indexB] }));
+    actionScriptAPI.swapActionIndexes(groupId, indexA, indexB);
+    await dispatch(actionScriptSlice.actions.swapActionIndexes({ "group-id": groupId, "indexes": [indexA, indexB] }));
     dispatch(setScriptIsModifiedCall(true));
 };
 

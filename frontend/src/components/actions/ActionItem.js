@@ -1,72 +1,73 @@
 import "styles/components/actions/actionitem.scss";
 
-import { createActionCall, removeActionsCall, swapActionIndexesCall } from "store/reducers/actionScriptReducer";
+import { createActionCall, swapActionIndexesCall } from "store/reducers/actionScriptReducer";
 import { connect } from 'react-redux';
 import { Reorder, useDragControls } from "framer-motion";
 import BasicButton from "components/inputs/BasicButton";
 
-import { forwardRef, useImperativeHandle, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import ContextMenu from "components/contextmenu/contextMenu";
 import clipboardUtil from "utils/clipboardUtil";
 
-const ActionItem = forwardRef((props, ref) => {
-    const action = props.data;
+const ActionItem = (props) => {
     const dragControls = useDragControls();
+
+    const { onRemoveAction, currentScriptPlayState, groupActionAmount, data, index, groupId, isSelected, className, onPaste, onContextMenuOpenChange, onMoveUp, onMoveDown, onStartDragging, onSelectionClick, performing, onOpenEditWindow, onDrag, onDragEnd } = props;
 
     const contextMenuRef = useRef(null);
     const [contextMenuOpen, setContextMenuOpen] = useState(false);
     const [isHovering, setIsHovering] = useState(false);
     const [isHoveringActionsWrapper, setIsHoveringActionsWrapper] = useState(false);
     const [isHoveringActions, setIsHoveringActions] = useState(false);
+    const [contextMenuItems, setContextMenuItems] = useState([]);
 
-    const canModify = props.currentScript["play-state"] === "stopped";
-    const performingActionClass = (canModify) ? "" : (props.performing) ? "performing" : "disabled";
+    const canModify = currentScriptPlayState === "stopped";
+    const performingActionClass = (canModify) ? "" : (performing) ? "performing" : "disabled";
 
-    const isSelected = props.isSelected === true ? true : false;
-    const index = props.index;
+    const removeAction = useCallback(() => {
 
-    const groupId = props.groupId;
-    const actionsInGroup = props.currentScript["action-groups"][`${groupId}`]["actions"];
+        if (!onRemoveAction) {
+            return;
+        }
 
-    const removeAction = () => {
-        props.removeActionsCall(groupId, [action.id]);
-    }
+        onRemoveAction(groupId, data.id, index);
+    }, [onRemoveAction, data.id, groupId, index]);
 
-    const openEditWindow = () => {
+    const openEditWindow = useCallback(() => {
         setContextMenuOpen(false);
-        props.onOpenEditWindow(action);
-    }
+        onOpenEditWindow(data);
+    }, [onOpenEditWindow, data]);
 
-    const moveUp = () => {
-        if (props.moveUp) {
-            props.moveUp(action.id);
+    const moveUp = useCallback(() => {
+        if (onMoveUp) {
+            onMoveUp(index);
         }
-    }
+    }, [onMoveUp, index]);
 
-    const moveDown = () => {
-        if (props.moveDown) {
-            props.moveDown(action.id);
+    const moveDown = useCallback(() => {
+        if (onMoveDown) {
+            onMoveDown(index);
         }
-    }
+    }, [onMoveDown, index]);
 
-    const startDragging = (e) => {
+    const startDragging = useCallback((e) => {
         // We can't modify anything when the actions are running
         if (!canModify) {
             return;
         }
 
         dragControls.start(e);
-    }
+    }, [dragControls, canModify]);
 
-    const onDragContainerPointerDown = (e) => {
-        if (props.onStartDragging) {
-            props.onStartDragging(e);
+    const onDragContainerPointerDown = useCallback((e) => {
+        if (onStartDragging) {
+            onStartDragging(e);
         }
 
         startDragging(e);
-    }
+    }, [onStartDragging, startDragging]);
 
-    const onRightClick = (e) => {
+    const onRightClick = useCallback((e) => {
         // If button isn't rigth click
         if (e.button !== 2) {
             return;
@@ -82,125 +83,92 @@ const ActionItem = forwardRef((props, ref) => {
         contextMenuRef.current.setOpen(true);
         contextMenuRef.current.setPosition(e.clientX + 10, e.clientY - 10);
         setContextMenuOpen(true);
-    }
+    }, []);
 
-    const copy = () => {
+    const copy = useCallback(() => {
         contextMenuRef.current.setOpen(false);
         setContextMenuOpen(false);
-        clipboardUtil.copyActions([action]);
-    }
+        clipboardUtil.copyActions([data]);
+    }, [data]);
 
-    const paste = () => {
-        if (props.onPaste) {
-            props.onPaste();
+    const paste = useCallback(() => {
+        if (onPaste) {
+            onPaste(index + 1);
         }
 
         contextMenuRef.current.setOpen(false);
         setContextMenuOpen(false);
-    }
+    }, [onPaste, index]);
 
-    const cut = () => {
+    const cut = useCallback(() => {
         copy();
         removeAction();
-    }
+    }, [copy, removeAction]);
 
-    const onItemClicked = (e) => {
+    const onItemClicked = useCallback((e) => {
         if (!canModify) {
             return;
         }
 
-        if (!props.onSelectionClick) {
+        if (!onSelectionClick) {
             return;
         }
 
-        props.onSelectionClick(e, isSelected);
-    }
+        onSelectionClick(e, data.id, index, isSelected);
+    }, [canModify, onSelectionClick, index, isSelected, data.id]);
 
-    const contextMenuItems = [
-        {
-            "name": "edit",
-            "text": "Edit",
-            "onClick": openEditWindow
-        },
-        {
-            "name": "delete",
-            "text": "Delete",
-            "onClick": removeAction
-        },
-        {
-            "name": "sep-2",
-            "type": "separator",
-        },
-        {
-            "name": "cut",
-            "text": "Cut",
-            "onClick": cut
-        },
-        {
-            "name": "copy",
-            "text": "Copy",
-            "onClick": copy
-        },
-        {
-            "name": "paste",
-            "text": "Paste",
-            "onClick": paste
-        },
-        {
-            "name": "sep-1",
-            "type": "separator",
-        },
-        {
-            "name": "move-up",
-            "text": "Move up",
-            "onClick": moveUp,
-            "disabled": index === 0,
-        },
-        {
-            "name": "move-down",
-            "text": "Move down",
-            "onClick": moveDown,
-            "disabled": index === actionsInGroup.length - 1,
-        },
-    ]
-
-    const onDrag = (e, info) => {
-        if (props.onDrag) {
-            props.onDrag(e, info);
+    const onDragEvent = useCallback((e, info) => {
+        if (onDrag) {
+            onDrag(e, info);
         }
-    }
-    const onDragEnd = (e, info) => {
-        if (props.onDragEnd) {
-            props.onDragEnd(e, info);
-        }
-    }
+    }, [onDrag]);
 
-    useImperativeHandle(ref, () => ({
-        startDragging
-    }));
-
-    const onContextMenuOpenChange = (isOpen) => {
-        if (props.onContextMenuOpenChange) {
-            props.onContextMenuOpenChange(isOpen);
+    const onDragEndEvent = useCallback((e, info) => {
+        if (onDragEnd) {
+            onDragEnd(e, info);
         }
-    }
+    }, [onDragEnd]);
+
+    const contextMenuOpenChange = useCallback((isOpen) => {
+        if (onContextMenuOpenChange) {
+            onContextMenuOpenChange(isOpen);
+        }
+    }, [onContextMenuOpenChange]);
+
+    const isLastIndex = (index === groupActionAmount - 1);
+    const isFirstIndex = (index === 0);
+
+    // Update contextmenu items
+    useEffect(() => {
+        setContextMenuItems([
+            { name: "edit", text: "Edit", onClick: openEditWindow },
+            { name: "delete", text: "Delete", onClick: removeAction },
+            { name: "sep-2", type: "separator" },
+            { name: "cut", text: "Cut", onClick: cut },
+            { name: "copy", text: "Copy", onClick: copy },
+            { name: "paste", text: "Paste", onClick: paste, disabled: clipboardUtil.getCopiedActions().length === 0 },
+            { name: "sep-1", type: "separator" },
+            { name: "move-up", text: "Move up", onClick: moveUp, disabled: isFirstIndex },
+            { name: "move-down", text: "Move down", onClick: moveDown, disabled: isLastIndex },
+        ]);
+    }, [isLastIndex, isFirstIndex, openEditWindow, removeAction, cut, copy, paste, moveUp, moveDown]);
 
     return (
         <div className="action-item-wrapper">
-            <ContextMenu onOpenChange={onContextMenuOpenChange} onClose={() => setContextMenuOpen(false)} ref={contextMenuRef} items={contextMenuItems} />
-            <Reorder.Item onDragEnd={onDragEnd} onDrag={onDrag} value={action} dragListener={false} dragControls={dragControls} className="action-item-container">
-                <div className={"action-item" + ((isHoveringActionsWrapper) ? " hovering-actions-wrapper" : "") + ((isHoveringActions) ? " hovering-actions" : "") + ((isHovering) ? " hover" : "") + ((contextMenuOpen === true) ? " context-menu-open" : "") + ((isSelected) ? " selected" : "") + ((props.className) ? ` ${props.className}` : "") + ` ${performingActionClass}`} onMouseUp={onRightClick} >
+            <ContextMenu onOpenChange={contextMenuOpenChange} onClose={setContextMenuOpen} ref={contextMenuRef} items={contextMenuItems} />
+            <Reorder.Item onDragEnd={onDragEndEvent} onDrag={onDragEvent} value={data} dragListener={false} dragControls={dragControls} className="action-item-container">
+                <div className={"action-item" + ((isHoveringActionsWrapper) ? " hovering-actions-wrapper" : "") + ((isHoveringActions) ? " hovering-actions" : "") + ((isHovering) ? " hover" : "") + ((contextMenuOpen === true) ? " context-menu-open" : "") + ((isSelected) ? " selected" : "") + ((className) ? ` ${className}` : "") + ` ${performingActionClass}`} onMouseUp={onRightClick} >
                     <div className="drag-items">
                         <div onPointerDown={onDragContainerPointerDown} className="data drag">
                             <img alt="Drag Icon" draggable="false" className="icon" src="images/icons/drag.png"></img>
                         </div>
                     </div>
                     <div className="other-items" onClick={onItemClicked} onMouseLeave={() => setIsHovering(false)} onMouseEnter={() => setIsHovering(true)}>
-                        <div className="data"><p className="text">{action["name"]}</p></div>
-                        <div className="data"><p className="text">{action["type-display-name"]}</p></div>
-                        <div className="data"><p className="text">{action["start-delay-ms"]}</p></div>
-                        <div className="data"><p className="text">{action["end-delay-ms"]}</p></div>
-                        <div className="data"><p className="text">{action["loop-count"]}</p></div>
+                        <div className="data"><p className="text">{data["name"]}</p></div>
+                        <div className="data"><p className="text">{data["type-display-name"]}</p></div>
+                        <div className="data"><p className="text">{data["start-delay-ms"]}</p></div>
+                        <div className="data"><p className="text">{data["end-delay-ms"]}</p></div>
+                        <div className="data"><p className="text">{data["loop-count"]}</p></div>
                     </div>
                     <div className="actions-wrapper" onMouseLeave={() => setIsHoveringActionsWrapper(false)} onMouseEnter={() => setIsHoveringActionsWrapper(true)}>
                         <div className="actions" onMouseLeave={() => setIsHoveringActions(false)} onMouseEnter={() => setIsHoveringActions(true)}>
@@ -214,19 +182,18 @@ const ActionItem = forwardRef((props, ref) => {
 
         </div>
     )
-});
+};
 
 
 const mapStateToProps = (state) => {
     return {
-        currentScript: state.actionScript.currentScript,
+        currentScriptPlayState: state.actionScript.currentScript["play-state"],
     };
 };
 
 const mapDispatchToProps = {
     createActionCall,
-    removeActionsCall,
     swapActionIndexesCall
 };
 
-export default connect(mapStateToProps, mapDispatchToProps, null, { forwardRef: true })(ActionItem);
+export default connect(mapStateToProps, mapDispatchToProps)(ActionItem);

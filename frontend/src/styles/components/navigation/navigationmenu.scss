@@ -100,6 +100,8 @@
                 &.active {
                     .icon-wrapper {
                         scale: 1.1;
+                        filter: brightness(1);
+                        filter: drop-shadow(0 0 0.5rem rgba(255, 255, 255, 0.3));
                     }
                 }
 
@@ -107,6 +109,7 @@
                     height: 100%;
                     border-radius: $global-border-radius;
                     transition: all 0.2s;
+                    filter: brightness(0.8);
 
                     &.alert {
                         &::after {
