@@ -125,16 +125,17 @@ const ScriptEditorView = (props) => {
     const stopHotkeyText = (hotkeysEnabled) ? `${allSettings["stop-script-key-combination-display"]}` : "";
 
     let playButton = <></>;
-    const buttonTextAlignment = hotkeysEnabled ? "flex-start" : "center";
+    const playTextAlignment = hotkeysEnabled && startHotkeyText ? "flex-start" : "center";
+    const stopTextAlignment = hotkeysEnabled && stopHotkeyText ? "flex-start" : "center";
     switch (currentScript["play-state"]) {
         case "playing":
-            playButton = <BasicButton centering={buttonTextAlignment} onClick={pauseScript} className="play-button" icon="images/icons/pause_play.png">{startHotkeyText}</BasicButton>
+            playButton = <BasicButton centering={playTextAlignment} onClick={pauseScript} className="play-button" icon="images/icons/pause_play.png">{startHotkeyText}</BasicButton>
             break;
         case "stopped":
-            playButton = <BasicButton centering={buttonTextAlignment} disabled={actionsInGroup.length === 0} onClick={startScript} className="play-button" icon="images/icons/start_play.png">{startHotkeyText}</BasicButton>
+            playButton = <BasicButton centering={playTextAlignment} disabled={actionsInGroup.length === 0} onClick={startScript} className="play-button" icon="images/icons/start_play.png">{startHotkeyText}</BasicButton>
             break;
         case "paused":
-            playButton = <BasicButton centering={buttonTextAlignment} onClick={startScript} className="play-button" icon="images/icons/continue_play.png">{startHotkeyText}</BasicButton>
+            playButton = <BasicButton centering={playTextAlignment} onClick={startScript} className="play-button" icon="images/icons/continue_play.png">{startHotkeyText}</BasicButton>
             break;
         default:
             break;
@@ -159,7 +160,7 @@ const ScriptEditorView = (props) => {
             </div>
             <div className="playstate-actions">
                 {playButton}
-                <BasicButton theme="warning" centering={buttonTextAlignment} disabled={currentScript["play-state"] === "stopped" || isLoadingActions} onClick={stopScript} icon="images/icons/stop_play.png" className="play-button cancel">{stopHotkeyText}</BasicButton>
+                <BasicButton theme="warning" centering={stopTextAlignment} disabled={currentScript["play-state"] === "stopped" || isLoadingActions} onClick={stopScript} icon="images/icons/stop_play.png" className="play-button cancel">{stopHotkeyText}</BasicButton>
                 <BasicButton disabled={!isStopped || isLoadingActions} onClick={switchScriptLoopType} className="repeat-button" icon={`images/icons/${currentScript["loop-type"] === 'infinite' ? "loop_infinite.png" : "loop_x_times.png"}`}></BasicButton>
                 <TextInput min="0" value={currentScript["loop-count"]} onChange={newValue => setScriptLoopCount(newValue)} className="input" type="number" placeholder="Loops" disabled={!isStopped || currentScript["loop-type"] === 'infinite' || isLoadingActions} />
             </div>
