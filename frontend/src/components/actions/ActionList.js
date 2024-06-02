@@ -409,6 +409,10 @@ const ActionList = (props) => {
     }, [actionsInGroup, moveActionDownWithId, selectedActionIds]);
 
     const selectActionsInGroup = useCallback(() => {
+        if (!firstActionOnPage || !lastActionOnPage) {
+            return;
+        }
+
         resetSelectedActionIds();
         setFromSelectedActionId(firstActionOnPage.id);
         setToSelectedActionId(lastActionOnPage.id);
