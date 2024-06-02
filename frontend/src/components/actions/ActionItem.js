@@ -20,6 +20,7 @@ const ActionItem = (props) => {
     const [isHoveringActionsWrapper, setIsHoveringActionsWrapper] = useState(false);
     const [isHoveringActions, setIsHoveringActions] = useState(false);
     const [contextMenuItems, setContextMenuItems] = useState([]);
+    const [isDragging, setIsDragging] = useState(false);
 
     const canModify = currentScriptPlayState === "stopped";
     const performingActionClass = (canModify) ? "" : (performing) ? "performing" : "disabled";
@@ -56,6 +57,7 @@ const ActionItem = (props) => {
             return;
         }
 
+        setIsDragging(true);
         dragControls.start(e);
     }, [dragControls, canModify]);
 
@@ -127,6 +129,8 @@ const ActionItem = (props) => {
         if (onDragEnd) {
             onDragEnd(e, info);
         }
+
+        setIsDragging(false);
     }, [onDragEnd]);
 
     const contextMenuOpenChange = useCallback((isOpen) => {
@@ -157,7 +161,7 @@ const ActionItem = (props) => {
         <div className="action-item-wrapper">
             <ContextMenu onOpenChange={contextMenuOpenChange} onClose={setContextMenuOpen} ref={contextMenuRef} items={contextMenuItems} />
             <Reorder.Item onDragEnd={onDragEndEvent} onDrag={onDragEvent} value={data} dragListener={false} dragControls={dragControls} className="action-item-container">
-                <div className={"action-item" + ((isHoveringActionsWrapper) ? " hovering-actions-wrapper" : "") + ((isHoveringActions) ? " hovering-actions" : "") + ((isHovering) ? " hover" : "") + ((contextMenuOpen === true) ? " context-menu-open" : "") + ((isSelected) ? " selected" : "") + ((className) ? ` ${className}` : "") + ` ${performingActionClass}`} onMouseUp={onRightClick} >
+                <div className={"action-item" + (isDragging ? " dragging" : "") + ((isHoveringActionsWrapper) ? " hovering-actions-wrapper" : "") + ((isHoveringActions) ? " hovering-actions" : "") + ((isHovering) ? " hover" : "") + ((contextMenuOpen === true) ? " context-menu-open" : "") + ((isSelected) ? " selected" : "") + ((className) ? ` ${className}` : "") + ` ${performingActionClass}`} onMouseUp={onRightClick} >
                     <div className="drag-items">
                         <div onPointerDown={onDragContainerPointerDown} className="data drag">
                             <img alt="Drag Icon" draggable="false" className="icon" src="images/icons/drag.png"></img>

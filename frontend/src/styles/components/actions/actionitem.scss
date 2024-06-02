@@ -18,14 +18,16 @@
         }
 
         /* When hovering anything but the actions */
-        &:is(:hover, .hovering-actions-wrapper):not(.performing):not(.disabled):not(.hovering-actions) {
+        &:is(:hover, .dragging, .hovering-actions-wrapper):not(.performing):not(.disabled):not(.hovering-actions) {
             background: rgba(255, 255, 255, 0.02);
             cursor: pointer;
 
             &.selected {
                 background: rgba(255, 255, 255, 0.08);
             }
+        }
 
+        &.hover:not(.dragging) {
             .actions-wrapper {
                 .actions {
                     transform: translateX(0);
