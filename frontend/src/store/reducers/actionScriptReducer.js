@@ -10,7 +10,8 @@ const initialState = {
             "0": {
                 "actions": []
             }
-        }
+        },
+        "hotkeys": {}
     },
     recentScripts: [],
     scriptIsModified: false,
@@ -24,8 +25,19 @@ const actionScriptSlice = createSlice({
             state.currentScript["play-state"] = playState.payload;
 
         },
-        setCurrentScript: (state, script) => {
+        setScript: (state, script) => {
             state.currentScript = script.payload;
+        },
+        updateScript: (state, script) => {
+            const newScript = { ...state.currentScript };
+            const changes = script.payload;
+
+            for (let key in changes) {
+                let data = script.payload[key];
+                newScript[key] = data;
+            }
+
+            state.currentScript = newScript;
         },
         setRecentScripts: (state, recentScripts) => {
             state.recentScripts = recentScripts.payload;
@@ -63,7 +75,7 @@ const actionScriptSlice = createSlice({
 
             const group = allGroups[groupId];
             const actionsInGroup = group["actions"];
-            actionsInGroup.splice(index, 0, ...actions)
+            actionsInGroup.splice(index, 0, ...actions);
         },
         updateAction: (state, data) => {
             const groupId = data.payload["group-id"];
@@ -175,12 +187,12 @@ const stopScriptCall = () => async (dispatch) => {
 
 const getScriptCall = () => async (dispatch) => {
     const response = await actionScriptAPI.getActionScript();
-    dispatch(actionScriptSlice.actions.setCurrentScript(response.data));
+    dispatch(actionScriptSlice.actions.setScript(response.data));
 };
 
 const updateScriptCall = (scriptData) => async (dispatch) => {
     await actionScriptAPI.updateActionScript(scriptData);
-    dispatch(actionScriptSlice.actions.setCurrentScript(scriptData));
+    dispatch(actionScriptSlice.actions.updateScript(scriptData));
     dispatch(actionScriptSlice.actions.setScriptIsModified(true));
 };
 

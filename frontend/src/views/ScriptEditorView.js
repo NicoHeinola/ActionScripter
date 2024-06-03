@@ -1,3 +1,5 @@
+import "styles/views/scripteditorview.scss";
+
 import BasicButton from "components/inputs/BasicButton";
 import SelectBox from "components/inputs/SelectBox";
 import TextInput from "components/inputs/TextInput";
@@ -7,13 +9,13 @@ import { connect } from 'react-redux';
 import { createActionCall, setScriptPlayStateCall } from "store/reducers/actionScriptReducer";
 import ActionList from "components/actions/ActionList";
 
-import "styles/views/scripteditorview.scss";
 import { getScriptCall, pauseScriptCall, startScriptCall, stopScriptCall, updateScriptCall } from "store/reducers/actionScriptReducer";
 
 import socket from "socket/socketManager";
 import { useNavigate } from 'react-router-dom';
 import { motion } from "framer-motion";
 import ActionGroupList from "components/actions/groups/ActionGroupList";
+import ScriptSettingsForm from "components/forms/ScriptSettingsForm";
 
 const ScriptEditorView = (props) => {
     const navigate = useNavigate();
@@ -25,8 +27,9 @@ const ScriptEditorView = (props) => {
     const [actionFilterKeyword, setActionFilterKeyword] = useState("");
     const [filteredActions, setFilteredActions] = useState([]);
     const [selectedActionType, setSelectedActionType] = useState("");
+    const [settingsOpen, setSettingsOpen] = useState(false);
 
-    const { currentScript, isLoadingActions, allSettings, getScriptCall, setScriptPlayStateCall, startScriptCall, stopScriptCall, pauseScriptCall, createActionCall } = props;
+    const { updateScriptCall, currentScript, isLoadingActions, allSettings, getScriptCall, setScriptPlayStateCall, startScriptCall, stopScriptCall, pauseScriptCall, createActionCall } = props;
 
     const [currentGroupId, setCurrentGroupId] = useState(0);
 
@@ -73,30 +76,31 @@ const ScriptEditorView = (props) => {
 
     const updateScript = useCallback((updatedScript) => {
         updatedScript = { ...updatedScript };
-
-        // Actions are updated elsewhere
-        delete updatedScript["actions"];
-
+        console.log(updatedScript);
         updateScriptCall(updatedScript);
-    }, []);
+    }, [updateScriptCall]);
 
     const switchScriptLoopType = useCallback(() => {
-        let updatedCurrentScript = { ...currentScript };
+        let updatedData = {};
 
-        if (updatedCurrentScript["loop-type"] === "infinite") {
-            updatedCurrentScript["loop-type"] = "loop-x-times";
+        if (currentScript["loop-type"] === "infinite") {
+            updatedData["loop-type"] = "loop-x-times";
         } else {
-            updatedCurrentScript["loop-type"] = "infinite";
+            updatedData["loop-type"] = "infinite";
         }
 
-        updateScript(updatedCurrentScript);
-    }, [currentScript, updateScript]);
+        updateScript(updatedData);
+    }, [updateScript, currentScript]);
 
     const setScriptLoopCount = useCallback((newValue) => {
-        let updatedCurrentScript = { ...currentScript };
-        updatedCurrentScript["loop-count"] = newValue;
-        updateScript(updatedCurrentScript);
-    }, [currentScript, updateScript]);
+        let updatedData = {};
+        updatedData["loop-count"] = newValue;
+        updateScript(updatedData);
+    }, [updateScript]);
+
+    const openSettings = useCallback(() => {
+        setSettingsOpen(true);
+    }, []);
 
     if (currentScript["missing-script"] && !isLoadingActions) {
         return (
@@ -120,9 +124,9 @@ const ScriptEditorView = (props) => {
     const actionsInGroup = currentScript["action-groups"][`${currentGroupId}`]["actions"];
 
     const isStopped = currentScript["play-state"] === "stopped";
-    const hotkeysEnabled = allSettings["hotkeys-enabled"] === "true";
-    const startHotkeyText = (hotkeysEnabled) ? `${allSettings["start-script-key-combination-display"]}` : "";
-    const stopHotkeyText = (hotkeysEnabled) ? `${allSettings["stop-script-key-combination-display"]}` : "";
+    const hotkeysEnabled = currentScript["hotkeys-enabled"] && allSettings["hotkeys-enabled"] === "true";
+    const startHotkeyText = (hotkeysEnabled) ? `${currentScript["hotkeys"]["start-script"]["display"]}` : "";
+    const stopHotkeyText = (hotkeysEnabled) ? `${currentScript["hotkeys"]["stop-script"]["display"]}` : "";
 
     let playButton = <></>;
     const playTextAlignment = hotkeysEnabled && startHotkeyText ? "flex-start" : "center";
@@ -147,9 +151,10 @@ const ScriptEditorView = (props) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="script-editor-view page">
+            <ScriptSettingsForm visible={settingsOpen} onVisibilityChange={setSettingsOpen} />
             <div className="add-action-container">
                 <div className="actions">
-                    <TextInput onChange={newValue => setActionFilterKeyword(newValue)} type={"text"} placeholder={"Filter Actions"}></TextInput>
+                    <TextInput value={actionFilterKeyword} onChange={setActionFilterKeyword} type="text" placeholder="Filter Actions"></TextInput>
                     <SelectBox onSelect={setSelectedActionType} className="action-list" placeholder="Actions" options={filteredActions} />
                     <BasicButton theme="add" disabled={!isStopped || isLoadingActions} onClick={addNewAction} className="add-button" icon={"images/icons/new_action.png"}></BasicButton>
                 </div>
@@ -161,7 +166,8 @@ const ScriptEditorView = (props) => {
             <div className="playstate-actions">
                 {playButton}
                 <BasicButton theme="warning" centering={stopTextAlignment} disabled={currentScript["play-state"] === "stopped" || isLoadingActions} onClick={stopScript} icon="images/icons/stop_play.png" className="play-button cancel">{stopHotkeyText}</BasicButton>
-                <BasicButton disabled={!isStopped || isLoadingActions} onClick={switchScriptLoopType} className="repeat-button" icon={`images/icons/${currentScript["loop-type"] === 'infinite' ? "loop_infinite.png" : "loop_x_times.png"}`}></BasicButton>
+                <BasicButton disabled={!isStopped || isLoadingActions} onClick={openSettings} theme="utility" icon="images/icons/settings_2.png" className="small-button"></BasicButton>
+                <BasicButton disabled={!isStopped || isLoadingActions} onClick={switchScriptLoopType} className="small-button" icon={`images/icons/${currentScript["loop-type"] === 'infinite' ? "loop_infinite.png" : "loop_x_times.png"}`}></BasicButton>
                 <TextInput min="0" value={currentScript["loop-count"]} onChange={newValue => setScriptLoopCount(newValue)} className="input" type="number" placeholder="Loops" disabled={!isStopped || currentScript["loop-type"] === 'infinite' || isLoadingActions} />
             </div>
         </motion.div>

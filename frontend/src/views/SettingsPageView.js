@@ -13,10 +13,13 @@ ring.register()
 
 const SettingsPageView = (props) => {
 
-    const loadSettingDefaultsCall = props.loadSettingDefaultsCall;
-    const loadSettingsCall = props.loadSettingsCall;
-    const allSettings = props.allSettings;
-    const settingDefaults = props.settingDefaults;
+    const { loadSettingDefaultsCall, loadSettingsCall, allSettings, settingDefaults, updateSettingsCall } = props;
+
+    // Setting keys
+    const startKeyDisplay = allSettings["start-script-display"];
+    const stopKeyDisplay = allSettings["stop-script-display"];
+
+    const isLoadingSettings = Object.keys(allSettings).length === 0;
 
     useEffect(() => {
         loadSettingsCall();
@@ -28,7 +31,7 @@ const SettingsPageView = (props) => {
     }
 
     const updateSettings = (settingsToUpdate) => {
-        props.updateSettingsCall(settingsToUpdate);
+        updateSettingsCall(settingsToUpdate);
     }
 
     const resetSettings = (settingNames) => {
@@ -49,18 +52,18 @@ const SettingsPageView = (props) => {
             className="settings-page-view page">
             <div className="settings">
                 {
-                    (Object.keys(settingDefaults).length === 0) ?
+                    isLoadingSettings ?
                         <l-ring color="white"></l-ring>
                         :
                         <>
                             <GroupBox title="General" className="group">
-                                <TextInput placeholder="Actions per page" onIconClicked={() => resetSettings(["actions-per-page"])} onChange={(newValue) => updateSettings({ "actions-per-page": newValue })} value={Number(allSettings["actions-per-page"])} icons={!hasSettingDefaultValue("actions-per-page") ? [{ id: "reset", src: "images/icons/reset.png" }] : []} type="number" min="1"></TextInput>
-                                <TextInput placeholder="Location picker delay (s)" onIconClicked={() => resetSettings(["mouse-location-picker-wait-delay-s"])} onChange={(newValue) => updateSettings({ "mouse-location-picker-wait-delay-s": String(newValue) })} value={Number(allSettings["mouse-location-picker-wait-delay-s"])} icons={!hasSettingDefaultValue("mouse-location-picker-wait-delay-s") ? [{ id: "reset", src: "images/icons/reset.png" }] : []} type="number" min="0" step="any"></TextInput>
+                                <TextInput placeholder="Actions per page" icons={!hasSettingDefaultValue("actions-per-page") ? [{ id: "reset", src: "images/icons/reset.png", onClick: () => resetSettings(["actions-per-page"]) }] : []} onChange={(newValue) => updateSettings({ "actions-per-page": newValue })} value={Number(allSettings["actions-per-page"])} type="number" min="1"></TextInput>
+                                <TextInput placeholder="Location picker delay (s)" icons={!hasSettingDefaultValue("mouse-location-picker-wait-delay-s") ? [{ id: "reset", src: "images/icons/reset.png", onClick: () => resetSettings(["mouse-location-picker-wait-delay-s"]) }] : []} onChange={(newValue) => updateSettings({ "mouse-location-picker-wait-delay-s": String(newValue) })} value={Number(allSettings["mouse-location-picker-wait-delay-s"])} type="number" min="0" step="any"></TextInput>
                             </GroupBox>
-                            <GroupBox title="Keys" className="group">
-                                <CheckboxInput label="Hotkeys enabled" onChecked={checked => updateSettings({ "hotkeys-enabled": checked.toString() })} checked={hotkeysEnabled} />
-                                <KeyPickerInput disabled={!hotkeysEnabled} value={allSettings["start-script-key-combination-display"]} onIconClicked={() => resetSettings(["start-script-key-combination", "start-script-key-combination-display"])} onChange={(codes, text) => updateSettings({ "start-script-key-combination": codes.join("+"), "start-script-key-combination-display": text })} placeholder="Start / Pause / Continue" icons={!hasSettingDefaultValue("start-script-key-combination-display") ? [{ id: "reset", src: "images/icons/reset.png" }] : []}></KeyPickerInput>
-                                <KeyPickerInput disabled={!hotkeysEnabled} value={allSettings["stop-script-key-combination-display"]} onIconClicked={() => resetSettings(["stop-script-key-combination", "stop-script-key-combination-display"])} onChange={(codes, text) => updateSettings({ "stop-script-key-combination": codes.join("+"), "stop-script-key-combination-display": text })} placeholder="Stop" icons={!hasSettingDefaultValue("stop-script-key-combination-display") ? [{ id: "reset", src: "images/icons/reset.png" }] : []}></KeyPickerInput>
+                            <GroupBox title="Default keys" className="group">
+                                <CheckboxInput label="Track key presses" onChecked={checked => updateSettings({ "hotkeys-enabled": checked.toString() })} checked={hotkeysEnabled} />
+                                <KeyPickerInput value={startKeyDisplay} icons={!hasSettingDefaultValue("start-script") ? [{ id: "reset", src: "images/icons/reset.png", onClick: () => resetSettings(["start-script", "start-script-display"]) }] : []} onChange={(codes, text) => updateSettings({ "start-script": codes.join("+"), "start-script-display": text })} placeholder="Start / Pause / Continue" ></KeyPickerInput>
+                                <KeyPickerInput value={stopKeyDisplay} icons={!hasSettingDefaultValue("stop-script") ? [{ id: "reset", src: "images/icons/reset.png", onClick: () => resetSettings(["stop-script", "stop-script-display"]) }] : []} onChange={(codes, text) => updateSettings({ "stop-script": codes.join("+"), "stop-script-display": text })} placeholder="Stop"></KeyPickerInput>
                             </GroupBox>
                         </>
                 }

@@ -8,6 +8,10 @@ const PopupForm = (props) => {
     const { children, visible, onVisibilityChange, onSave, onCancel, allowSaving } = props;
 
     const close = useCallback(() => {
+        if (!onVisibilityChange) {
+            return;
+        }
+
         onVisibilityChange(false);
     }, [onVisibilityChange]);
 

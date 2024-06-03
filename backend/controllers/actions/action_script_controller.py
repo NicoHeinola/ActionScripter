@@ -5,6 +5,7 @@ from typing import List
 from flask import jsonify, make_response, request
 from controllers.base_controller import BaseController
 from models.recent_script_model import RecentScript
+from models.setting_model import Setting
 from scripter.action_group import ActionGroup
 from scripter.action_script import ActionScript
 from scripter.actions.action import Action
@@ -35,6 +36,15 @@ class ActionScriptController(BaseController):
             ActionGroup.reset_global_id_count()
 
             new_script: ActionScript = ActionScript()
+
+            # Set hotkeys of the script
+            start_hotkey: str = Setting.query.filter_by(name="start-script").first().value
+            start_hotkey_display: str = Setting.query.filter_by(name="start-script-display").first().value
+            stop_hotkey: str = Setting.query.filter_by(name="stop-script").first().value
+            stop_hotkey_display: str = Setting.query.filter_by(name="stop-script-display").first().value
+
+            new_script.set_hotkey("start-script", start_hotkey, start_hotkey_display)
+            new_script.set_hotkey("stop-script", stop_hotkey, stop_hotkey_display)
 
             new_script.on("performed-action", lambda current_action_index: self._socket.emit("performed-action", current_action_index))
             new_script.on("finished-actions", lambda: self._socket.emit("finished-actions"))

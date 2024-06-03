@@ -69,7 +69,10 @@ class HotkeyManager:
         Checks if user is pressing any key-combinations
         """
 
-        def on_start_key() -> None:
+        if ActionScript.current_script is None:
+            return
+
+        def on_start_key(script) -> None:
             if ActionScript.current_script is None:
                 return
 
@@ -90,45 +93,48 @@ class HotkeyManager:
                 self._socket.start_background_task(target=lambda: script.start(latest_group_id, sleep_func))
                 self._socket.emit("changed-play-state", "playing")
 
-        def on_stop_key() -> None:
-            if ActionScript.current_script is None:
-                return
-
-            if not ActionScript.current_script.is_stopped():
-                ActionScript.current_script.stop()
+        def on_stop_key(script: ActionScript) -> None:
+            if not script.is_stopped():
+                script.stop()
                 self._socket.emit("changed-play-state", "stopped")
 
         with self._app.app_context():
-            combinations_to_test = [
-                {
-                    "key-string": Setting.query.filter_by(name="start-script-key-combination").first().value,
-                    "call": on_start_key
-                },
-                {
-                    "key-string": Setting.query.filter_by(name="stop-script-key-combination").first().value,
-                    "call": on_stop_key
-                }
-            ]
+            scripts: List[ActionScript] = [ActionScript.current_script]
 
-            for combination in combinations_to_test:
-                keys: List[str] = combination["key-string"].split("+")
-
-                # We need to press the exact keys and nothing extra
-                if len(keys) != len(self._pressed_keys):
+            for script in scripts:
+                if not script.are_hotkeys_enabled():
                     continue
 
-                is_pressing_all: bool = True
+                combinations_to_test = [
+                    {
+                        "key-string": script.get_hotkey_data("start-script")["hotkey"],
+                        "call": lambda: on_start_key(script)
+                    },
+                    {
+                        "key-string": script.get_hotkey_data("stop-script")["hotkey"],
+                        "call": lambda: on_stop_key(script)
+                    }
+                ]
 
-                # Make sure we are pressing all the necessary keys
-                for key in keys:
-                    if key not in self._pressed_keys:
-                        is_pressing_all = False
-                        break
+                for combination in combinations_to_test:
+                    keys: List[str] = combination["key-string"].split("+")
 
-                if not is_pressing_all:
-                    continue
+                    # We need to press the exact keys and nothing extra
+                    if len(keys) != len(self._pressed_keys):
+                        continue
 
-                self._hotkey_functions_to_run.append(combination["call"])
+                    is_pressing_all: bool = True
+
+                    # Make sure we are pressing all the necessary keys
+                    for key in keys:
+                        if key not in self._pressed_keys:
+                            is_pressing_all = False
+                            break
+
+                    if not is_pressing_all:
+                        continue
+
+                    self._hotkey_functions_to_run.append(combination["call"])
 
     def hotkey_emitter(self) -> None:
         """

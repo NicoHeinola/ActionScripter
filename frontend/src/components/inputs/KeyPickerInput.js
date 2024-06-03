@@ -17,6 +17,9 @@ const KeyPickerInput = (props) => {
 
     const propValue = props.value;
 
+    const allSettings = props.allSettings;
+    const hotkeysEnabled = allSettings["hotkeys-enabled"] === "true";
+
     useEffect(() => {
         setPickedKeyValue(propValue);
     }, [propValue, setPickedKeyValue])
@@ -31,7 +34,11 @@ const KeyPickerInput = (props) => {
                 socket.emit("listening-for-keybinds", false)
                 setIsListening(false);
                 clearInterval(interval);
-                onChangePropCall(pickedKeyCodes, pickedKeyValue);
+
+                if (onChangePropCall) {
+                    onChangePropCall(pickedKeyCodes, pickedKeyValue);
+                }
+
                 return;
             }
 
@@ -72,21 +79,11 @@ const KeyPickerInput = (props) => {
         socket.emit("listening-for-keybinds", true)
     }
 
-    const onIconClicked = (id) => {
-        if (id === "keyboard") {
-            onStartListening();
-            return;
-        }
-
-        if (props.onIconClicked) {
-            props.onIconClicked(id)
-        }
-    }
-
-    const icons = (props.icons) ? props.icons : [];
+    const keyboardIcon = { id: "keyboard", src: "images/icons/keyboard.png", onClick: onStartListening };
+    const icons = (props.icons) ? [...props.icons, keyboardIcon] : [keyboardIcon];
 
     return (
-        <TextInput disabled={props.disabled} onIconClicked={onIconClicked} value={pickedKeyValue} allowTyping={false} placeholder={placeholder} icons={[...icons, { id: "keyboard", src: "images/icons/keyboard.png" }]} className={props.className}></TextInput>
+        <TextInput disabled={props.disabled || !hotkeysEnabled} value={pickedKeyValue} allowTyping={false} placeholder={placeholder} icons={icons} className={props.className}></TextInput>
     )
 }
 

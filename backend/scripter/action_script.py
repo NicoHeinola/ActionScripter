@@ -43,6 +43,32 @@ class ActionScript(EventEmitter):
         # Makes it possible to keep track of what group we select at the frontend
         self._latest_selected_group_id: int = 0
 
+        # Hotkeys
+        self._hotkeys_enabled: bool = True
+        self._hotkeys: dict = {}
+        self._hotkey_extra_infos: dict = {
+            "start-script": {
+                "text": "Start / Pause / Continue"
+            },
+            "stop-script": {
+                "text": "Stop"
+            }
+        }
+
+    def set_hotkeys_enabled(self, are_enabled: bool) -> None:
+        self._hotkeys_enabled = are_enabled
+
+    def are_hotkeys_enabled(self) -> bool:
+        return self._hotkeys_enabled
+
+    def set_hotkey(self, key: str, hotkey: str, display_name: str) -> None:
+        self._hotkeys[key] = {"hotkey": hotkey, "display": display_name}
+        if key in self._hotkey_extra_infos:
+            self._hotkeys[key].update(self._hotkey_extra_infos[key])
+
+    def get_hotkey_data(self, key: str) -> dict:
+        return self._hotkeys[key]
+
     def set_latest_selected_group_id(self, group_id: int) -> None:
         self._latest_selected_group_id = group_id
 
@@ -320,6 +346,8 @@ class ActionScript(EventEmitter):
             action_group_data: dict = action_group.serialize()
             serialized_action_groups[action_group.get_id()] = action_group_data
         data["action-groups"] = serialized_action_groups
+        data["hotkeys"] = self._hotkeys
+        data["hotkeys-enabled"] = self.are_hotkeys_enabled()
 
         return data
 
@@ -338,6 +366,15 @@ class ActionScript(EventEmitter):
                 self.add_action_group(action_group)
 
             self.set_latest_selected_group_id(list(self._action_groups.keys())[0])
+
+        if "hotkeys-enabled" in data:
+            self.set_hotkeys_enabled(data["hotkeys-enabled"])
+
+        if "hotkeys" in data:
+            self._hotkeys.clear()
+            for hotkey in data["hotkeys"]:
+                hotkey_data = data["hotkeys"][hotkey]
+                self.set_hotkey(hotkey, hotkey_data["hotkey"], hotkey_data["display"])
 
     def save_as(self) -> None:
         file_path: str = filedialog.asksaveasfilename(defaultextension=".acsc", filetypes=[("ActionScript Files", "*.acsc"), ("All Files", "*.*")])

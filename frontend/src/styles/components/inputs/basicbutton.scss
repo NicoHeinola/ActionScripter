@@ -30,6 +30,10 @@
         background: $button-color-1-cancel;
     }
 
+    &.utility-theme {
+        background: $button-color-1-utility;
+    }
+
     background: $button-color-1;
 
     .text {
