@@ -23,7 +23,8 @@ const NoFileSelectedView = (props) => {
         // Create a temporary input to open the file dialog
         var input = document.createElement('input');
         input.type = 'file';
-        input.multiple = false
+        input.multiple = false;
+        input.accept = ".acsc";
 
         input.onchange = e => {
             // Get the selected file
