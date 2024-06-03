@@ -230,7 +230,7 @@ const ActionList = (props) => {
 
     const moveActionUp = useCallback(async (index) => {
         // Couldn't find action index
-        if (index === null) {
+        if (index === null || index === undefined) {
             return null;
         }
 
@@ -251,7 +251,7 @@ const ActionList = (props) => {
 
     const moveActionDown = useCallback(async (index) => {
         // Couldn't find action index
-        if (index === null) {
+        if (index === null || index === undefined) {
             return null;
         }
 

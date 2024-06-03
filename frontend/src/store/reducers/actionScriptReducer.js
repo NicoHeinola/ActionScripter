@@ -274,7 +274,7 @@ const removeActionsCall = (groupId, actionIds) => async (dispatch) => {
 };
 
 const swapActionIndexesCall = (groupId, indexA, indexB) => async (dispatch) => {
-    actionScriptAPI.swapActionIndexes(groupId, indexA, indexB);
+    await actionScriptAPI.swapActionIndexes(groupId, indexA, indexB);
     await dispatch(actionScriptSlice.actions.swapActionIndexes({ "group-id": groupId, "indexes": [indexA, indexB] }));
     dispatch(setScriptIsModifiedCall(true));
 };
