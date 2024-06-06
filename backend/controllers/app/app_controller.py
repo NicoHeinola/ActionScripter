@@ -1,6 +1,6 @@
 import os
 import signal
-from flask import make_response, request
+from flask import make_response
 from controllers.base_controller import BaseController
 
 

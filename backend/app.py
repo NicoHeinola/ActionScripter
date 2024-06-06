@@ -1,9 +1,9 @@
 import os
 from flask_migrate import Migrate
-from flask_socketio import SocketIO, emit
-from flask import Flask, jsonify
+from flask_socketio import SocketIO
+from flask import Flask
 from dotenv import load_dotenv
-from flask_cors import CORS, cross_origin
+from flask_cors import CORS
 from controllers.actions.action_script_controller import ActionScriptController
 from controllers.app.app_controller import AppController
 from controllers.settings.setting_controller import SettingController

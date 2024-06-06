@@ -1,4 +1,3 @@
-import time
 from typing import Callable
 from flask_socketio import SocketIO
 

@@ -33,6 +33,9 @@ yarn-error.log*
 # Backend
 *.pyc
 /backend/instance
+/backend/build
+/backend/dist
 *.db
+*.spec
 
 .VSCodeCounter/

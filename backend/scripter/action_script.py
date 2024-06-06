@@ -3,7 +3,6 @@ from typing import Callable, Dict, List
 
 from scripter.action_group import ActionGroup
 from scripter.actions.action import Action
-from scripter.actions.mouse_click_action import MouseClickAction
 from scripter.event_emitter import EventEmitter
 from tkinter import filedialog
 
