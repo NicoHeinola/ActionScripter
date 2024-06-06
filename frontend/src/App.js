@@ -30,6 +30,7 @@ function App() {
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
+
   return (
     <Provider store={store}>
       <BrowserRouter>
