@@ -10,6 +10,9 @@ class AppController(BaseController):
 
         @self._app.route(f"{base_route}/quit", methods=["POST"])
         def quit():
+            if os.getenv("BUILD_MODE") == "DEBUG":
+                return
+
             pid = os.getpid()
             os.kill(pid, signal.SIGINT)
             return make_response("", 200)

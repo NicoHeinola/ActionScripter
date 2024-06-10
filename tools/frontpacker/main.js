@@ -1,10 +1,9 @@
 const { default: axios } = require('axios');
 const { app, BrowserWindow, globalShortcut } = require('electron');
 const path = require('path');
-require('dotenv').config();
 
 const axiosInstance = axios.create({
-    baseURL: `${process.env.API_URL}:${process.env.API_PORT}`,
+    baseURL: `${process.env.PROTOCOL}${process.env.HOST}:${process.env.PORT}`,
     timeout: 20000,
     headers: {
         'Content-Type': 'application/json',
@@ -20,7 +19,7 @@ function createWindow() {
         }
     });
 
-    if (process.env.BUILD_MODE == "debug") {
+    if (process.env.BUILD_MODE == "DEBUG") {
         mainWindow.loadURL("http://localhost:3000");
     } else {
         mainWindow.loadFile(path.join(__dirname, '/frontend/index.html'));
@@ -32,7 +31,7 @@ function createWindow() {
 
         // Your custom logic here, like making an API call
         try {
-            await axiosInstance.post(`${process.env.API_URL}:${process.env.API_PORT}/app/quit`);
+            await axiosInstance.post(`/app/quit`);
         } catch (error) {
             console.error('API call failed', error);
         }
@@ -46,7 +45,7 @@ app.on('ready', () => {
 })
 
 app.on('browser-window-focus', function () {
-    if (process.env.BUILD_MODE == "debug") {
+    if (process.env.BUILD_MODE == "DEBUG") {
         globalShortcut.registerAll(['CommandOrControl+W', 'CommandOrControl+O'], () => {
             return false
         });

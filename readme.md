@@ -7,16 +7,25 @@ This is a tool to automate mouse and keyboard events such as clicks, movement or
 
 It is afterwards compiled into a "single" executable that launches two applications (frontend and backend) that work as a "single application".
 
+# How to make a release
+## Automatic
+Run build.bat (Windows only)
+
 # .Env files
-## tools/frontpacker
+## backend
 .env should have:
+- HOST
+    - What host the backend runs in. It should most likely be 127.0.0.1.
+- PORT
+    - What port the backend runs in. Should match the frontend configuration.
+- PROTOCOL
+    - Typically http. Only used for release build in frontpacker.
 - BUILD_MODE
-    - debug: Means that we are running the app in localhost:3000
-    - other: Means that we want to use the pre-built app files
+    - DEBUG / RELEASE
 
 ## frontend
 .env should have:
-- API_URL
-    - Address of the python backend (normally 127.0.0.1)
-- API_PORT
-    - What port the python backend runs in
+- REACT_APP_API_URL
+    - Address of the python backend (normally http://127.0.0.1).
+- REACT_APP_API_PORT
+    - What port the python backend runs in.

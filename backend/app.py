@@ -1,5 +1,5 @@
 import os
-from flask_migrate import Migrate
+from flask_migrate import Migrate, upgrade, stamp
 from flask_socketio import SocketIO
 from flask import Flask
 from dotenv import load_dotenv
@@ -12,30 +12,50 @@ from controllers.utils.util_controller import UtilController
 from database.database import db
 
 
-# Load .env file
-load_dotenv()
+def database_exists(app: Flask):
+    db_path: str = app.config['SQLALCHEMY_DATABASE_URI'].replace('sqlite:///', '')
+    return os.path.exists(db_path)
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
-app.config['SECRET_KEY'] = '*AER*SAETGYSRYH*W¤&*S%¤*U%*#A'
-
-socketio = SocketIO(app, cors_allowed_origins="*")
-CORS(app)
-
-migrate = Migrate(app, db)
-
-db.init_app(app)
-
-hotkey_manager: HotkeyManager = HotkeyManager(app, socketio)
-
-action_script_controller: ActionScriptController = ActionScriptController(app, socketio, hotkey_manager)
-util_controller: UtilController = UtilController(app, socketio, hotkey_manager)
-setting_controller: SettingController = SettingController(app, socketio, hotkey_manager)
-app_controller: AppController = AppController(app, socketio, hotkey_manager)
 
 if __name__ == '__main__':
+    # Load .env file
+    BASEDIR: str = os.path.abspath(os.path.dirname(__file__))
+    load_dotenv(os.path.join(BASEDIR, ".env"))
+
+    # If we are running release build, open the frontend
+    if os.getenv("BUILD_MODE") == "RELEASE":
+        os.startfile(os.path.join(os.getcwd(), "frontend", "ActionScripter.exe"))
+
+    app = Flask(__name__)
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+    app.config['SECRET_KEY'] = '*AER*SAETGYSRYH*W¤&*S%¤*U%*#A'
+
+    socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet")
+    CORS(app)
+
+    migrate = Migrate(app, db)
+
+    db.init_app(app)
+
     with app.app_context():
+        db_exists: bool = database_exists(app)
+
+        # Create database tables for our data models if they don't exist
         db.create_all()
 
-    socketio.run(app, host=os.getenv("HOST"), port=int(os.getenv("PORT")), debug=os.getenv("ENVIRONMENT") == "DEBUG")
+        if not db_exists:
+            # Mark the database as up-to-date with the migrations
+            stamp()
+
+        # Apply the latest migrations if the database already exists
+        upgrade()
+
+    hotkey_manager: HotkeyManager = HotkeyManager(app, socketio)
+
+    action_script_controller: ActionScriptController = ActionScriptController(app, socketio, hotkey_manager)
+    util_controller: UtilController = UtilController(app, socketio, hotkey_manager)
+    setting_controller: SettingController = SettingController(app, socketio, hotkey_manager)
+    app_controller: AppController = AppController(app, socketio, hotkey_manager)
+
+    socketio.run(app, host=os.getenv("HOST"), port=int(os.getenv("PORT")), debug=os.getenv("BUILD_MODE") == "DEBUG")
     hotkey_manager.stop_listening_to_keys()

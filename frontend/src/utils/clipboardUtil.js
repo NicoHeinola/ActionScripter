@@ -4,7 +4,12 @@ const getCopiedActions = () => {
     try {
         parsedActions = JSON.parse(localStorage.getItem("copied-actions"));
     } catch {
+        parsedActions = [];
+    }
 
+    if (!Array.isArray(parsedActions)) {
+        parsedActions = [];
+        copyActions([]);
     }
 
     return parsedActions;

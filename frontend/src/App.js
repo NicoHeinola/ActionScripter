@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route } from 'react-router-dom';
 import 'styles/app.scss';
 import MissingPageView from 'views/MissingPageView';
 import NoFileSelectedView from 'views/NoFileSelectedView';
@@ -33,7 +33,7 @@ function App() {
 
   return (
     <Provider store={store}>
-      <BrowserRouter>
+      <HashRouter>
         <div className='app'>
           <SaveManager />
           <HotkeyManager />
@@ -45,7 +45,7 @@ function App() {
             <Route index path='/settings' element={<SettingsPageView />} />
           </Routes>
         </div>
-      </BrowserRouter>
+      </HashRouter>
     </Provider>
   );
 }

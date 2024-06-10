@@ -6,25 +6,45 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "pack": "electron-builder --dir",
+    "pack": "cross-env BUILKD_MODE=RELEASE HOST=127.0.0.1 PORT=5432 PROTOCOL=http:// electron-builder --dir",
     "easy-pack": "cd \"../../frontend\" && npm run build && xcopy /f /y \"build\" \"../tools/frontpacker/frontend/\" /E /H /C /I && cd \"../tools/frontpacker\" && npm run pack",
     "dist": "electron-builder"
   },
   "build": {
     "asar": true,
+    "npmRebuild": false,
+    "buildDependenciesFromSource": true,
+    "compression": "maximum",
     "appId": "com.yourcompany.yourapp",
-    "productName": "YourApp",
+    "electronLanguages": [
+      "en_US"
+    ],
+    "productName": "ActionScripter",
     "directories": {
       "output": "dist"
     },
     "files": [
-      "main.js",
-      "frontend/**/*"
+      "!src",
+      "!test",
+      "!docs",
+      "!*.md",
+      "!*.map",
+      "!*.log",
+      "!node_modules/.bin",
+      "!gruntfile.js",
+      "!README.md",
+      "!notarize.js",
+      "!.env",
+      "!minify.js",
+      "!.git/*",
+      "!resources/mac/*",
+      "main.js"
     ],
     "mac": {
       "category": "your.app.category.type"
     },
     "win": {
+      "icon": "icon.ico",
       "target": [
         "nsis"
       ]
@@ -38,11 +58,11 @@
   "keywords": [],
   "license": "ISC",
   "devDependencies": {
-    "electron": "^29.1.6",
+    "cross-env": "^7.0.3",
+    "electron": "^30.1.0",
     "electron-builder": "^24.13.3"
   },
   "dependencies": {
-    "axios": "^1.7.2",
-    "dotenv": "^16.4.5"
+    "axios": "^1.7.2"
   }
 }

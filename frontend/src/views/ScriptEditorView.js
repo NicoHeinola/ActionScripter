@@ -31,7 +31,7 @@ const ScriptEditorView = (props) => {
 
     const { updateScriptCall, currentScript, isLoadingActions, allSettings, getScriptCall, setScriptPlayStateCall, startScriptCall, stopScriptCall, pauseScriptCall, createActionCall } = props;
 
-    const [currentGroupId, setCurrentGroupId] = useState(0);
+    const [currentGroupId, setCurrentGroupId] = useState(Number(Object.keys(currentScript["action-groups"])[0]));
 
     // Filter pickable actions
     useEffect(() => {
