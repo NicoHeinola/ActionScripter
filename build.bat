@@ -87,7 +87,6 @@ robocopy "./backend/dist/%name%" "./build/%name%" /E /COPY:DAT /R:2 /W:5 /NFL /N
 robocopy "./tools/frontpacker/dist/win-unpacked" "./build/%name%/frontend" /E /COPY:DAT /R:2 /W:5 /NFL /NDL /NJH /NJS >nul
 echo %seperatorLvl2%
 echo Creating a release zip
-tar -a -c -f "./build/%name%.zip" -C "./build/%name%" .
 powershell -command "Compress-Archive -Path '.\build\%name%\*' -DestinationPath '.\build\ActionScripter.zip'"
 echo %seperatorLvl1%
 echo Build complete

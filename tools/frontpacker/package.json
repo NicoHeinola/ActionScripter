@@ -38,7 +38,8 @@
       "!minify.js",
       "!.git/*",
       "!resources/mac/*",
-      "main.js"
+      "main.js",
+      "frontend/**/*"
     ],
     "mac": {
       "category": "your.app.category.type"
