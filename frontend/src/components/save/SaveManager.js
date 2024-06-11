@@ -3,20 +3,37 @@ import { useLocation } from 'react-router-dom';
 
 import { connect } from 'react-redux';
 import { saveActionScriptCall, saveAsActionScriptCall } from "store/reducers/actionScriptReducer";
+import { save } from '@tauri-apps/api/dialog';
 
 const SaveManager = (props) => {
     const location = useLocation();
     const currentPath = location.pathname;
 
-    const saveActionScriptCall = props.saveActionScriptCall;
-    const saveAsActionScriptCall = props.saveAsActionScriptCall;
+    const { saveActionScriptCall, saveAsActionScriptCall } = props;
 
     const handleSaveFile = useCallback(() => {
         saveActionScriptCall();
     }, [saveActionScriptCall]);
 
-    const handleSaveAsFile = useCallback(() => {
-        saveAsActionScriptCall();
+    const handleSaveAsFile = useCallback(async () => {
+
+        // Open a selection dialog for directories
+        const savePath = await save({
+            "title": "Save as",
+            "filters": [
+                {
+                    "name": "ActionScript",
+                    "extensions": ["acsc"]
+                }
+            ]
+
+        });
+
+        if (!savePath) {
+            return;
+        }
+
+        saveAsActionScriptCall(savePath);
     }, [saveAsActionScriptCall]);
 
     const currentScript = props.currentScript;
@@ -26,14 +43,14 @@ const SaveManager = (props) => {
             event.preventDefault();
 
 
-            if (event.shiftKey) {
+            if (event.shiftKey || !currentScript["is-saved"]) {
                 handleSaveAsFile();
                 return;
             }
 
             handleSaveFile();
         }
-    }, [handleSaveAsFile, handleSaveFile]);
+    }, [handleSaveAsFile, handleSaveFile, currentScript]);
 
 
     useEffect(() => {
@@ -72,7 +89,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = {
     saveActionScriptCall,
-    saveAsActionScriptCall,
+    saveAsActionScriptCall
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(SaveManager);

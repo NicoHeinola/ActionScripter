@@ -2,7 +2,7 @@ import { useCallback, useEffect } from "react";
 import { useLocation } from 'react-router-dom';
 
 import { connect } from 'react-redux';
-import { redoHistoryCall, saveActionScriptCall, saveAsActionScriptCall, undoHistoryCall } from "store/reducers/actionScriptReducer";
+import { redoHistoryCall, undoHistoryCall } from "store/reducers/actionScriptReducer";
 
 const HistoryManager = (props) => {
     const location = useLocation();
@@ -71,8 +71,6 @@ const mapStateToProps = (state) => {
 };
 
 const mapDispatchToProps = {
-    saveActionScriptCall,
-    saveAsActionScriptCall,
     undoHistoryCall,
     redoHistoryCall
 };

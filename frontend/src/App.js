@@ -13,6 +13,9 @@ import HotkeyManager from 'components/hotkey/HotkeyManager';
 import { useEffect } from 'react';
 import { ring } from 'ldrs';
 
+import appAPI from "apis/appAPI";
+import { appWindow } from '@tauri-apps/api/window';
+
 ring.register()
 
 function App() {
@@ -23,11 +26,25 @@ function App() {
       }
     };
 
+    const onContextMenu = (event) => {
+      event.preventDefault();
+    }
+
+    const onWindowClose = async () => {
+      appAPI.quitBackend();
+      appWindow.close();
+    };
+
+    const unlisten = appWindow.listen('tauri://close-requested', onWindowClose);
+
     document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('contextmenu', onContextMenu);
 
     // Cleanup the event listener on component unmount
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('contextmenu', onContextMenu);
+      unlisten.then((f) => f());
     };
   }, []);
 

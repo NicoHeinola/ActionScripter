@@ -5,6 +5,7 @@
   "homepage": "./",
   "dependencies": {
     "@reduxjs/toolkit": "^2.2.3",
+    "@tauri-apps/api": "^1.5.6",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
@@ -23,9 +24,11 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "build-optimized": "set \"GENERATE_SOURCEMAP=false\" && react-scripts build",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "tauri": "tauri"
   },
   "eslintConfig": {
     "extends": [
@@ -44,5 +47,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^1.5.14"
   }
 }

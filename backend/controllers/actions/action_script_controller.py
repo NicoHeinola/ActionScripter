@@ -149,32 +149,19 @@ class ActionScriptController(BaseController):
             if ActionScript.current_script is None:
                 return make_response({"error": "No current script found!"}, 500)
 
-            saved_path = ActionScript.current_script.save_as()
+            data: dict = request.get_json()
 
-            if saved_path is None:
-                return make_response({"save-path": ""}, 200)
+            if "save-path" not in data:
+                return make_response({"error": "Missing 'save-path'!"}, 400)
 
-            path: str = ActionScript.current_script._latest_save_path
-            recent_script: RecentScript = RecentScript.query.filter_by(path=path).first()
-
-            if recent_script is not None:
-                recent_script.updated_at = datetime.now()
-            else:
-                recent_script = RecentScript()
-                recent_script.path = path
-
-            db.session.add(recent_script)
-            db.session.commit()
-
-            return make_response({"save-path": ActionScript.current_script._latest_save_path}, 200)
+            save_path: str = data["save-path"]
+            ActionScript.current_script.set_latest_save_path(save_path)
+            return save()
 
         @self._app.route(f"{base_route}/save", methods=["POST"])
         def save():
             if ActionScript.current_script is None:
                 return make_response({"error": "No current script found!"}, 500)
-
-            if not os.path.exists(ActionScript.current_script._latest_save_path):
-                return save_as()
 
             ActionScript.current_script.save()
 

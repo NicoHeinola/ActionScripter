@@ -1,10 +1,10 @@
 import json
+import os
 from typing import Callable, Dict, List
 
 from scripter.action_group import ActionGroup
 from scripter.actions.action import Action
 from scripter.event_emitter import EventEmitter
-from tkinter import filedialog
 
 
 class ActionScript(EventEmitter):
@@ -347,6 +347,7 @@ class ActionScript(EventEmitter):
         data["action-groups"] = serialized_action_groups
         data["hotkeys"] = self._hotkeys
         data["hotkeys-enabled"] = self.are_hotkeys_enabled()
+        data["is-saved"] = self.save_exists()
 
         return data
 
@@ -375,20 +376,14 @@ class ActionScript(EventEmitter):
                 hotkey_data = data["hotkeys"][hotkey]
                 self.set_hotkey(hotkey, hotkey_data["hotkey"], hotkey_data["display"])
 
-    def save_as(self) -> None:
-        file_path: str = filedialog.asksaveasfilename(defaultextension=".acsc", filetypes=[("ActionScript Files", "*.acsc"), ("All Files", "*.*")])
+    def save_exists(self) -> bool:
+        return os.path.exists(self._latest_save_path)
 
-        if not file_path:
-            return None
-
-        self._latest_save_path = file_path
-
-        self.save()
-
-        return file_path
+    def set_latest_save_path(self, path: str) -> None:
+        self._latest_save_path = path
 
     def save(self) -> None:
-        with open(self._latest_save_path, 'w') as file:
+        with open(self._latest_save_path, 'w+') as file:
             file.write(json.dumps(self.serialize()))
 
     def clear_history(self, group_id: int) -> None:

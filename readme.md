@@ -2,7 +2,7 @@
 This is a tool to automate mouse and keyboard events such as clicks, movement or keypresses.
 
 ## Technologies
-- React and Electron for frontend
+- React and Tauri/(Electron which is no longer supported) for frontend
 - Python and Flask for backend
 
 It is afterwards compiled into a "single" executable that launches two applications (frontend and backend) that work as a "single application".
@@ -18,7 +18,7 @@ Run build.bat (Windows only)
     - What host the backend runs in. It should most likely be 127.0.0.1.
 - PORT
     - What port the backend runs in. Should match the frontend configuration.
-- PROTOCOL
+- PROTOCOL (deprecated)
     - Typically http. Only used for release build in frontpacker.
 - BUILD_MODE
     - DEBUG / RELEASE

@@ -30,7 +30,7 @@ for %%a in (%HiddenImportsList%) do (
 )
 
 REM Excluded modules
-set "ExcludedModuleList=PIL"
+set "ExcludedModuleList=PIL tkinter pyinstaller"
 set "ExcludedModules="
 for %%a in (%ExcludedModuleList%) do (
     REM Concatenate the strings with "--hidden-import"
@@ -69,26 +69,24 @@ echo Building frontend
 echo %seperatorLvl2%
 
 REM Build and copy frontend
-cd ../tools/frontpacker
-echo Removing old build files...
-rmdir /s /q frontend
-rmdir /s /q dist
+cd ../
+cd ./frontend
 
-echo %seperatorLvl2%
-echo Creating the frontend executable
-echo %seperatorLvl2%
-call npm run easy-pack
-echo Frontend executable is done
+call npm run tauri build
+echo Frontend build is complete
 echo %seperatorLvl1%
 echo Moving everything into a single build
 
-cd ../../
+cd ../
 robocopy "./backend/dist/%name%" "./build/%name%" /E /COPY:DAT /R:2 /W:5 /NFL /NDL /NJH /NJS >nul
-robocopy "./tools/frontpacker/dist/win-unpacked" "./build/%name%/frontend" /E /COPY:DAT /R:2 /W:5 /NFL /NDL /NJH /NJS >nul
+
+mkdir ".\build\%name%\frontend"
+copy ".\frontend\src-tauri\target\release\%name%.exe" ".\build\%name%\frontend\%name%.exe"
+
 echo %seperatorLvl2%
 echo Creating a release zip
 powershell -command "Compress-Archive -Path '.\build\%name%\*' -DestinationPath '.\build\ActionScripter.zip'"
 echo %seperatorLvl1%
-echo Build complete
+echo Build is complete
 
 pause

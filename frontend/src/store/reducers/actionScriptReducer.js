@@ -28,6 +28,9 @@ const actionScriptSlice = createSlice({
         setScript: (state, script) => {
             state.currentScript = script.payload;
         },
+        setIsSaved: (state, isSaved) => {
+            state.currentScript["is-saved"] = isSaved.payload;
+        },
         updateScript: (state, script) => {
             const newScript = { ...state.currentScript };
             const changes = script.payload;
@@ -206,39 +209,31 @@ const newRecentScriptCall = (scriptPath) => async (dispatch) => {
     dispatch(getRecentScriptsCall());
 };
 
-const saveActionScriptCall = (scriptPath) => async (dispatch) => {
-    const response = await actionScriptAPI.saveActionScript(scriptPath);
-
-    if (response.data["save-path"] === "") {
-        return;
-    }
-
+const saveActionScriptCall = () => async (dispatch) => {
+    await actionScriptAPI.saveActionScript();
     dispatch(getRecentScriptsCall());
+    dispatch(actionScriptSlice.actions.setIsSaved(true));
     dispatch(actionScriptSlice.actions.setScriptIsModified(false));
 };
 
 const saveAsActionScriptCall = (scriptPath) => async (dispatch) => {
-    const response = await actionScriptAPI.saveAsActionScript(scriptPath);
-
-    if (response.data["save-path"] === "") {
-        return;
-    }
-
+    await actionScriptAPI.saveAsActionScript(scriptPath);
     dispatch(getRecentScriptsCall());
+    dispatch(actionScriptSlice.actions.setIsSaved(true));
     dispatch(actionScriptSlice.actions.setScriptIsModified(false));
 };
 
 const loadActionScriptCall = (scriptPath) => async (dispatch, getState) => {
-    dispatch(actionScriptSlice.actions.setIsLoadingActions(true));
+    await dispatch(actionScriptSlice.actions.setIsLoadingActions(true));
 
     await actionScriptAPI.loadActionScript(scriptPath);
     await dispatch(getScriptCall());
-    dispatch(actionScriptSlice.actions.setIsLoadingActions(false));
-    dispatch(actionScriptSlice.actions.setScriptIsModified(false));
+    await dispatch(actionScriptSlice.actions.setIsLoadingActions(false));
+    await dispatch(actionScriptSlice.actions.setScriptIsModified(false));
 };
 
 const setScriptIsModifiedCall = (isModified) => async (dispatch) => {
-    dispatch(actionScriptSlice.actions.setScriptIsModified(isModified));
+    await dispatch(actionScriptSlice.actions.setScriptIsModified(isModified));
 }
 
 const createActionCall = (groupId, actionType) => async (dispatch) => {
@@ -340,20 +335,20 @@ const applyActionChangesRedoCall = (groupId, changes) => async (dispatch, getSta
 }
 
 const undoHistoryCall = (groupId) => async (dispatch) => {
-    dispatch(actionScriptSlice.actions.setIsLoadingActions(true));
+    await dispatch(actionScriptSlice.actions.setIsLoadingActions(true));
     const response = await actionScriptAPI.undoHistory(groupId);
     const changes = response.data;
     await dispatch(applyActionChangesUndoCall(groupId, changes));
-    dispatch(actionScriptSlice.actions.setIsLoadingActions(false));
+    await dispatch(actionScriptSlice.actions.setIsLoadingActions(false));
     dispatch(actionScriptSlice.actions.setScriptIsModified(true));
 };
 
 const redoHistoryCall = (groupId) => async (dispatch) => {
-    dispatch(actionScriptSlice.actions.setIsLoadingActions(true));
+    await dispatch(actionScriptSlice.actions.setIsLoadingActions(true));
     const response = await actionScriptAPI.redoHistory(groupId);
     const changes = response.data;
     await dispatch(applyActionChangesRedoCall(groupId, changes));
-    dispatch(actionScriptSlice.actions.setIsLoadingActions(false));
+    await dispatch(actionScriptSlice.actions.setIsLoadingActions(false));
     dispatch(actionScriptSlice.actions.setScriptIsModified(true));
 };
 
@@ -373,7 +368,7 @@ const removeActionGroupCall = (groupId) => async (dispatch) => {
 }
 
 const setIsLoadingActionsCall = (isLoadingActions) => async (dispatch) => {
-    dispatch(actionScriptSlice.actions.setIsLoadingActions(isLoadingActions));
+    await dispatch(actionScriptSlice.actions.setIsLoadingActions(isLoadingActions));
 }
 
 export {

@@ -1,4 +1,5 @@
 import os
+import sys
 from flask_migrate import Migrate, upgrade, stamp
 from flask_socketio import SocketIO
 from flask import Flask
@@ -10,6 +11,7 @@ from controllers.settings.setting_controller import SettingController
 from controllers.utils.hotkey_manager import HotkeyManager
 from controllers.utils.util_controller import UtilController
 from database.database import db
+import socket
 
 
 def database_exists(app: Flask):
@@ -17,10 +19,27 @@ def database_exists(app: Flask):
     return os.path.exists(db_path)
 
 
+def is_port_in_use(host: str, port: int):
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        try:
+            s.bind((host, port))
+        except socket.error:
+            return True
+        return False
+
+
 if __name__ == '__main__':
     # Load .env file
     BASEDIR: str = os.path.abspath(os.path.dirname(__file__))
     load_dotenv(os.path.join(BASEDIR, ".env"))
+
+    port: int = int(os.getenv("PORT"))
+    host: str = os.getenv("HOST")
+
+    # If port is in use, quit
+    if is_port_in_use(host, port):
+        print("Port is already in use!")
+        sys.exit(-1)
 
     # If we are running release build, open the frontend
     if os.getenv("BUILD_MODE") == "RELEASE":
@@ -57,5 +76,5 @@ if __name__ == '__main__':
     setting_controller: SettingController = SettingController(app, socketio, hotkey_manager)
     app_controller: AppController = AppController(app, socketio, hotkey_manager)
 
-    socketio.run(app, host=os.getenv("HOST"), port=int(os.getenv("PORT")), debug=os.getenv("BUILD_MODE") == "DEBUG")
+    socketio.run(app, host=host, port=port, debug=os.getenv("BUILD_MODE") == "DEBUG")
     hotkey_manager.stop_listening_to_keys()

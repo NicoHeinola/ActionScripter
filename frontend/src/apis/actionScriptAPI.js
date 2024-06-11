@@ -82,8 +82,8 @@ const saveActionScript = () => {
     })
 }
 
-const saveAsActionScript = () => {
-    return axiosInstance.post(`${BASE_ROUTE}/save-as`).then(response => {
+const saveAsActionScript = (savePath) => {
+    return axiosInstance.post(`${BASE_ROUTE}/save-as`, { "save-path": savePath }).then(response => {
         return response;
     }).catch(e => {
         throw e;

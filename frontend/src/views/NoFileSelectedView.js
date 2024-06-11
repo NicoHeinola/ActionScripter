@@ -5,8 +5,10 @@ import { useNavigate } from 'react-router-dom';
 
 import { connect } from 'react-redux';
 import { getRecentScriptsCall, getScriptCall, loadActionScriptCall, newRecentScriptCall, setIsLoadingActionsCall, setScriptIsModifiedCall, updateScriptCall } from "store/reducers/actionScriptReducer";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
+import { open } from '@tauri-apps/api/dialog';
+import { readTextFile } from '@tauri-apps/api/fs';
 
 const NoFileSelectedView = (props) => {
     const navigate = useNavigate();
@@ -19,51 +21,31 @@ const NoFileSelectedView = (props) => {
         setScriptIsModifiedCall(true);
     }
 
-    const selectFileFromDisk = () => {
-        // Create a temporary input to open the file dialog
-        var input = document.createElement('input');
-        input.type = 'file';
-        input.multiple = false;
-        input.accept = ".acsc";
-
-        input.onchange = e => {
-            // Get the selected file
-            let file = e.target.files[0];
-
-            if (!file) {
-                return;
-            }
-
-            // Read the contents of that file
-            let reader = new FileReader();
-            reader.onload = async function (e) {
-                let contents = null;
-                try {
-                    contents = JSON.parse(e.target.result);
-                } catch {
-                    return;
+    const selectFileFromDisk = useCallback(async () => {
+        const filePath = await open({
+            multiple: false,
+            title: "Choose an action script",
+            filters: [
+                {
+                    name: "ActionScript",
+                    extensions: ["acsc"]
                 }
+            ]
+        });
 
-                if (!("action-groups" in contents)) {
-                    return;
-                }
+        const fileContentsPlain = await readTextFile(filePath);
+        const fileContents = JSON.parse(fileContentsPlain);
 
-                // Create a new action script according to the opened file
-                setIsLoadingActionsCall(true);
-                await actionScriptAPI.newActionScript();
-                await getScriptCall();
-                navigate('/script-editor');
-                await updateScriptCall(contents);
-                getScriptCall();
-                newRecentScriptCall(file.path);
-                setIsLoadingActionsCall(false);
-                setScriptIsModifiedCall(false);
-            };
-            reader.readAsText(file);
-        }
-
-        input.click();
-    }
+        await actionScriptAPI.newActionScript();
+        await getScriptCall();
+        await setIsLoadingActionsCall(true);
+        navigate('/script-editor');
+        await updateScriptCall(fileContents);
+        await getScriptCall();
+        newRecentScriptCall(filePath);
+        setScriptIsModifiedCall(false);
+        setIsLoadingActionsCall(false);
+    }, [getScriptCall, navigate, newRecentScriptCall, setIsLoadingActionsCall, setScriptIsModifiedCall, updateScriptCall]);
 
     const openRecentFile = async (path) => {
         await actionScriptAPI.newActionScript();

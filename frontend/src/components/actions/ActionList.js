@@ -239,11 +239,6 @@ const ActionList = (props) => {
         return index - 1;
     }, [swapActionIndexesCall, groupId]);
 
-    const moveActionUpWithId = useCallback((id) => {
-        let index = actionsInGroup.findIndex(action => action.id === id);
-        moveActionUp(index);
-    }, [moveActionUp, actionsInGroup]);
-
     const findActionIndex = useCallback((id) => {
         let index = actionsInGroup.findIndex((action) => action.id === id);
         return index;
@@ -261,11 +256,6 @@ const ActionList = (props) => {
 
         return newIndex;
     }, [swapActionIndexesCall, groupId]);
-
-    const moveActionDownWithId = useCallback(async (id) => {
-        let index = findActionIndex(id);
-        moveActionDown(index);
-    }, [moveActionDown, findActionIndex])
 
     const onActionItemSelectionClick = useCallback((e, id, index, isSelected) => {
 
@@ -347,66 +337,43 @@ const ActionList = (props) => {
     }, [groupId, selectedActionIds, removeActions]);
 
     const moveAllSelectedActionsUp = useCallback(async () => {
-        let selectedIdsSorted = [];
+        const selectedIdsSorted = [];
 
-        for (let action of actionsInGroup) {
-            let id = action.id;
+        for (let index in actionsInGroup) {
+            let id = actionsInGroup[index].id;
 
             if (id in selectedActionIds) {
-                selectedIdsSorted.push(id);
+                selectedIdsSorted.push({ "id": id, "index": Number(index) });
             }
         }
 
-        let topIndex = -1;
-        for (let id of selectedIdsSorted) {
-            let index = actionsInGroup.findIndex((action) => action.id === id);
+        selectedIdsSorted.sort((a, b) => a["index"] - b["index"]);
 
-            // If the next index would overlap with the limit, let's skip this one
-            if (index - 1 === topIndex) {
-                topIndex = index;
-                continue;
-            }
-
-            let newIndex = await moveActionUpWithId(id);
-
-            // We didn't move so we found the limit
-            if (newIndex === null) {
-                topIndex = index;
-            }
+        for (const item of selectedIdsSorted) {
+            const index = item["index"];
+            await moveActionDown(index - 1);
         }
-    }, [actionsInGroup, moveActionUpWithId, selectedActionIds]);
+
+    }, [actionsInGroup, moveActionDown, selectedActionIds]);
 
     const moveAllSelectedActionsDown = useCallback(async () => {
-        let selectedIdsSorted = [];
+        const selectedIdsSorted = [];
 
-        for (let action of actionsInGroup) {
-            let id = action.id;
+        for (let index in actionsInGroup) {
+            let id = actionsInGroup[index].id;
 
             if (id in selectedActionIds) {
-                selectedIdsSorted.push(id);
+                selectedIdsSorted.push({ "id": id, "index": Number(index) });
             }
         }
 
-        selectedIdsSorted.reverse();
+        selectedIdsSorted.sort((a, b) => b["index"] - a["index"]);
 
-        let bottomIndex = -1;
-        for (let id of selectedIdsSorted) {
-            let index = actionsInGroup.findIndex((action) => action.id === id);
-
-            // If the next index would overlap with the limit, let's skip this one
-            if (index + 1 === bottomIndex) {
-                bottomIndex = index;
-                continue;
-            }
-
-            let newIndex = await moveActionDownWithId(id);
-
-            // We didn't move so we found the limit
-            if (newIndex === null) {
-                bottomIndex = index;
-            }
+        for (const item of selectedIdsSorted) {
+            const index = item["index"];
+            await moveActionUp(index + 1);
         }
-    }, [actionsInGroup, moveActionDownWithId, selectedActionIds]);
+    }, [actionsInGroup, moveActionUp, selectedActionIds]);
 
     const selectActionsInGroup = useCallback(() => {
         if (!firstActionOnPage || !lastActionOnPage) {
