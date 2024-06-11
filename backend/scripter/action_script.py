@@ -161,7 +161,8 @@ class ActionScript(EventEmitter):
             group.play_handler(sleep_handler, self.is_playing)
 
             if not self.is_playing():
-                self._remove_latest_playing_action_group()
+                if self.is_stopped():
+                    self._remove_latest_playing_action_group()
                 return
 
             self._current_loop_count += 1
